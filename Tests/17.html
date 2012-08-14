@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Sudo Slider jQuery Plugin - Internal Test #17</title>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
+	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){	
+			var ajaximages = [
+			    '../images/01.jpg', 
+			    '../images/02.jpg', 
+			    '../images/03.jpg', 
+			    '../images/04.jpg', 
+			    '../images/05.jpg'
+			];
+			var sudoSlider = $('#slider').sudoSlider({ 
+				slideCount:2,
+				continuous:true,
+				autowidth:false,
+				moveCount:2,
+			    ajaxLoadFunction: function(t){
+
+			    },
+			    beforeAniFunc: function(t){ 
+
+			    },
+			    afterAniFunc: function(t){ 
+
+			    },
+				ajax: ajaximages
+			});
+		});	
+	</script>
+
+	<style>
+	#slider, #slider ul {width:696px;}
+#slider img, #slider li {width:348px;}
+	</style>
+</head>
+<body>
+<div id="container">
+	<h1>Sudo Slider jQuery Plugin - Internal Test #17</h1> 
+	<div style="position:relative;">
+		<div id="slider"></div>
+	</div>
+</body>
+</html>

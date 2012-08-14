@@ -1,0 +1,33 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<body>
+	<script>
+	$(document).ready(function(){	
+		$('button.clickthistext').click(function() {
+			// Here i do some check, to see if the 
+			var value = false;
+			$('input#inputID').each(function() {
+				value = $(this).val();
+			});
+			if (value)
+			{
+				sudoSlider.goToSlide(2);
+			}
+			else
+			{
+				alert('ERROR!!!');
+			}
+		});
+	});
+	</script>
+	<h1>This is the document form.html</h1>
+	<p>Here i got some kind of form.</p>
+	<p>Everything you see here is ajax-loaded<br>
+	including the javascript form-validator. But for that to work, you have to put the javascript in the document body. <br>
+	Anything in the header of a ajax-document will be excluded.</p>
+	<p>If you enter something in the below form, you can get to the next slide by clicking the button.</p>
+	<input type="text" id="inputID">
+	<p><button class="clickthistext" style="padding:25px;font-size:25px;" >CLICK HERE!</button>
+</body>
+</html>

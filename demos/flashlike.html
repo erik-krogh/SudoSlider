@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Sudo Slider | Flashlike demo</title>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
+	<link rel="STYLESHEET" type="text/css" href="flashLikeFiles/style.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){	
+			var firstRun = true;
+			var anispeed = 800; // miliseconds. 
+			var ease = 'swing';
+			$('.blackLeft, .blackRight').fadeTo(0,0.8);
+			runOnImagesLoaded($("#slider img"), true, function () {
+				$("#loading").fadeTo(400,0,function (){
+					$(this).remove();
+				});
+			});
+			var sudoSlider = $("#slider").sudoSlider({ 
+				prevNext:false,
+				continuous:true,
+				autowidth:false,
+				autoheight:false,
+				clickableAni:false,
+				slideCount:2,
+				ease:ease,
+				speed:anispeed,
+				beforeAniFunc: function(t){ 
+					var width = $(this).width();
+					var parentWidth = $("#slider").parent().width();
+					var marginleft = (parentWidth - width) / 2;
+					var anitime = firstRun ? 0 : anispeed;
+					$("#slider").stop().animate({marginLeft:marginleft},{duration:anitime,easing:ease});
+					firstRun = false;
+					$('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:anitime,easing:ease});
+				},
+				afterAniFunc: function(t){ 
+					
+				}
+			});
+			$('.blackRight, #slider').click(function(){
+				sudoSlider.goToSlide('next');
+			});
+			$('.blackLeft').click(function(){
+				sudoSlider.goToSlide('prev');
+			});
+
+		});
+		// This function is a direct copy of a function inside SudoSlider. 
+		function runOnImagesLoaded (target, allSlides, callback) // This function have to be rock stable, cause i use it ALL the time!
+			{
+				var elems = target.add(target.find('img')).filter('img');
+				var len = elems.length;
+				if (!len)
+				{
+					callback();
+					// No need to do anything else. 
+					return this;
+				}
+				function loadFunction(that)
+				{
+					$(that).unbind('load').unbind('error');
+					// Webkit/Chrome (not sure) fix. 
+					if (that.naturalHeight && !that.clientHeight)
+					{
+						$(that).height(that.naturalHeight).width(that.naturalWidth);
+					}
+					if (allSlides)
+					{
+						len--;
+						if (len == 0)
+						{
+							callback();
+						}
+					}
+					else
+					{
+						callback();
+					}
+				}
+				elems.each(function(){
+					var that = this;
+					$(that).load(function () {
+						loadFunction(that);
+					}).error(function () {
+						loadFunction(that);
+					});
+					/*
+					 * Start ugly working IE fix. 
+					 */
+					if (that.readyState == "complete") 
+					{
+						$(that).trigger("load");	
+					}
+					else if (that.readyState)
+					{
+						// Sometimes IE doesn't fire the readystatechange, even though the readystate has been changed to complete. AARRGHH!! I HATE IE, I HATE IT, I HATE IE!
+						that.src = that.src; // Do not ask me why this works, ask the IE team!
+					}
+					/*
+					 * End ugly working IE fix. 
+					 */
+					else if (that.complete)
+					{
+						$(that).trigger("load");
+					}
+					else if (that.complete === undefined)
+					{
+						var src = that.src;
+						// webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
+						// data uri bypasses webkit log warning (thx doug jones)
+						that.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="; // This is about the smallest image you can make. 
+						that.src = src;
+					}
+				}); 
+			}	
+	</script>
+	
+
+
+	
+</head>
+<body>
+<div style="position:relative;width:1200px;margin:0 auto;overflow:hidden;height:700px;">
+	<div style="width:1200px;height:700px;color:white;padding-top:300px;text-align:center;" id="loading"><span style="font-size:36px">Loading images</span></div>
+    <div class="blackLeft"></div>
+    <div class="blackRight"></div>
+    <div id="slider" class="slider">
+        <ul>				
+            <li><img src="../images/06.jpg" height="241" alt="image description"/></li>
+            <li><img src="../images/07.jpg" height="241" alt="image description"/></li>
+            <li><img src="../images/08.jpg" height="241" alt="image description"/></li>
+            <li><img src="../images/04.jpg" height="241" alt="image description"/></li>
+            <li><img src="../images/05.jpg" height="241" alt="image description"/></li>			
+        </ul>			
+    </div>
+</div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-20484420-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
