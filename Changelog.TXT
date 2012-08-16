@@ -227,4 +227,4 @@ Change in script: Removed the clickableani option, since it does not work well a
 Change in docs: SudoSlider is now on github (https://github.com/webbiesdk/SudoSlider), and on that occasion i decided to bump up the version to 2.2.0. The best way to file a bug, is to make an issue on github. 
 
 2.2.1
-Change in script: Fixed an issue where the ajaxcontent would try to load twice, resulting in it trying to load the image "false". Bug was introduced by upgrading to 1.8.0, but it was a bug in the SudoSlider code. 
+Change in script: Fixed an issue where the ajaxcontent would try to load twice, resulting in it trying to load the image "false". Bug was introduced by upgrading to 1.8.0, but it was a bug in the SudoSlider code. Also fixed another potential (never observed) bug with ajax-loading. 

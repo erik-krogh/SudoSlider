@@ -47,7 +47,7 @@
 			fadespeed:         1000, /* option[22]/*fadespeed*/
 			updatebefore:      FALSE, /* option[23]/*updateBefore*/
 			ajax:              FALSE, /* option[24]/*ajax*/
-			preloadajax:       100, /* option[25]/*preloadajax*/
+			preloadajax:       500, /* option[25]/*preloadajax*/
 			startslide:        FALSE, /* option[26]/*startslide*/
 			ajaxloadfunction:  FALSE, /* option[27]/*ajaxloadfunction*/
 			beforeanifunc:     FALSE, /* option[28]/*beforeanifunc*/
@@ -173,6 +173,7 @@
 			asyncTimedLoad,
 			callBackList = [],
 			obj = $(this),
+			adjustedTo = FALSE, // This variable teels if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff. 
 			// Making sure that changes in options stay where they belong, very local. 
 			options = optionsOrg,
 			option = [],
@@ -341,6 +342,7 @@
 				};
 				
 				// Preload elements. // Not the startslide, i let the animate function load that. 
+				// If preload is set to a number, then something else entirely happens. 
 				if (option[25]/*preloadajax*/ === TRUE) for (i=0;i<=ts;i++) if (option[24]/*ajax*/[i] && option[26]/*startslide*/-1 != i) ajaxLoad(i, FALSE, 0, FALSE);
 				
 				
@@ -704,6 +706,15 @@
 			}	
 			function autoadjust(i, speed)
 			{
+				if (speed == 0)
+				{
+					adjustedTo = i;
+				}
+				else
+				{
+					adjustedTo = FALSE;
+				}
+				
 				// Both autoheight and autowidth can be enabled at the same time. It's like magic. 
 				if (option[18]/*autoheight*/) autoheightwidth(i, speed, TRUE);//autoheight(i, speed);
 				if (option[38]/*autowidth*/) autoheightwidth(i, speed, FALSE);//autowidth(i, speed);
@@ -916,7 +927,8 @@
 					liConti = ul.children("li");
 					//if (ajaxInit === TRUE) adjustPosition();// Only doing this little trick at init. 
 				}
-				if (adjust) autoadjust(i, speed);
+				// Adjusting if we are supposed to, or if we already are supposed to be adjusted to it. 
+				if (adjust || adjustedTo == i) autoadjust(i, speed);
 				
 				runOnImagesLoaded (target, TRUE, function(){
 					if (ajaxInit === TRUE) adjustPosition();// Doing this little trick after the images are done. 
@@ -925,7 +937,6 @@
 					startAsyncDelayedLoad();
 				});
 				// If we want, we can launch a function here. 
-				// This line is after the "runOnImagesLoaded" function has run, because that might fix some height/width == 0 problems in webkit browsers. 
 				if (isFunc(option[27]/*ajaxloadfunction*/)){option[27]/*ajaxloadfunction*/.call(target, parseInt10(i)+1, img);}
 				// In some cases, i want to call the beforeanifunc here. 
 				if (ajaxCallBack == 2)
