@@ -224,4 +224,4 @@ Change in script: When initiating multiple sliders using one selector (one .sudo
 Change in docs: Upgraded jQuery to version 1.8.0
 Change in script: Changed some internal parts of the script, so that jQuery 1.7+ is now a requirement for the script to work at all. (And jQuery 1.8 fixes a position bug in IE, so use that!). 
 Change in script: Removed the clickableani option, since it does not work well anymore. 
-Change in docs: SudoSlider is now on github (https://github.com/webbiesdk/SudoSlider), and on that occasion i decided to bump up the version to 2.2.0. 
+Change in docs: SudoSlider is now on github (https://github.com/webbiesdk/SudoSlider), and on that occasion i decided to bump up the version to 2.2.0. The best way to file a bug, is to make an issue on github. 
