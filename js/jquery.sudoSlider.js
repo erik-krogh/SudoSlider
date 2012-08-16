@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.0 - jQuery plugin 
+ *  Sudo Slider ver 2.2.1 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -445,7 +445,15 @@
 						{
 							clearTimeout(asyncTimedLoad);
 							asyncTimedLoad = setTimeout(function(){
-								ajaxLoad(a, FALSE, 0, FALSE);
+								if (option[24][a])
+								{
+									ajaxLoad(a, FALSE, 0, FALSE);
+								}
+								else
+								{
+									// Trying the next, no rush. 
+									startAsyncDelayedLoad();
+								}
 							},parseInt10(option[25]/*preloadajax*/));
 							break;
 						}
@@ -846,16 +854,16 @@
 			{
 				if (asyncTimedLoad) clearTimeout(asyncTimedLoad);// I dont want it to run to often. 
 				// <strike>Not as complicated as it looks. </strike> Everything complicated about this line disappeared in version 2.0.12
-				var target = option[24]/*ajax*/[i],
-				targetslide = li.eq(i),
+				var target = option[24]/*ajax*/[i];
+				var targetslide = li.eq(i);
 				// parsing the init variable. 
-				ajaxInit = speed === TRUE,
-				speed = (speed === TRUE) ? 0 : speed,
+				var ajaxInit = speed === TRUE;
+				var speed = (speed === TRUE) ? 0 : speed;
 				// What speed should the autoheight function animate with?
-				ajaxspeed = (fading) ? (!option[21]/*crossfade*/ ? parseInt10(option[22]/*fadespeed*/ * (2/5)) : option[22]/*fadespeed*/) : speed,
+				var ajaxspeed = (fading) ? (!option[21]/*crossfade*/ ? parseInt10(option[22]/*fadespeed*/ * (2/5)) : option[22]/*fadespeed*/) : speed;
 				// The script itself is not using the 'tt' variable. But a custom function can use it. 
-				tt = i + 1,
-				textloaded = FALSE;
+				var tt = i + 1;
+				var textloaded = FALSE;
 				
 				// The thing that loads it. 
 				$.ajax({
@@ -1312,6 +1320,7 @@
 						autoOn :
 					undefined;
 			});	
+			
 		});
 	};
 })(jQuery);
