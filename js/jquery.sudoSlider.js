@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.1.9 - jQuery plugin 
+ *  Sudo Slider ver 2.2.0 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -1069,7 +1069,7 @@
 				if ((clickable && !destroyed && (dir != t || init)) && s >  getRealPos(dir) || ajaxcallback)
 				{
 					if (!ajaxcallback) ajaxloading = FALSE;
-					clickable = (!clicked && !option[9]/*auto*/) ? TRUE : option[16]/*clickableani*/;
+					clickable = !clicked && !option[9]/*auto*/;
 					// to the adjust function. 
 					buttonclicked = clicked;
 					ot = t;

@@ -12,7 +12,6 @@
 			$("#slider").sudoSlider({ 
 				ajax: ['../images/06.jpg', '../images/07.jpg', '../images/08.jpg'],
 				continuous: true,
-				clickableAni: true,
 				ajaxLoadFunction: function(t){
 					var target = $(this).children();
 					target.css('cursor' , 'pointer').click(function() {
@@ -72,7 +71,6 @@ $(document).ready(function(){
    $("#slider").sudoSlider({ 
       ajax: ['../images/06.jpg', '../images/07.jpg', '../images/08.jpg'],
       continuous: true,
-      clickableAni: true,
       ajaxLoadFunction: function(t){
          var target = $(this).children();
          target.css('cursor' , 'pointer').click(function() {

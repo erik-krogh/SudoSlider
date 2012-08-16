@@ -215,7 +215,7 @@ Change in script: When using moveCount and slideCount, the slider will no longer
 Change in script: Instead of calling beforeAniFunc and afterAniFunc more than once, the script just calls with all the continuous clones inside a single "this" variable. 
 Change in docs: Upgraded jQuery to version 1.7.2
 
-2.1.9
+2.2.0
 Change in script: Readded the adjust method (forgot it in the docs). The method now adjustets every position aspect of the slider, so if you call it after resizing anything, the slider will look pretty. Removed the time parameter the method took, it now only does it in 0 ms. 
 Change in script: Added the responsive option, use this to make the slider adjust to the container its in. See the responsive demo for details. 
 Change in docs: Added the responsive demo, demonstrating how you can use SudoSlider in a dynamic layout. 
@@ -223,3 +223,5 @@ Change in script: All options can now be written in lowercase, uppercase or any 
 Change in script: When initiating multiple sliders using one selector (one .sudoSlider()) call, the methods now run on all the sliders instead of just the last. When a method returns someting, an array of the values is returned. The methods never return undefined, when undefined is supposed to be returned, the jQuery object is returned instead. 
 Change in docs: Upgraded jQuery to version 1.8.0
 Change in script: Changed some internal parts of the script, so that jQuery 1.7+ is now a requirement for the script to work at all. (And jQuery 1.8 fixes a position bug in IE, so use that!). 
+Change in script: Removed the clickableani option, since it does not work well anymore. 
+Change in docs: SudoSlider is now on github (https://github.com/webbiesdk/SudoSlider), and on that occasion i decided to bump up the version to 2.2.0. 
