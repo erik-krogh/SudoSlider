@@ -231,3 +231,6 @@ Change in script: Fixed an issue where the ajaxcontent would try to load twice, 
 
 2.2.2
 Change in script: Fixed the setOption method not working for non-lowercase options. 
+
+2.2.3
+Change in docs: Updated jQuery to version 1.8.1
