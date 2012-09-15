@@ -1251,7 +1251,7 @@
 			
 			// Now the anonyous functions, i do not use these within the script. 
 			addMethod("getOption", function(a){
-				return options[a];
+				return options[a.toLowerCase()];
 			});
 			
 			addMethod("setOption", function(a, val){
