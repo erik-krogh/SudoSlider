@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.1 - jQuery plugin 
+ *  Sudo Slider ver 2.2.2 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -355,7 +355,6 @@
 				// And if you wan't it even more flexible, you can use the public methods (http://webbies.dk/SudoSlider/help/) like sudoSlider.goToSlide('next');
 				if (option[19]/*customlink*/) 
 				{
-					// høns
 					$(document).on('click', option[19]/*customlink*/, function() { // When i started making this script, the .live() was brand new, now its deprecated. 
 						if (a = $(this).attr('rel')) {
 							// Check for special events
@@ -1257,7 +1256,7 @@
 			
 			addMethod("setOption", function(a, val){
 				publicDestroy(); // Make it easy to work. 
-				options[a] = val; // Sets the semi-global option. 
+				options[a.toLowerCase()] = val; // Sets the semi-global option. 
 				publicInit(); // This makes sure that the semi-local options is inserted into the slide again. 
 			});
 			

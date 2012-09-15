@@ -228,3 +228,6 @@ Change in docs: SudoSlider is now on github (https://github.com/webbiesdk/SudoSl
 
 2.2.1
 Change in script: Fixed an issue where the ajaxcontent would try to load twice, resulting in it trying to load the image "false". Bug was introduced by upgrading to 1.8.0, but it was a bug in the SudoSlider code. Also fixed another potential (never observed) bug with ajax-loading. 
+
+2.2.2
+Change in script: Fixed the setOption method not working for non-lowercase options. 
