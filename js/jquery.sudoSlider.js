@@ -194,6 +194,9 @@
 				
 				// Fix for nested list items
 				ul = obj.children("ul");
+				// Is the ul element there?
+				if (ul.length == 0) obj.append(ul = $('<ul></ul>'));// No it's not, lets create it. 
+				
 				li = ul.children("li");
 				// Some variables i'm gonna use alot. 
 				s = li.length;
@@ -202,9 +205,6 @@
 				// I assume that it's can only be broken, if ajax is enabled. If it's broken without Ajax being enabled, the script doesn't have anything to fill the holes. 
 				if (option[24]/*ajax*/)
 				{
-					// Is the ul element there?
-					if (ul.length == 0) obj.append(ul = $('<ul></ul>'));// No it's not, lets create it. 
-					
 					// Do we have enough list elements to fill out all the ajax documents. 
 					if (option[24]/*ajax*/.length > s)
 					{
@@ -1178,29 +1178,17 @@
 			};
 			function getRealPos(a) //instead of the position of the "continuous-clone"
 			{
-				// Even newer method, makes it possible to have an possibly infinite amount of continuous clones. 
+				// Fixes an infinite loop if there are 0 slides in the slider. 
+				if (s == 0)
+				{
+					return 0;
+				}
 				a = parseInt10(a);
 				while (a < 0)
 				{
 					a += s;	
 				}
 				return a % s;
-				/*
-				return parseInt10(
-					a < 0 ?
-						a + s :
-					a % s); */
-				/*return parseInt10(
-					a < 0 ?
-						a + s :
-					a % s);*/
-				/* Old method, new method saved 7 bytes. 
-				a < 0 ?
-					a + s :
-				a > ts ?
-					a - s :
-				a
-				*/
 			}
 			function isFunc(func) //Closure compiler inlines this. But i still keep it. 
 			{

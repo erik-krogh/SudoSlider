@@ -234,3 +234,4 @@ Change in script: Fixed the setOption method not working for non-lowercase optio
 
 2.2.3
 Change in docs: Updated jQuery to version 1.8.1
+Change in script: You can know initialize SudoSlider on an empty container, even if you are not using AJAX. Thanks to clime from github.
