@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.3 - jQuery plugin 
+ *  Sudo Slider ver 2.2.4 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -513,7 +513,7 @@
 					
 					if (option[20]/*fade*/)
 					{
-						fadeto(i, clicked, speed);
+						fadeto(i, clicked, FALSE);
 					}
 					else
 					{
@@ -1207,7 +1207,7 @@
 			* Public methods. 
 			*/
 			
-			// First i just define those i use more than one (with a "public" prefix). Then i just add them as anonymous functions.
+			// First i just define those i use more than one (with a "public" prefix). Then i just add the others as anonymous functions.
 			function publicDestroy(){
 				// Saving the current position.
 				destroyT = t;
