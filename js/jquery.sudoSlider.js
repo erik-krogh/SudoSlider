@@ -1317,7 +1317,16 @@
 					a == 'autoAnimation' ?
 						autoOn :
 					undefined;
-			});	
+			});
+
+			addMethod("getSlide", function (number) {
+			    number = getRealPos(parseInt10(number) - 1);
+			    var slides = $();
+			    for (a in callBackList[number]) {
+			        slides = slides.add(callBackList[number][a]);
+			    }
+			    return slides;
+			});
 			
 		});
 	};
