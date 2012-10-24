@@ -907,14 +907,20 @@
 				options.ajax[i] = FALSE;
 			};
 			function ajaxAdjust(i, speed, ajaxCallBack, adjust, ajaxInit, img){
-				var target = li.eq(i);
+			    var target = li.eq(i);
+			    var callbackTarget = target;
 				// Now to see if the generated content needs to be inserted anywhere else. 
 				if (continuousClones)
 				{
 					var notFirst = FALSE;
 					for (a in callBackList[i])
 					{
-						if (notFirst) callBackList[i][a].replaceWith($(target).clone());
+					    if (notFirst) {
+					        var newSlide = target.clone();
+					        callBackList[i][a].replaceWith(newSlide);
+					        callBackList[i][a] = newSlide;
+					        callbackTarget = callbackTarget.add(newSlide);
+					    }
 						notFirst = TRUE;
 					}
 					
@@ -935,8 +941,8 @@
 					if (isFunc(ajaxCallBack)) ajaxCallBack();
 					startAsyncDelayedLoad();
 				});
-				// If we want, we can launch a function here. 
-				if (isFunc(option[27]/*ajaxloadfunction*/)){option[27]/*ajaxloadfunction*/.call(target, parseInt10(i)+1, img);}
+			    // If we want, we can launch a function here. 
+				if (isFunc(option[27]/*ajaxloadfunction*/)) { option[27]/*ajaxloadfunction*/.call(callbackTarget, parseInt10(i) + 1, img); }
 				// In some cases, i want to call the beforeanifunc here. 
 				if (ajaxCallBack == 2)
 				{

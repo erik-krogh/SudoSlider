@@ -238,3 +238,4 @@ Change in script: You can know initialize SudoSlider on an empty container, even
 
 2.2.4
 Change in docs: Updated jQuery to version 1.8.2
+Change in script: Added the getSlide method, see the docs for details. 
