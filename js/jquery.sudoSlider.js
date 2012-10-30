@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.4 - jQuery plugin 
+ *  Sudo Slider ver 2.2.5 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -171,7 +171,7 @@
 			orgslidecount,
 			beforeanifuncFired = FALSE,
 			asyncTimedLoad,
-			callBackList = [],
+			callBackList,
 			obj = $(this),
 			adjustedTo = FALSE, // This variable teels if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff. 
 			// Making sure that changes in options stay where they belong, very local. 
@@ -249,7 +249,7 @@
 				// Am i going to make continuous clones?
 				// If using fade, continuous clones are only needed if more than one slide is shown at the time. 
 				continuousClones = option[11]/*continuous*/ && (!option[20]/*fade*/ || option[39]/*slidecount*/ > 1);
-				
+				if (continuousClones) continuousClones = [];
 				// Okay, now we have a lot of the variables in place, now we can check for some special conditions. 
 				
 				// The user doens't always put a text in the numerictext. 
@@ -260,23 +260,25 @@
 					// Same thing for ajax. 
 					option[24]/*ajax*/[a] = option[24]/*ajax*/[a] || FALSE;
 				}
-				
+				callBackList = [];
 				for (i = 0; i < s; i++)
 				{
-					if (callBackList[i] == undefined) callBackList[i] = [];
+					callBackList[i] = [];
 					callBackList[i].push(li.eq(i));
 				}
 				
 				// Clone elements for continuous scrolling
 				if(continuousClones)
 				{
-					for (i = option[39]/*slidecount*/;i >= 1 ;i--)
+					for (i = Math.min(option[39]/*slidecount*/, s);i >= 1 ;i--)
 					{
 						var appendRealPos = getRealPos(-option[39]/*slidecount*/+i-1);
 						var prependRealPos = getRealPos(option[39]/*slidecount*/-i);
 						var appendClone = li.eq(appendRealPos).clone();
+						continuousClones.push(appendClone);
 						var prependClone = li.eq(prependRealPos).clone();
-						
+						continuousClones.push(prependClone);
+
 						callBackList[appendRealPos].push(appendClone);
 						callBackList[prependRealPos].push(prependClone);
 						ul.prepend(appendClone).append(prependClone);
@@ -340,10 +342,6 @@
 						prevbutton = makecontrol(option[32]/*prevhtml*/, "prev");
 					}
 				};
-				
-				// Preload elements. // Not the startslide, i let the animate function load that. 
-				// If preload is set to a number, then something else entirely happens. 
-				if (option[25]/*preloadajax*/ === TRUE) for (i=0;i<=ts;i++) if (option[24]/*ajax*/[i] && option[26]/*startslide*/-1 != i) ajaxLoad(i, FALSE, 0, FALSE);
 				
 				
 				// Lets make those fast/normal/fast into some numbers we can make calculations with.
@@ -411,6 +409,10 @@
 					// startslide is allways enabled, if not by the user, then by the code. 
 					else animate(option[26]/*startslide*/ - 1,FALSE,FALSE,FALSE); 
 				});
+
+			    // Preload elements. // Not the startslide, i let the animate function load that. 
+			    // If preload is set to a number, then something else entirely happens. 
+				if (option[25]/*preloadajax*/ === TRUE) for (i = 0; i <= ts; i++) if (option[24]/*ajax*/[i] && option[26]/*startslide*/ - 1 != i) ajaxLoad(i, FALSE, 0, FALSE);
 			}
 			/*
 			 * The functions do the magic. 
@@ -917,6 +919,7 @@
 					{
 					    if (notFirst) {
 					        var newSlide = target.clone();
+					        continuousClones.push(newSlide);
 					        callBackList[i][a].replaceWith(newSlide);
 					        callBackList[i][a] = newSlide;
 					        callbackTarget = callbackTarget.add(newSlide);
@@ -1228,8 +1231,13 @@
 				destroyed = TRUE; // No animation, no fading, no clicking from now. 
 				// Then remove the customlink bindings:
 				$(option[19]/*customlink*/).die("click");
-				// Now remove the "continuous clones". 
-				if (continuousClones) for (a=1;a<=option[39]/*slidecount*/;a++) liConti.eq(a-1).add(liConti.eq(-a)).remove();
+			    // Now remove the "continuous clones". 
+				if (continuousClones) {
+				    for (var i = 0; i < continuousClones.length; i++) {
+				        continuousClones[i].remove();
+				    }
+				}
+				// if (continuousClones) for (a=1;a<=Math.min([39]/*slidecount*/, s);a++) liConti.eq(a-1).add(liConti.eq(-a)).remove();
 				// I need the slider to be at the same place.
 				adjustPosition();
 				// And now it's done. The only way to make this slider do something visible, is by making a new init. 
@@ -1254,7 +1262,7 @@
 				publicInit(); // This makes sure that the semi-local options is inserted into the slide again. 
 			});
 			
-			addMethod("insertSlide", function(html, pos, numtext){
+			addMethod("insertSlide", function (html, pos, numtext) {
 				// First we make it easier to work. 
 				publicDestroy();
 				// pos = 0 means before everything else. 

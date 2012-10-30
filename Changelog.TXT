@@ -240,3 +240,8 @@ Change in script: You can know initialize SudoSlider on an empty container, even
 Change in docs: Updated jQuery to version 1.8.2
 Change in script: Added the getSlide method, see the docs for details. 
 Change in script: Fixed ajaxloadfunction and continuous not working well together. 
+
+2.2.5
+Change in docs: Changed the "urls" in the history demo to remove any spaces in them. 
+Change in script: Fixed that calling some methods when using continuous would bug if slideCount > [number of slides]
+Change in docs: Added the keyboard demo, showcasing basic keyboard navigation by using the methods. 
