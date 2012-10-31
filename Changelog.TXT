@@ -245,3 +245,6 @@ Change in script: Fixed ajaxloadfunction and continuous not working well togethe
 Change in docs: Changed the "urls" in the history demo to remove any spaces in them. 
 Change in script: Fixed that calling some methods when using continuous would bug if slideCount > [number of slides]
 Change in docs: Added the keyboard demo, showcasing basic keyboard navigation by using the methods. 
+Change in script: Fixed "flickering" of the controls in some very rare cases. 
+Change in script: Fixed that the ajaxLoadFunction ran to early. 
+Change in script: Added an argument to the insertSlide method, so you now can specify where the slider should be after inserting the slide. 

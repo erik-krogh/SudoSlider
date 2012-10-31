@@ -570,8 +570,8 @@
 				}
 				if (option[0]/*controlsShow*/)
 				{
-					if (option[12]/*prevnext*/) eA[fadeOpacity ? 'fadeIn' : 'fadeOut'](fadetime);
-					if (firstlastshow) eB[fadeOpacity ? 'fadeIn' : 'fadeOut'](fadetime);
+				    if (option[12]/*prevnext*/) eA.stop()[fadeOpacity ? 'fadeIn' : 'fadeOut'](fadetime);
+					if (firstlastshow) eB.stop()[fadeOpacity ? 'fadeIn' : 'fadeOut'](fadetime);
 				}
 				if(option[19]/*customlink*/)
 				{
@@ -579,6 +579,7 @@
 					.filter(function(index) { 
 						return ($(this).attr("rel") == directionA || $(this).attr("rel") == directionB);
 					})
+                    .stop()
 					[fadeOpacity ? "fadeIn" : "fadeOut"](fadetime);
 				} 
 			};
@@ -943,9 +944,10 @@
 					// And the callback. 
 					if (isFunc(ajaxCallBack)) ajaxCallBack();
 					startAsyncDelayedLoad();
+				    // If we want, we can launch a function here. 
+					if (isFunc(option[27]/*ajaxloadfunction*/)) { option[27]/*ajaxloadfunction*/.call(callbackTarget, parseInt10(i) + 1, img); }
 				});
-			    // If we want, we can launch a function here. 
-				if (isFunc(option[27]/*ajaxloadfunction*/)) { option[27]/*ajaxloadfunction*/.call(callbackTarget, parseInt10(i) + 1, img); }
+			    
 				// In some cases, i want to call the beforeanifunc here. 
 				if (ajaxCallBack == 2)
 				{
@@ -1262,7 +1264,7 @@
 				publicInit(); // This makes sure that the semi-local options is inserted into the slide again. 
 			});
 			
-			addMethod("insertSlide", function (html, pos, numtext) {
+			addMethod("insertSlide", function (html, pos, numtext, goToSlide) {
 				// First we make it easier to work. 
 				publicDestroy();
 				// pos = 0 means before everything else. 
@@ -1272,7 +1274,12 @@
 				if (!pos || pos == 0) ul.prepend(html);
 				else li.eq(pos -1).after(html);
 				// Finally, we make it work again. 
-				if (pos <= destroyT || (!pos || pos == 0)) destroyT++;
+				if (goToSlide) {
+				    destroyT = goToSlide - 1;
+				}
+				else if (pos <= destroyT || (!pos || pos == 0)) {
+				    destroyT++;
+				}
 				if (option[15]/*numerictext*/.length < pos){ option[15]/*numerictext*/.length = pos;}
 				option[15]/*numerictext*/.splice(pos,0,numtext || parseInt10(pos)+1);
 				publicInit();
