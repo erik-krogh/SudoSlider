@@ -270,9 +270,9 @@
 				// Clone elements for continuous scrolling
 				if(continuousClones)
 				{
-					for (i = Math.min(option[39]/*slidecount*/, s);i >= 1 ;i--)
+				    for (i = option[39]/*slidecount*/ ; i >= 1 ; i--)
 					{
-						var appendRealPos = getRealPos(-option[39]/*slidecount*/+i-1);
+					    var appendRealPos = getRealPos(-option[39]/*slidecount*/ + i - 1);
 						var prependRealPos = getRealPos(option[39]/*slidecount*/-i);
 						var appendClone = li.eq(appendRealPos).clone();
 						continuousClones.push(appendClone);
@@ -285,14 +285,6 @@
 					}
 					// This variable is also defined later, that's for the cases where Ajax is off, i also need to define it now, because the below code needs it. 
 					liConti = ul.children("li");
-					if (option[24]/*ajax*/)
-					{
-						for(a = s - option[39]/*slidecount*/;a<s;a++)
-						{
-							if (option[24]/*ajax*/[a] && a != option[26]/*startslide*/ - 1) ajaxLoad(a, FALSE, 0, FALSE); // I still do not wan't to load the current slide at this point. 
-						}
-					}
-					
 				}
 				// I don't fade the controls if continuous is enabled. 
 				option[2]/*controlsfade*/ = option[2]/*controlsfade*/ && !option[11]/*continuous*/;
@@ -570,8 +562,14 @@
 				}
 				if (option[0]/*controlsShow*/)
 				{
-				    if (option[12]/*prevnext*/) eA.stop()[fadeOpacity ? 'fadeIn' : 'fadeOut'](fadetime);
-					if (firstlastshow) eB.stop()[fadeOpacity ? 'fadeIn' : 'fadeOut'](fadetime);
+				    if (fadeOpacity) {
+				        if (option[12]/*prevnext*/) eA.filter(":hidden").fadeIn(fadetime);
+				        if (firstlastshow) eB.filter(":hidden").fadeIn(fadetime);
+				    }
+				    else {
+				        if (option[12]/*prevnext*/) eA.filter(":visible").fadeOut(fadetime);
+				        if (firstlastshow) eB.filter(":visible").fadeOut(fadetime);
+				    }
 				}
 				if(option[19]/*customlink*/)
 				{
@@ -579,7 +577,6 @@
 					.filter(function(index) { 
 						return ($(this).attr("rel") == directionA || $(this).attr("rel") == directionB);
 					})
-                    .stop()
 					[fadeOpacity ? "fadeIn" : "fadeOut"](fadetime);
 				} 
 			};
@@ -760,7 +757,7 @@
 			function getSlidePosition(slide, vertical)
 			{
 				// The new way <strike>Doesn't work well in some cases when ajax-loading stuff. </strike>
-				var slide = liConti.eq(slide + (continuousClones ? option[39]/*slidecount*/ : 0));
+			    var slide = liConti.eq(slide + (continuousClones ? option[39]/*slidecount*/ : 0));
 				return slide.length ? - slide.position()[vertical ? 'top' : 'left'] : 0;
 			};
 			// When the animation finishes (fade or sliding), we need to adjust the slider. 

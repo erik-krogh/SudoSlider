@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>Sudo Slider | Callbacks 4 (thumbnails) demo</title>
@@ -14,8 +14,10 @@
 		        numeric:true,
 		        preloadAjax:true,
 		        ajaxLoadFunction: function(t){
-		            var url = $(this).children().attr('src');	
-		            $('.controls li a span').eq(t-1).html('<img src="' + url + '" width="80" height="28" />');
+		            var $img = $(this).children();
+		            var url = $img.attr('src');
+		            var width = ($img.width() / $img.height()) * 28;
+		            $('.controls li a span').eq(t-1).html('<img src="' + url + '" width="' + width + '" height="28" />');
 		        }
 		    });
 		});
@@ -42,8 +44,10 @@ $(document).ready(function(){
         numeric:true,
         preloadAjax:true,
         ajaxLoadFunction: function(t){
-            var url = $(this).children().attr('src');	
-            $('.controls li a span').eq(t-1).html('&lt;img src="' + url + '" width="80" height="28" /&gt;');
+            var $img = $(this).children();
+            var url = $img.attr('src');
+            var width = ($img.width() / $img.height()) * 28;
+            $('.controls li a span').eq(t-1).html('&lt;img src="' + url + '" width="' + width + '" height="28" /&gt;');
         }
     });
 });

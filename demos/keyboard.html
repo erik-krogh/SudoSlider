@@ -52,7 +52,8 @@
 &lt;script type="text/javascript" &gt;
    $(document).ready(function(){	
       var sudoSlider = $("#slider").sudoSlider({ 
-         numeric:true
+         prevNext: false,
+         continuous:true
       });
       $(document).keydown(function (e) {
          if (e.which == 39) { // Arrow right
