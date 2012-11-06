@@ -573,11 +573,15 @@
 				}
 				if(option[19]/*customlink*/)
 				{
-					$(option[19]/*customlink*/)
-					.filter(function(index) { 
-						return ($(this).attr("rel") == directionA || $(this).attr("rel") == directionB);
-					})
-					[fadeOpacity ? "fadeIn" : "fadeOut"](fadetime);
+				    var filterFunction = function () {
+				        return ($(this).attr("rel") == directionA || $(this).attr("rel") == directionB);
+				    };
+				    if (fadeOpacity) {
+				        $(option[19]/*customlink*/).filter(filterFunction).filter(":hidden").fadeIn(fadetime);
+				    }
+				    else {
+				        $(option[19]/*customlink*/).filter(filterFunction).filter(":visible").fadeOut(fadetime);
+				    }
 				} 
 			};
 			// Fade the controls, if we are at the end of the slide. 
