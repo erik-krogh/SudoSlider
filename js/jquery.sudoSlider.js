@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.5 - jQuery plugin 
+ *  Sudo Slider ver 2.2.6 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -462,10 +462,10 @@
 					goToSlide("next", FALSE);
 				},pause);
 			}
-			function stopAuto()
+			function stopAuto(autoPossibleStillOn)
 			{
 				clearTimeout(timeout);
-				autoOn = FALSE; // The variable telling that auto is no longer in charge. 
+				if (!autoPossibleStillOn) autoOn = FALSE; // The variable telling that auto is no longer in charge. 
 			}
 			function textSpeedToNumber(speed)
 			{	
@@ -482,7 +482,7 @@
 			// I go a long way to save lines of code. 
 			function makecontrol(html, action)
 			{
-				return $(html).prependTo(controls).click(function(){
+			    return $(html).prependTo(controls).click(function () {
 					goToSlide(action, TRUE);
 					return FALSE;
 				});
@@ -490,21 +490,12 @@
 			// <strike>Simple function</strike><b>A litle complecated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work. 
 			function goToSlide(i, clicked, speed)
 			{
+                // Stopping, because if its needed then its restarted after the end of the animation. 
+			    stopAuto(true);
+
 				beforeanifuncFired = FALSE;
 				if (!destroyed)
-				{
-					if (option[9]/*auto*/)
-					{
-						var delay = option[20]/*fade*/ ? option[22]/*fadespeed*/ : option[7]/*speed*/;
-						// Stopping auto if clicked. And also continuing after X seconds of inactivity. 
-						if(clicked){
-							stopAuto();
-							if (option[40]/*resumepause*/) timeout = startAuto(delay + option[40]/*resumepause*/);
-						}
-						// Continuing if not clicked.
-						else timeout = startAuto(option[10]/*pause*/ + delay); 
-					}
-					
+				{	
 					if (option[20]/*fade*/)
 					{
 						fadeto(i, clicked, FALSE);
@@ -767,14 +758,25 @@
 			// When the animation finishes (fade or sliding), we need to adjust the slider. 
 			function adjust()
 			{
-				t = getRealPos(t); // Going to the real slide, away from the clone. 
+                t = getRealPos(t); // Going to the real slide, away from the clone. 
 				if(!option[23]/*updateBefore*/) setCurrent(t);
 				adjustPosition();
 				clickable = TRUE;
 				if(option[16]/*history*/ && buttonclicked) window.location.hash = option[15]/*numerictext*/[t];
-				if (!fading && beforeanifuncFired)
-				{
-					AniCall (t, TRUE); // I'm not running it at init, if i'm loading the slide. 
+				
+				
+				if (option[9]/*auto*/) {
+				    // Stopping auto if clicked. And also continuing after X seconds of inactivity. 
+				    if (buttonclicked) {
+				        stopAuto();
+				        if (option[40]/*resumepause*/) timeout = startAuto( option[40]/*resumepause*/);
+				    }
+				    // Continuing if not clicked.
+				    else timeout = startAuto(option[10]/*pause*/);
+				}
+
+				if (!fading && beforeanifuncFired) {
+				    AniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide. 
 				}
 			};
 			// This function is called when i need a callback on the current element and it's continuous clones (if they are there).
@@ -1032,7 +1034,7 @@
 									fading = TRUE;
 									if (firstRun)
 									{
-										animate(ll,FALSE,FALSE,FALSE); // Moving to the correct place.
+										animate(ll,clicked,FALSE,FALSE); // Moving to the correct place. // TODO: Test "clicked" instead of "FALSE". 
 										if(option[16]/*history*/ && clicked) window.location.hash = option[15]/*numerictext*/[t]; // It's just one line of code, no need to make a function of it. 
 										// Now run that after animation function.
 										AniCall(ll, TRUE);
@@ -1165,8 +1167,8 @@
 							{
 								queue:FALSE,
 								duration:speed,
-								easing:option[8]/*ease*/,
-								complete:adjust
+								easing: option[8]/*ease*/,
+								complete: adjust
 							}
 						);
 						// End animation. 

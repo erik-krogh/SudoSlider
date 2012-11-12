@@ -7,17 +7,17 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){	
+	    $(document).ready(function () {
+	        var afterFunc = function (t) {
+	            if (t == sudoSlider.getValue("totalSlides")) {
+	                sudoSlider.stopAuto();
+	            }
+	        };
 			var sudoSlider;
 		    sudoSlider = $("#slider").sudoSlider({ 
 				auto:true,
 				prevNext:false,
-				afterAniFunc: function (t) {
-					if (t == sudoSlider.getValue("totalSlides"))
-					{
-						sudoSlider.stopAuto();	
-					}
-				}
+				afterAniFunc: afterFunc
 		   });
 		});
 	</script>
@@ -50,16 +50,15 @@
 	<pre>
 &lt;script type="text/javascript" &gt;
    $(document).ready(function(){	
-      var sudoSlider;
-      sudoSlider = $("#slider").sudoSlider({ 
+      var afterFunc = function (t) {
+         if (t == sudoSlider.getValue("totalSlides")) {
+            sudoSlider.stopAuto();
+         }
+      };
+      var sudoSlider = $("#slider").sudoSlider({ 
          auto:true,
          prevNext:false,
-         afterAniFunc: function (t) {
-            if (t == sudoSlider.getValue("totalSlides"))
-            {
-               sudoSlider.stopAuto();	
-            }
-         }
+         afterAniFunc: afterFunc
       });
    });
 &lt;/script&gt;</pre>
