@@ -1105,7 +1105,7 @@
 					buttonclicked = clicked;
 					ot = t;
 					t = dir;
-					if (option[23]/*updateBefore*/) setCurrent(t);
+					if (option[23]/*updateBefore*/ && !fading) setCurrent(t);
 					// Calculating the speed to do the animation with. 
 					var diff = Math.sqrt(Math.abs(ot-t));
 					if (!(speed || speed == 0))	var speed = (!time) ? 0 : ((!clicked && !option[9]/*auto*/) ? parseInt10(diff*option[17]/*speedhistory*/) : parseInt10(diff*option[7]/*speed*/)),

@@ -248,3 +248,11 @@ Change in docs: Added the keyboard demo, showcasing basic keyboard navigation by
 Change in script: Fixed "flickering" of the controls in some very rare cases. 
 Change in script: Fixed that the ajaxLoadFunction ran to early. 
 Change in script: Added an argument to the insertSlide method, so you now can specify where the slider should be after inserting the slide. 
+
+2.2.6
+Change in script: Fixed onCurrentFunc and onUncurrentFunc being fired twice with updatebefore = true and ajax = true. 
+Change in docs: Added a videos demo, showcasing how you can have videos that pause when you slide. 
+Change in docs: Fixed that the example CSS in the docs didn't reflect the CSS actually used. 
+Change in script: It wasn't possible to have extremely small pauses when using auto before. It is now. 
+Change in docs: Updated jQuery to version 1.8.3
+Change in docs: Updated TouchSwipe to 1.5.0
