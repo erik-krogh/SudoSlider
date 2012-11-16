@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.6 - jQuery plugin 
+ *  Sudo Slider ver 2.2.7 - jQuery plugin 
  *  Written by Erik Kristensen info@webbies.dk. 
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
@@ -270,7 +270,7 @@
 				// Clone elements for continuous scrolling
 				if(continuousClones)
 				{
-				    for (i = option[39]/*slidecount*/ ; i >= 1 ; i--)
+				    for (i = option[39]/*slidecount*/ ; i >= 1 && s > 0 ; i--)
 					{
 					    var appendRealPos = getRealPos(-option[39]/*slidecount*/ + i - 1);
 						var prependRealPos = getRealPos(option[39]/*slidecount*/-i);
@@ -278,7 +278,6 @@
 						continuousClones.push(appendClone);
 						var prependClone = li.eq(prependRealPos).clone();
 						continuousClones.push(prependClone);
-
 						callBackList[appendRealPos].push(appendClone);
 						callBackList[prependRealPos].push(prependClone);
 						ul.prepend(appendClone).append(prependClone);

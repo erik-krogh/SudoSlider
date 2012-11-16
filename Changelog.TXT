@@ -256,3 +256,6 @@ Change in docs: Fixed that the example CSS in the docs didn't reflect the CSS ac
 Change in script: It wasn't possible to have extremely small pauses when using auto before. It is now. 
 Change in docs: Updated jQuery to version 1.8.3
 Change in docs: Updated TouchSwipe to 1.5.0
+
+2.2.7
+Change in script: Fixed that 
