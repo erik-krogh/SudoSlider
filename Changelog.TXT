@@ -43,13 +43,11 @@ Change in script: Now the autoheight function wait's for the slider to be "ready
 Change in script: Cleartype is "fixed" after the end of every fade animation (IE fix). 
 Change in script: Fixed width == 0 px bug when ajax-loading an image. 
 Change in script: Fixed <li> having the wrong height after ajax-loading an image. 
-Change in docs: Upgraded to jquery.address 1.3.1 and downgraded back to 1.3.0 because of a bug. 
 Change in script: Merged imgAjaxFunc and docAjaxFunc to ajaxLoadFunction.
 Change in script: Deleted the old "actions". Now there are new "methods" instead. (Also added 2 demos demonstrating the use of methods). 
 Change in script: You can no longer "destroy" the slider using customLinks (use "methods" instead).
 Change in script: Rewrote a lot of it (to make things like methods work), no change in how it behaves (except for the things metioned here in the changelog). 
 Change in script: Fixed a bug with vertical, where the script got the height all wrong. (Bug introduced somewhere betwen 1.0.9 and 2.0.0)
-Change in script: Fixed auto only sliding one slide (bug introduced in 2.0.0pre)
 Change in script: Removed the options controlsBefore and controlsAfter.
 Change in script: Changed the way "loadingtext" works. Now 'Loading Content...' is default instead of a random funny text, but you can still change it to what you want. 
 
@@ -64,7 +62,7 @@ Change in script: Removed the method "setHeight". Instead there's the adjust met
 Change in script: Fixed autoheight not working when using fade animations. 
 
 2.0.3
-Change in script: Fixed 2 IE problems. First problem was that IE didn't get the correct position after an animation, and the second was continuous and fading fucking up. 
+Change in script: Fixed 2 IE problems. First problem was that IE didn't get the correct position after an animation, and the second was continuous and fading acting weird. 
 Change in docs: Added a navigation inside slider demo. 
 Change in script: Fixed fade not crossfade "lag" in the first and last slide when continuous was enabled. 
 Change in script: Fixed crossfade not animating to the correct slide. 
@@ -94,7 +92,7 @@ Change in script: Fixed a problem when ajax, fade (not crossfade) and continuous
 Change in script: If there are five slides, and slideCount == 2, the script only makes numeric-buttons 1 to 4..
 
 2.0.7
-Change in script: Fixed that afterAniFunc and beforeAniFunc  rarely ran on the correct "continuous-clone".
+Change in script: Fixed that afterAniFunc and beforeAniFunc rarely ran on the correct "continuous-clone".
 Change in script: Fixed that auto had a to long pause, if fade == true. 
 Change in script: Fixed a potential inifinite loop when loading slides during a sliding animation across more than 10 unloaded slides. Also removed the limitation of only loading up to 10 slides when sliding across many unloaded slides. 
 Change in script: Now all slides before the slide being animated to (if it's not a fade animation) is loaded before the actual animation is started. This removes a bug where the slider didn't animate to the correct slide (but got to the correct slide in 0 ms after the animation was done). 
@@ -134,7 +132,7 @@ Change in docs: Added a "modal" demo, demonstrating how you can link to an enlar
 2.0.12
 Change in docs: Upgraded to jQuery version 1.5.2.
 Change in script: If continuous is on, ajaxLoadFunction was run 2 times, first on the normal element, then the "continuous-clone". And the content was also loaded twice. Now it's only loaded once, and after ajaxLoadFunction has run on the normal slide, it's cloned and placed as a "continuous-clone".
-Change in script: IF for slideCount, ajax and continuous is used at the same time, all content is no longer loaded before init, now it loads after init (but all content is still being loaded). 
+Change in script: If for slideCount, ajax and continuous is used at the same time, all content is no longer loaded before init, now it loads after init (but all content is still being loaded). 
 Change in script: Optimized fade & continuous. Now the "continuous-clones" aren't created if fade is on. 
 Change in script: Fixed that the height wouldn't be adjusted correct on first load in some situations when using ajax. 
 Change in script: The getValue method has a new value, "autoAnimation". It tells if an automatic slideshow is currently running. 
@@ -258,4 +256,5 @@ Change in docs: Updated jQuery to version 1.8.3
 Change in docs: Updated TouchSwipe to 1.5.0
 
 2.2.7
-Change in script: Fixed that 
+Change in script: Fixed that continuous crashed the script if initialized on an empty slider. 
+Change in docs: Added 3 new demos, fancy stuff 1 + 2 and ticker mode. 
