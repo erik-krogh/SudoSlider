@@ -137,27 +137,27 @@
 			 */
 			// First we declare a lot of variables. 
 			// Some of the names may be long, but they get minified. 
-			var init, 
-			ul, 
-			li, 
+		    var init,
+			ul,
+			li,
 			liConti,
-			s, 
-			t, 
-			ot, 
-			ts, 
-			clickable, 
-			buttonclicked, 
+			s,
+			t,
+			ot,
+			ts,
+			clickable,
+			buttonclicked,
 			fading,
-			ajaxloading, 
-			numericControls, 
-			numericContainer, 
-			destroyed, 
-			controls, 
-			html, 
-			firstbutton, 
-			lastbutton, 
-			nextbutton, 
-			prevbutton, 
+			ajaxloading,
+			numericControls,
+			numericContainer,
+			destroyed,
+			controls,
+			html,
+			firstbutton,
+			lastbutton,
+			nextbutton,
+			prevbutton,
 			timeout,
 			destroyT,
 			oldSpeed,
@@ -176,8 +176,7 @@
 			adjustedTo = FALSE, // This variable teels if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff. 
 			// Making sure that changes in options stay where they belong, very local. 
 			options = optionsOrg,
-			option = [],
-			bigNumber = 10000000;
+			option = [];
 			initSudoSlider(obj, FALSE);
 			function initSudoSlider(obj, destroyT)
 			{
@@ -290,7 +289,7 @@
 				
 				// Now that the slide content is in place, some adjustments can be made. 
 				// First i make sure that i have enough room in the <ul> (Through testing, i found out that the max supported size (height or width) in Firefox is 17895697px, Chrome supports up to 134217726px, and i didn't find any limits in IE (6/7/8/9)). 
-				ul[option[6]/*vertical*/ ? 'height' : 'width'](bigNumber); // That gives room for about 14000 slides of 700px each (and works in every browser i tested). 
+				ul[option[6]/*vertical*/ ? 'height' : 'width'](9000000); // That gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in Firefox on OSX. 
 				
 				// And i can make this variable for later use. 
 				// The variable contains every <li> element. 
