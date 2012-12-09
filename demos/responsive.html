@@ -12,10 +12,26 @@
 				responsive: true,
 				prevNext: false,
 				numeric:true,
-				continuous:true
+				continuous:true,
+				slideCount: 2
 			});
 			$(window).on("resize focus", function () {
-				$("#container, #slider").width($(window).width());
+				var width = $(window).width();
+				
+				var orgSlideCount = sudoSlider.getOption("slideCount");
+				var slideCount;
+				if (width > 1600) {
+					slideCount = 4;
+				} else if (width > 1200) {
+					slideCount = 3;
+				} else if (width > 900) {
+					slideCount = 2;
+				} else {
+					slideCount = 1;
+				}
+				if (slideCount != orgSlideCount) {
+					sudoSlider.setOption("slideCount", slideCount);
+				}
 			}).resize();
 		});	
 	</script>
@@ -62,16 +78,32 @@
 	<h4>The Javascript to start it (including IE6 fix in the bottom).</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
-    $(document).ready(function(){	
-        $(document).ready(function(){	
-            var sudoSlider = $("#slider").sudoSlider({
-                responsive: true,
-                prevNext: false,
-                numeric:true,
-                continuous:true,
-            });
-        });	
-    });	
+$(document).ready(function(){	
+    var sudoSlider = $("#slider").sudoSlider({
+        responsive: true,
+        prevNext: false,
+        numeric:true,
+        continuous:true,
+        slideCount: 2
+    });
+    $(window).on("resize focus", function () {
+        var width = $(window).width();
+        var orgSlideCount = sudoSlider.getOption("slideCount");
+        var slideCount;
+        if (width > 1600) {
+            slideCount = 4;
+        } else if (width > 1200) {
+            slideCount = 3;
+        } else if (width > 900) {
+            slideCount = 2;
+        } else {
+            slideCount = 1;
+        }
+        if (slideCount != orgSlideCount) {
+            sudoSlider.setOption("slideCount", slideCount);
+        }
+    }).resize();
+});	
 &lt;/script&gt;
 &lt;!-- IE6 fix --&gt;
 &lt;!--[if lte IE 6]&gt;
