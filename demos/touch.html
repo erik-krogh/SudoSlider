@@ -8,12 +8,25 @@
     <script type="text/javascript" src="../js/jquery.touchSwipe.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
+	
+		var power = 1;
+
+		jQuery.easing['jswing'] = jQuery.easing['swing'];
+		jQuery.extend( jQuery.easing,
+		{
+			kineticOut: function (x, current_time, start_value, end_value, total_time) {
+				return ((Math.pow(((Math.pow(x, power)) - 1), 3) + 1) + (1 - Math.pow(((Math.pow(x, power)) - 1), 2)))/2;
+			}
+		});
+
 		$(document).ready(function(){	
 			var ulMarginLeft = 0;
 			var sudoSlider = $("#slider").sudoSlider({
 				continuous: true,
+				prevNext: false,
+				//speed: 50,
 				slideCount: 2,
-				speed:800,
+				ease: "kineticOut",
 				afterAniFunc: function ()
 				{
 					ulMarginLeft = $("#slider ul").css("marginLeft");
@@ -26,147 +39,89 @@
 				allowPageScroll:"vertical"
 			});		
 			var starttime;
+			var slideWidth;
+			var lasttime;
 			var lastDistance;
 			function moveSlides(procent)
 			{
 				$("#slider ul").css("marginLeft",(ulMarginLeft + procent*slideWidth) + "px");
 			}
+			var N = 4;
+			var positionsBuffer = new Array(N);;
+			var timeBuffer = [];
 			function swipeStatus(event, phase, direction, distance)
 			{
 				if (sudoSlider.getValue('clickable'))
 				{
 					if (phase == "move" && (direction == "left" || direction == "right"))
 					{
+						
+						positionsBuffer = positionsBuffer.slice(1, N);
+						timeBuffer = timeBuffer.slice(1, N);
+						positionsBuffer.push(Math.abs(lastDistance - Number(distance)));
+						timeBuffer.push((new Date() - 0) - lasttime);
+						
+						lasttime = new Date() - 0;
 						slideWidth = $(event.currentTarget).find("li").eq(0).width();
 						lastDistance = Number(distance);
 						if (direction == "left")
 							moveSlides(-lastDistance/slideWidth);
 						else
 							moveSlides(lastDistance/slideWidth);
+							
 					}
 					else if (phase == "start")
 					{
+						for (var i = 0; i < N; i++) {
+							positionsBuffer[i] = 0;
+							timeBuffer[i] = 0;
+						}
+						lastDistance = 0;
+						lasttime = new Date() - 0;
 						starttime = new Date();	
 					}
 					else if (phase == "end" || phase == "cancel")
 					{
-						var duration = ((new Date() - starttime)/lastDistance) * (slideWidth - lastDistance);
+						var maxSpeed = 5;
+						var time = 0; 
+						var distance = 0;
+						for (var i = 0; i < N; i++) {
+							distance += positionsBuffer[i];
+							time += timeBuffer[i];
+						}
+						// This is in pixels pr. ms. 
+						var speed = Math.min(distance / time, maxSpeed);
+					
+					
+						var duration = ((new Date() - starttime)/(lastDistance*speed)) * (slideWidth - lastDistance);
 						duration = duration > 1000 ? 1000 : duration;
+						
+						
+						power = Math.pow(((maxSpeed - speed) / maxSpeed), 3) * 1.3 + 0.7
+						
 						sudoSlider.goToSlide((direction == "left") ? 'next' : 'prev', duration);
 					}
 				}
 			}
 		});
 	</script>
-	
-
-
-	
+		
 </head>
 <body>
 <div id="container">
-	<h1>Sudo Slider jQuery Plugin - TouchSwipe demo</h1> 
+	<h1 id="link">Sudo Slider jQuery Plugin - TouchSwipe demo</h1> 
 	<div style="position:relative;">
-			<div id="slider" class="slider">
-				<ul>				
-					<li><img src="../images/01.jpg" alt="image description"></li>
-					<li><img src="../images/02.jpg" alt="image description"></li>
-					<li><img src="../images/03.jpg" alt="image description"></li>
-					<li><img src="../images/04.jpg" alt="image description"></li>
-					<li><img src="../images/05.jpg" alt="image description"></li>		
-				</ul>			
-			</div>
-        </div>
-	<h3>Usage</h3>
-	<h4>Include the javascripts</h4>
-	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="../js/jquery.touchSwipe.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-	<h4>The Javascript to start it.</h4>
-	<pre>
-&lt;script type="text/javascript" &gt;
-    $(document).ready(function(){   
-   var ulMarginLeft = 0;
-   var sudoSlider = $("#slider").sudoSlider({
-      continuous: true,
-      slideCount: 2,
-      speed:800,
-      afterAniFunc: function ()
-      {
-         ulMarginLeft = $("#slider ul").css("marginLeft");
-         ulMarginLeft = Number(ulMarginLeft.substring(0, ulMarginLeft.length - 2));
-      }
-   });
-   $("#slider").swipe({
-      swipeStatus:swipeStatus,
-      threshold:0,
-      allowPageScroll:"vertical"
-   });      
-   var starttime;
-   var lastDistance;
-   function moveSlides(procent)
-   {
-      $("#slider ul").css("marginLeft",(ulMarginLeft + procent*slideWidth) + "px");
-   }
-   function swipeStatus(event, phase, direction, distance)
-   {
-      if (sudoSlider.getValue('clickable'))
-      {
-         if (phase == "move" && (direction == "left" || direction == "right"))
-         {
-            slideWidth = $(event.currentTarget).find("li").eq(0).width();
-            lastDistance = Number(distance);
-            if (direction == "left")
-               moveSlides(-lastDistance/slideWidth);
-            else
-               moveSlides(lastDistance/slideWidth);
-         }
-         else if (phase == "start")
-         {
-            starttime = new Date();   
-         }
-         else if (phase == "end" || phase == "cancel")
-         {
-            var duration = ((new Date() - starttime)/lastDistance) * (slideWidth - lastDistance);
-            duration = duration > 1000 ? 1000 : duration;
-            sudoSlider.goToSlide((direction == "left") ? 'next' : 'prev', duration);
-         }
-      }
-   }
-});
-&lt;/script&gt;</pre>
-	<h4>The CSS</h4>
-	<pre>
-#slider {
-    width:696px;
-}
-#slider img{
-    border:none;
-}
-#slider ul, #slider li{
-    position:relative;
-    margin:0;
-    padding:0;
-    list-style:none;
-    display:block;
-}
-#slider li { 
-    width:696px;
-    overflow:hidden; 
-}</pre>
-	<h4>The HTML</h4>
-	<pre>
-&lt;div id="slider" &gt;
-    &lt;ul&gt;
-        &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;	
-    &lt;/ul&gt;
-&lt;/div&gt;
-</pre>
+		<div id="slider" class="slider">
+			<ul>				
+				<li><img src="../images/01.jpg" alt="image description"></li>
+				<li><img src="../images/02.jpg" alt="image description"></li>
+				<li><img src="../images/03.jpg" alt="image description"></li>
+				<li><img src="../images/04.jpg" alt="image description"></li>
+				<li><img src="../images/05.jpg" alt="image description"></li>		
+			</ul>			
+		</div>
+	</div>
+	<h3>Usage: See the source code</h3>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">
