@@ -16,13 +16,11 @@
 				slideCount: 2
 			});
 			$(window).on("resize focus", function () {
-				var width = $(window).width();
+				var width = $("#slider").width();
 				
 				var orgSlideCount = sudoSlider.getOption("slideCount");
 				var slideCount;
-				if (width > 1600) {
-					slideCount = 4;
-				} else if (width > 1200) {
+				if (width >= 1200) {
 					slideCount = 3;
 				} else if (width > 900) {
 					slideCount = 2;
@@ -38,27 +36,26 @@
 	<!-- IE6 fix -->
 	<!--[if lte IE 6]>
 	<script type="text/javascript">
+		var maxWidth = 1200;
 		$(document).ready(function(){	
 			$(window).on("resize focus", function () {
-				$("#container, #slider").width($(window).width());
+				// $("#container, #slider").width(10);
+				var width = $(window).width();
+				$("#container, #slider").width(Math.min(width, maxWidth));
 			}).resize();
 		});	
 	</script>
 	<![endif]-->
 	<style>
-		#container, #slider {width: auto;}
+		#container, #slider {width: auto; max-width: 1200px;}
 		#slider li img {width: 100%;}
 	</style>
-	
-
-
 	
 </head>
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Responsive demo</h1> 
 	<h2>Try to resize the window, and see how the slider adjusts to its container. </h2>
-	<h3>Note: When using responsive, autowidth doesn't work, since all slides are forced to have the same width as viewport. </h3>
 	<div style="position:relative;">
 		<div id="slider">
 			<ul>				
@@ -70,84 +67,7 @@
 			</ul>
 		</div>
 	</div>
-	<h3>Usage</h3>
-	<h4>Include the javascripts</h4>
-	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-	<h4>The Javascript to start it (including IE6 fix in the bottom).</h4>
-	<pre>
-&lt;script type="text/javascript" &gt;
-$(document).ready(function(){	
-    var sudoSlider = $("#slider").sudoSlider({
-        responsive: true,
-        prevNext: false,
-        numeric:true,
-        continuous:true,
-        slideCount: 2
-    });
-    $(window).on("resize focus", function () {
-        var width = $(window).width();
-        var orgSlideCount = sudoSlider.getOption("slideCount");
-        var slideCount;
-        if (width > 1600) {
-            slideCount = 4;
-        } else if (width > 1200) {
-            slideCount = 3;
-        } else if (width > 900) {
-            slideCount = 2;
-        } else {
-            slideCount = 1;
-        }
-        if (slideCount != orgSlideCount) {
-            sudoSlider.setOption("slideCount", slideCount);
-        }
-    }).resize();
-});	
-&lt;/script&gt;
-&lt;!-- IE6 fix --&gt;
-&lt;!--[if lte IE 6]&gt;
-&lt;script type="text/javascript" &gt;
-    $(document).ready(function(){	
-        $(window).on("resize focus", function () {
-            $("#slider").width($(window).width());
-        }).resize();
-    });	
-&lt;/script&gt;
-&lt;![endif]--&gt;
-</pre>
-	<h4>The CSS</h4>
-	<pre>
-#slider img{
-    border:none;
-}
-#slider ul, #slider li{
-    position:relative;
-    margin:0;
-    padding:0;
-    list-style:none;
-    display:block;
-}
-#slider li { 
-    width:696px;
-    overflow:hidden; 
-	position:relative;
-}
-#slider li img {
-    width: 100%;
-}
-</pre>
-	<h4>The HTML</h4>
-	<pre>
-&lt;div id="slider" &gt;
-    &lt;ul&gt;
-        &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;	
-    &lt;/ul&gt;
-&lt;/div&gt;</pre>
+	<h3>Usage: See the source code</h3>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">
