@@ -260,3 +260,7 @@ Change in script: Fixed that continuous crashed the script if initialized on an 
 Change in docs: Added 3 new demos, fancy stuff 1 + 2 and ticker mode. 
 Change in scipt: Potentially fixed an unconfirmed bug in Firefox on OSX where the width was 1px off. 
 Change in docs: Updated the responsive demo, so it know adjust the number of slides being shown depending on window width.
+Change in docs: Updated the touch demo, it now behaves much more nicely after you let go of the finger. 
+Change in script: Fixed fade animation when using slidecount > 1 and vertical. Added the vertical fade demo to reflect this. 
+Change in script: When having slideCount > 1, autoheight and autowidth now scales the slider so that a [slidecount] number of slides is visible. It also makes sure that the biggest of the visible slides is always completely visible. 
+Change in script: AutoHeight and AutoWidth now always complete their animation at the same time as the slide (or fade) animation, even if the height of the slide changes during a slide (happens when an image is done loading during the animation). 

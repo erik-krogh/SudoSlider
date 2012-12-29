@@ -39,7 +39,9 @@
 
             var sudoSlider = $("#slider").sudoSlider({
                 beforeanifunc: function () {
-                    $("#slider ul li").children().tubeplayer("pause");
+                    $("#slider ul li").children().each(function () {
+                        $(this).tubeplayer("pause");
+                    });
                 }
             });
         });
