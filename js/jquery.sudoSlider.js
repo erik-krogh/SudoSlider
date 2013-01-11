@@ -137,14 +137,13 @@
 			numericControls,
 			numericContainer,
 			destroyed,
+			destroyT,
 			controls,
-			html,
 			firstbutton,
 			lastbutton,
 			nextbutton,
 			prevbutton,
 			timeout,
-			destroyT,
 			oldSpeed,
 			dontCountinue,
 			dontCountinueFade,
@@ -326,8 +325,7 @@
 				}
 
 
-				runOnImagesLoaded(liConti.slice(0,option[39]/*slidecount*/), TRUE, function ()
-				{
+				runOnImagesLoaded(liConti.slice(0,option[39]/*slidecount*/), TRUE, function () {
 					if (option[9]/*auto*/) {
 					    timeout = startAuto(option[10]/*pause*/);
 					}
@@ -1090,6 +1088,7 @@
 			
 			// First i just define those i use more than one (with a "public" prefix). Then i just add the others as anonymous functions.
 			function publicDestroy() {
+			    destroyed = TRUE;
 				destroyT = t;
 
 				if (option[42]/*responsive*/) {
@@ -1099,8 +1098,6 @@
 				if (controls) {
 				    controls.remove();
 				}
-
-				destroyed = TRUE;
 
 				$(option[19]/*customlink*/).off("click");
 
