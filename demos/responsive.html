@@ -36,19 +36,21 @@
 	<!-- IE6 fix -->
 	<!--[if lte IE 6]>
 	<script type="text/javascript">
+		// If you don't want any max-width stuff. Comment out the two lines containing "maxWidth". 
 		var maxWidth = 1200;
 		$(document).ready(function(){	
 			$(window).on("resize focus", function () {
 				// $("#container, #slider").width(10);
 				var width = $(window).width();
-				$("#container, #slider").width(Math.min(width, maxWidth));
+				width = Math.min(width, maxWidth)
+				$("#container, #slider").width(width);
 			}).resize();
 		});	
 	</script>
 	<![endif]-->
 	<style>
 		#container, #slider {width: auto; max-width: 1200px;}
-		#slider li img {width: 100%;}
+		#slider, #slider li img {width: 100%;}
 	</style>
 	
 </head>
@@ -67,7 +69,7 @@
 			</ul>
 		</div>
 	</div>
-	<h3>Usage: See the source code</h3>
+	<h3>Usage: See the source code (remember the CSS in the style tag)</h3>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">

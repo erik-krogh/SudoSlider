@@ -11,10 +11,8 @@
  *	 http://jquery.com
  *
  */
-(function($)
-{
-	$.fn.sudoSlider = function(optionsOrg)
-	{
+(function($) {
+	$.fn.sudoSlider = function(optionsOrg) {
 		// Saves space in the minified version.
 		// It might look complicated, but it isn't. It's easy to make using "replace all" and it saves a bit in the minified version (only .1KB after i started using Closure Compiler). 
 		var undefined; // Makes sure that undefined really is undefined within this scope. 
@@ -85,7 +83,7 @@
 					for (var i = 0; i < functions.length; i++)
 					{
 						// Arguments is already defined, they are the arguments this method was called with. 
-						var tmpReturn = functions[i].apply(this, arguments);
+						var tmpReturn = functions[i].apply(baseSlider, arguments);
 						if (tmpReturn != undefined) {
 							numberofreturns++;
 							if (numberofreturns == 1) {
@@ -104,7 +102,6 @@
 				};
 			}
 		}
-		
 
 		function objectToLowercase (obj) {
 			var ret = {};
@@ -143,9 +140,6 @@
 			dontCountinue,
 			dontCountinueFade,
 			autoOn,
-			a,
-			b,
-			i,
 			continuousClones,
 			numberOfVisibleSlides,
 			beforeanifuncFired = FALSE,
@@ -162,10 +156,10 @@
 			initSudoSlider(obj, FALSE);
 			function initSudoSlider(obj, destroyT) {
 				// Storing the public options in an array.
-				b = 0;
+				var i = 0;
 				for (a in options) {
-					option[b] = options[a];
-					b++;
+					option[i] = options[a];
+					i++;
 				}
 
 				destroyed = FALSE;
@@ -186,7 +180,9 @@
 				if (option[24]/*ajax*/) {
 					// Do we have enough list elements to fill out all the ajax documents. 
 					if (option[24]/*ajax*/.length > s) {
-						for (a = 1; a <= option[24]/*ajax*/.length - s; a++) ul.append('<li><p>' +  option[34]/*loadingtext*/ + '</p></li>');
+						for (var a = 1; a <= option[24]/*ajax*/.length - s; a++) {
+							ul.append('<li><p>' +  option[34]/*loadingtext*/ + '</p></li>');
+						}
 						li = ul.children("li");
 						s = li.length;
 					}
@@ -226,20 +222,20 @@
 				continuousClones = option[11]/*continuous*/ && (!option[20]/*fade*/ || option[39]/*slidecount*/ > 1);
 				if (continuousClones) continuousClones = [];
 
-				for (a = 0; a < s; a++) {
+				for (var a = 0; a < s; a++) {
 					option[15]/*numerictext*/[a] = option[15]/*numerictext*/[a] || (a+1);
 					option[24]/*ajax*/[a] = option[24]/*ajax*/[a] || FALSE;
 				}
 
 				callBackList = [];
-				for (i = 0; i < s; i++) {
+				for (var i = 0; i < s; i++) {
 					callBackList[i] = [];
 					callBackList[i].push(li.eq(i));
 				}
 				
 				// Clone elements for continuous scrolling
 				if(continuousClones) {
-				    for (i = option[39]/*slidecount*/ ; i >= 1 && s > 0 ; i--) {
+				    for (var i = option[39]/*slidecount*/ ; i >= 1 && s > 0 ; i--) {
 					    var appendRealPos = getRealPos(-option[39]/*slidecount*/ + i - 1);
 						var prependRealPos = getRealPos(option[39]/*slidecount*/-i);
 						var appendClone = li.eq(appendRealPos).clone();
@@ -277,8 +273,8 @@
 					
 					if(option[13]/*numeric*/) {
 						numericContainer = controls.prepend('<ol '+ option[14]/*numericattr*/ +'></ol>').children();
-						b = option[13]/*numeric*/ == 'pages' ? numberOfVisibleSlides : 1;
-						for(a = 0; a < s - ((option[11]/*continuous*/ || option[13]/*numeric*/ == 'pages') ? 1 : numberOfVisibleSlides) + 1; a += b) {
+						var distanceBetweenPages = option[13]/*numeric*/ == 'pages' ? numberOfVisibleSlides : 1;
+						for(var a = 0; a < s - ((option[11]/*continuous*/ || option[13]/*numeric*/ == 'pages') ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
 							numericControls[a] = $("<li rel='" + (a+1) + "'><a href='#'><span>"+ option[15]/*numerictext*/[a] +"</span></a></li>")
 							.appendTo(numericContainer)
 							.click(function(){
@@ -297,25 +293,26 @@
 				
 				
 				// Lets make those fast/normal/fast into some numbers we can make calculations with.
-				b = [1/*controlsfadespeed*/,7/*speed*/,10/*pause*/,18/*speedhistory*/,23/*fadespeed*/];
-				for (a in b) {
-					option[parseInt10(b[a])] = textSpeedToNumber(option[parseInt10(b[a])]);
+				var optionsToConvert = [1/*controlsfadespeed*/,7/*speed*/,10/*pause*/,18/*speedhistory*/,23/*fadespeed*/];
+				for (a in optionsToConvert) {
+					option[parseInt10(optionsToConvert[a])] = textSpeedToNumber(option[optionsToConvert[a]]);
 				}
 
 				if (option[19]/*customlink*/) {
 					$(document).on('click', option[19]/*customlink*/, function() {
-						if (a = $(this).attr('rel')) {
-							if (a == 'stop') {
+						var target;
+						if (target = $(this).attr('rel')) {
+							if (target == 'stop') {
 								option[9]/*auto*/ = FALSE;
 								stopAuto();
 							}
-							else if (a == 'start') {
+							else if (target == 'start') {
 								timeout = startAuto(option[10]/*pause*/);
 								option[9]/*auto*/ = TRUE;
 							}
-							else if (a == 'block') clickable = FALSE;
-							else if (a == 'unblock') clickable = TRUE;
-							else if (clickable) goToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE);
+							else if (target == 'block') clickable = FALSE;
+							else if (target == 'unblock') clickable = TRUE;
+							else if (clickable) goToSlide((target == parseInt10(target)) ? target - 1 : target, TRUE);
 						}
 						return FALSE;
 					}); 
@@ -332,14 +329,15 @@
 					    animate(destroyT,FALSE,FALSE,FALSE);
 					} else if (option[16]/*history*/) {
 						// I support the jquery.address plugin, Ben Alman's hashchange plugin and Ben Alman's jQuery.BBQ.
-						a = $(window); // BYTES!
-						if (i = a.hashchange) {
-							i(URLChange);
-						} else if (i = $.address) {
-							i.change(URLChange);
+						var window = $(window); // BYTES!
+						var hashPlugin;
+						if (hashPlugin = window.hashchange) {
+							hashPlugin(URLChange);
+						} else if (hashPlugin = $.address) {
+							hashPlugin.change(URLChange);
 						} else {
 						    // This assumes that jQuery BBQ is included. If not, stuff won't work in old browsers.
-							a.on('hashchange', URLChange);
+							window.on('hashchange', URLChange);
 						}
 						URLChange();
 					}
@@ -347,7 +345,7 @@
 				});
 
 				if (option[25]/*preloadajax*/ === TRUE) {
-				    for (i = 0; i <= ts; i++) {
+				    for (var i = 0; i <= ts; i++) {
 				        if (option[24]/*ajax*/[i] && option[26]/*startslide*/ - 1 != i) {
 				            ajaxLoad(i, FALSE, 0, FALSE);
 				        }
@@ -371,9 +369,9 @@
 
 			// Triggered when the URL changes.
 			function URLChange() {
-				i = filterUrlHash(location.hash.substr(1));
-				if (init) animate(i,FALSE,FALSE,FALSE);
-				else if (i != t) goToSlide(i, FALSE);
+				var target = filterUrlHash(location.hash.substr(1));
+				if (init) animate(target,FALSE,FALSE,FALSE);
+				else if (target != t) goToSlide(target, FALSE);
 			}
 
 			function startAsyncDelayedLoad () {
@@ -437,16 +435,16 @@
 						fadeto(i, clicked, FALSE);
 					} else {
 						if (option[11]/*continuous*/) {
-							a = filterDir(i);
-							i = a;
+							var realTarget = filterDir(i);
+							i = realTarget;
 							// Finding the shortest path from where we are to where we are going.
-							var diff = Math.abs(t-a);
-							if (a < option[39]/*slidecount*/-numberOfVisibleSlides+1 && Math.abs(t - a - s)/* t - (a + s) */ < diff) {
-								i = a + s;
-								diff = Math.abs(t - a - s); // Setting the new "standard", for how long the animation can be. 
+							var diff = Math.abs(t-realTarget);
+							if (realTarget < option[39]/*slidecount*/-numberOfVisibleSlides+1 && Math.abs(t - realTarget - s)/* t - (realTarget + s) */ < diff) {
+								i = realTarget + s;
+								diff = Math.abs(t - realTarget - s); // Setting the new "standard", for how long the animation can be. 
 							}
-							if (a > ts - option[39]/*slidecount*/ && Math.abs(t - a + s)/* t - (a - s) */  < diff) {
-								i = a - s;
+							if (realTarget > ts - option[39]/*slidecount*/ && Math.abs(t - realTarget + s)/* t - (realTarget - s) */  < diff) {
+								i = realTarget - s;
 							}
 						} else {
 							i = filterDir(i);
@@ -521,15 +519,13 @@
 						
 					element
 						.filter(function() {
-							b = $(this).attr("rel");
-							if (option[13]/*numeric*/ == 'pages')
-							{
-								for (a = 0; a < numberOfVisibleSlides; a++)
-								{
-									if (b == i - a) return TRUE;
+							var elementTarget = $(this).attr("rel");
+							if (option[13]/*numeric*/ == 'pages') {
+								for (var a = 0; a < numberOfVisibleSlides; a++) {
+									if (elementTarget == i - a) return TRUE;
 								}
 							}
-							else return b == i;
+							else return elementTarget == i;
 							return FALSE; 
 						})
 						.addClass("current")
@@ -695,7 +691,10 @@
 			// after:  TRUE == afteranifunc : FALSE == beforeanifunc;
 			function AniCall (i, after) {
 				i = getRealPos(i);
-				(after ? afterAniCall : beforeAniCall)(getSlideElements(i), i + 1);
+				// Wierd fix to let IE accept the existance of the sudoSlider object. 
+				setTimeout(function () {
+					(after ? afterAniCall : beforeAniCall)(getSlideElements(i), i + 1);
+				}, 0);
 			}
 
 			function afterAniCall(el, a) {
@@ -858,7 +857,7 @@
 						// Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements. 
 						dontCountinueFade = 0;
 						oldSpeed = speed;
-						for (a = ll; a < ll + numberOfVisibleSlides; a++) {
+						for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
 							if (option[24]/*ajax*/[a]) {
 								ajaxLoad(getRealPos(a), FALSE, speed, function(){
 									fadeto(i, clicked, TRUE);
@@ -879,7 +878,7 @@
 							var firstRun = TRUE;
 							var push = 0;
 
-							for (a = ll; a < ll + numberOfVisibleSlides; a++) {
+							for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
 								// I clone the target, and fade it in, then hide the cloned element while adjusting the slider to show the real target.
 								var clone = li.eq(getRealPos(a)).clone().prependTo(obj);
 								clone.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', 'top' : option[6]/*vertical*/ ? push : 0, 'left' : option[6]/*vertical*/ ? 0 : push}).
@@ -961,10 +960,12 @@
 					if (option[23]/*updateBefore*/ && !fading) setCurrent(t);
 
 					var diff = Math.sqrt(Math.abs(ot-t));
-					if (!(speed || speed == 0))	var speed = (!time) ? 0 : ((!clicked && !option[9]/*auto*/) ? parseInt10(diff*option[17]/*speedhistory*/) : parseInt10(diff*option[7]/*speed*/)),
+					if (!(speed || speed == 0)) {
+						var speed = (!time) ? 0 : ((!clicked && !option[9]/*auto*/) ? parseInt10(diff*option[17]/*speedhistory*/) : parseInt10(diff*option[7]/*speed*/));
+					}
 
 					// Ajax begins here
-					i = getRealPos(t);
+					var i = getRealPos(t);
 					if (ajaxcallback) {
 						speed = oldSpeed;
 						// Do a check if it can continue.
@@ -978,11 +979,11 @@
 						// The slider need to have all slides that are scrolled over loaded, before it can do the animation.
 						// That's not easy, because the slider is only loaded once a callback is fired. 
 						if (!fading) {
-							var aa = (ot>t) ? t : ot,
-							ab = (ot>t) ? ot : t;
+							var aa = (ot>t) ? t : ot;
+							var ab = (ot>t) ? ot : t;
 							dontCountinue = 0;
 							oldSpeed = speed;
-							for (a = aa; a <= ab; a++) {
+							for (var a = aa; a <= ab; a++) {
 								if (a<=ts && a>=0 && option[24]/*ajax*/[a]) {
 									ajaxLoad(a, FALSE, speed, function(){
 										animate(dir,clicked,time, TRUE);
@@ -992,7 +993,7 @@
 							}
 						}
 						// Then we have to preload the next ones. 
-						for (a = i+1; a <= i + numberOfVisibleSlides; a++) {
+						for (var a = i+1; a <= i + numberOfVisibleSlides; a++) {
 							if (option[24]/*ajax*/[a]) {
 							    ajaxLoad(a, FALSE, 0, FALSE);
 							}

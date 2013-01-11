@@ -264,3 +264,6 @@ Change in docs: Updated the touch demo, it now behaves much more nicely after yo
 Change in script: Fixed fade animation when using slidecount > 1 and vertical. Added the vertical fade demo to reflect this. 
 Change in script: When having slideCount > 1, autoheight and autowidth now scales the slider so that a [slidecount] number of slides is visible. It also makes sure that the biggest of the visible slides is always completely visible. 
 Change in script: AutoHeight and AutoWidth now always complete their animation at the same time as the slide (or fade) animation, even if the height of the slide changes during a slide (happens when an image is done loading during the animation). 
+
+2.2.8
+Change in script: Fixed some situations where IE wouldn't accept the existance of the SudoSlider object in the callback functions. 
