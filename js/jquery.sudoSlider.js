@@ -716,9 +716,10 @@
 			// after:  TRUE == afteranifunc : FALSE == beforeanifunc;
 			function AniCall (i, after) {
 				i = getRealPos(i);
+				var slideElements = getSlideElements(i);
 				// Wierd fix to let IE accept the existance of the sudoSlider object.
 				setTimeout(function () {
-					(after ? afterAniCall : beforeAniCall)(getSlideElements(i), i + 1);
+					(after ? afterAniCall : beforeAniCall)(slideElements, i + 1);
 				}, 0);
 			}
 
@@ -897,8 +898,6 @@
 						clickable = !clicked;
 						autoadjust(ll,option[22]/*fadespeed*/);
 
-						AniCall(ll, FALSE);
-
 						if (option[21]/*crossfade*/) {
 							var firstRun = TRUE;
 							var push = 0;
@@ -907,8 +906,11 @@
 								// I clone the target, and fade it in, then hide the cloned element while adjusting the slider to show the real target.
 								var clone = li.eq(getRealPos(a)).clone().prependTo(obj);
 								clone.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : option[6]/*vertical*/ ? push : 0, "left" : option[6]/*vertical*/ ? 0 : push}).
-
 								hide().fadeIn(option[22]/*fadespeed*/, option[8]/*ease*/, function() {
+
+								    // Removing it from the callbacklist.
+								    callBackList[ll].pop();
+
 									fixClearType(this);
 
 									clickable = TRUE;
@@ -927,9 +929,19 @@
 
 									fading = FALSE;
 								});
+
+								// Adding it to the callbacklist while it exists.
+                                callBackList[ll].push(clone);
+
 								push += clone[option[6]/*vertical*/ ? 'outerHeight' : 'outerWidth'](TRUE);
 							}
+
+							// Now that everything has been set up, i can call the callback.
+							AniCall(ll, FALSE);
 						} else {
+						    // Executing callback right away. Nothing to set up.
+						    AniCall(ll, FALSE);
+
 							// fadeOut and fadeIn.
 							var fadeinspeed = parseInt10((speed)*(3/5));
 							var fadeoutspeed = speed - fadeinspeed;
