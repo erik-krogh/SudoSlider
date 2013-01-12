@@ -1,12 +1,12 @@
 /*
  *  Sudo Slider ver 2.2.8 - jQuery plugin
- *  Written by Erik Kristensen info@webbies.dk. 
+ *  Written by Erik Kristensen info@webbies.dk.
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
- *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it. 
- *	
+ *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it.
+ *
  *	 Dual licensed under the MIT
  *	 and GPL licenses.
- * 
+ *
  *	 Built for jQuery library
  *	 http://jquery.com
  *
@@ -14,11 +14,11 @@
 (function($) {
 	$.fn.sudoSlider = function(optionsOrg) {
 		// Saves space in the minified version.
-		// It might look complicated, but it isn't. It's easy to make using "replace all" and it saves a bit in the minified version (only .1KB after i started using Closure Compiler). 
-		var undefined; // Makes sure that undefined really is undefined within this scope. 
+		// It might look complicated, but it isn't. It's easy to make using "replace all" and it saves a bit in the minified version (only .1KB after i started using Closure Compiler).
+		var undefined; // Makes sure that undefined really is undefined within this scope.
 		var FALSE = !1;
 		var TRUE = !0;
-		// default configuration properties 
+		// default configuration properties
 		var defaults = {
 			controlsshow:      TRUE, /* option[0]/*controlsShow*/
 			controlsfadespeed: 400, /* option[1]/*controlsfadespeed*/
@@ -64,16 +64,16 @@
 			movecount:         1, /* option[41]/*movecount*/
 			responsive:        FALSE  /* option[42]/*responsive*/
 		};
-		// Defining the base element. 
+		// Defining the base element.
 		var baseSlider = this;
-		// This object holds all the callback functions, each field in the object is an array of functions. 
+		// This object holds all the callback functions, each field in the object is an array of functions.
 		var publicMethods = {};
 		// Adds a public method to the base element, to allow methods calls to be made on the returned object.
 		function addMethod(name, func) {
 			if (publicMethods[name]) {
 				publicMethods[name].push(func);
 			} else {
-				// No function, lets first make an array in the publicMethods object. 
+				// No function, lets first make an array in the publicMethods object.
 				publicMethods[name] = [func];
 				// Defining the method that is actually called. Its only responsibility is to call the specified methods and make sure to return something meaningful.
 				baseSlider[name] = function () {
@@ -82,7 +82,7 @@
 					var numberofreturns = 0;
 					for (var i = 0; i < functions.length; i++)
 					{
-						// Arguments is already defined, they are the arguments this method was called with. 
+						// Arguments is already defined, they are the arguments this method was called with.
 						var tmpReturn = functions[i].apply(baseSlider, arguments);
 						if (tmpReturn != undefined) {
 							numberofreturns++;
@@ -112,7 +112,7 @@
 
 		optionsOrg = $.extend(defaults, objectToLowercase(optionsOrg));
 
-		// Constants 
+		// Constants
 		var PAGES_MARKER_STRING = "pages";
 		var NEXT_STRING = "next";
 		var PREV_STRING = "prev";
@@ -779,13 +779,13 @@
 			}
 
 			// Load a ajax document (or image) into a slide.
-			// If testing this locally (loading everything from a harddisk instead of the internet), it may not work. 
-			// But then try to upload it to a server, and see it shine. 
+			// If testing this locally (loading everything from a harddisk instead of the internet), it may not work.
+			// But then try to upload it to a server, and see it shine.
 			function ajaxLoad(i, adjust, speed, ajaxCallBack) {
 				if (asyncTimedLoad) clearTimeout(asyncTimedLoad);// I dont want it to run to often.
 				var target = option[24]/*ajax*/[i];
 				var targetslide = li.eq(i);
-				// parsing the init variable. 
+				// parsing the init variable.
 				var ajaxInit = speed === TRUE;
 				var speed = (speed === TRUE) ? 0 : speed;
 				// What speed should the autoheight function animate with?
@@ -804,8 +804,8 @@
 						}
 					},
 					complete: function(jqXHR){
-						// Some browsers wont load images this way, so i treat an error as an image. 
-						// There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way. 
+						// Some browsers wont load images this way, so i treat an error as an image.
+						// There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
 						if (!textloaded) {
 							// Load the image.
 							image = new Image();
@@ -816,15 +816,15 @@
 						}
 					}
 				});
-				// It is loaded, we dont need to do that again. 
+				// It is loaded, we dont need to do that again.
 				option[24]/*ajax*/[i] = FALSE;
-				// It is the only option that i need to change for good. 
+				// It is the only option that i need to change for good.
 				options.ajax[i] = FALSE;
 			};
 			function ajaxAdjust(i, speed, ajaxCallBack, adjust, ajaxInit, img){
 			    var target = li.eq(i);
 			    var callbackTarget = target;
-				// Now to see if the generated content needs to be inserted anywhere else. 
+				// Now to see if the generated content needs to be inserted anywhere else.
 				if (continuousClones) {
 					var notFirst = FALSE;
 					for (a in callBackList[i]) {
@@ -837,23 +837,23 @@
 					    }
 						notFirst = TRUE;
 					}
-					
-					// The liConti gets messed up a bit in the above code, therefore i fix it. 
+
+					// The liConti gets messed up a bit in the above code, therefore i fix it.
 					liConti = ul.children("li");
 				}
 
 				if (adjust || finishedAdjustingTo == i) autoadjust(i, speed);
-				
+
 				runOnImagesLoaded (target, TRUE, function(){
-					if (ajaxInit === TRUE) adjustPosition();// Doing this little trick after the images are done. 
-					// And the callback. 
+					if (ajaxInit === TRUE) adjustPosition();// Doing this little trick after the images are done.
+					// And the callback.
 					if (isFunc(ajaxCallBack)) ajaxCallBack();
 					startAsyncDelayedLoad();
-				    // If we want, we can launch a function here. 
+				    // If we want, we can launch a function here.
 					if (isFunc(option[27]/*ajaxloadfunction*/)) { option[27]/*ajaxloadfunction*/.call(callbackTarget, parseInt10(i) + 1, img); }
 				});
-			    
-				// In some cases, i want to call the beforeanifunc here. 
+
+				// In some cases, i want to call the beforeanifunc here.
 				if (ajaxCallBack == 2) {
 					AniCall(i, FALSE);
 					if (!beforeanifuncFired) {
@@ -861,18 +861,20 @@
 						beforeanifuncFired = TRUE;
 					}
 				}
-				
+
 			};
 
 
 			function fadeto(i, clicked, ajaxcallback) {
 				if (filterDir(i) != t && !destroyed && clickable) {
-					// Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should. 
+					// Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
 					ajaxloading = FALSE;
 					if (option[23]/*updateBefore*/) setCurrent(filterDir(i));
-					if (!(speed || speed == 0)) var speed = (!clicked && !option[9]/*auto*/ && option[16]/*history*/) ? option[22]/*fadespeed*/ * (option[17]/*speedhistory*/ / option[7]/*speed*/) : option[22]/*fadespeed*/,
-					// I don't want to fade to a continuous clone, i go directly to the target. 
-					ll = filterDir(i);
+					if (!(speed || speed == 0)) {
+					    var speed = (!clicked && !option[9]/*auto*/ && option[16]/*history*/) ? option[22]/*fadespeed*/ * (option[17]/*speedhistory*/ / option[7]/*speed*/) : option[22]/*fadespeed*/;
+					}
+					// I don't want to fade to a continuous clone, i go directly to the target.
+					var ll = filterDir(i);
 
 					if(option[2]/*controlsfade*/) fadeControls (ll,option[1]/*controlsfadespeed*/);
 
@@ -880,7 +882,7 @@
 						speed = oldSpeed;
 						if (dontCountinueFade) dontCountinueFade--; // Short for if(dontContinueFade == 0).
 					} else if (option[24]/*ajax*/) {
-						// Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements. 
+						// Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements.
 						dontCountinueFade = 0;
 						oldSpeed = speed;
 						for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
@@ -953,12 +955,12 @@
 										duration:fadeoutspeed,
 										easing:option[8]/*ease*/,
 										complete:function () {
-											// So the animation function knows what to do. 
+											// So the animation function knows what to do.
 											clickable = TRUE;
 											fading = TRUE;
 											animate(ll,FALSE,FALSE,FALSE);
 
-											clickable = !clicked; 
+											clickable = !clicked;
 
 											$(this).animate(
 												{ opacity: 1 },
@@ -990,7 +992,7 @@
 				if ((clickable && !destroyed && (dir != t || init)) && s >  getRealPos(dir) || ajaxcallback) {
 					if (!ajaxcallback) ajaxloading = FALSE;
 					clickable = !clicked && !option[9]/*auto*/;
-					// to the adjust function. 
+					// to the adjust function.
 					buttonclicked = clicked;
 					ot = t;
 					t = dir;
@@ -1008,13 +1010,13 @@
 						// Do a check if it can continue.
 						if (dontCountinue) dontCountinue--;
 					} else if (option[24]/*ajax*/) {
-						// Loading the target slide, if not already loaded. 
+						// Loading the target slide, if not already loaded.
 						if (option[24]/*ajax*/[i]) {
 							ajaxLoad(i, TRUE, init || speed, 2); // 2 for AniCall
 							ajaxloading = TRUE;
 						}
 						// The slider need to have all slides that are scrolled over loaded, before it can do the animation.
-						// That's not easy, because the slider is only loaded once a callback is fired. 
+						// That's not easy, because the slider is only loaded once a callback is fired.
 						if (!fading) {
 							var aa = (ot>t) ? t : ot;
 							var ab = (ot>t) ? ot : t;
@@ -1029,7 +1031,7 @@
 								}
 							}
 						}
-						// Then we have to preload the next ones. 
+						// Then we have to preload the next ones.
 						for (var a = i+1; a <= i + numberOfVisibleSlides; a++) {
 							if (option[24]/*ajax*/[a]) {
 							    ajaxLoad(a, FALSE, 0, FALSE);
@@ -1059,7 +1061,7 @@
 
 						if(option[2]/*controlsfade*/) {
 							var fadetime = option[1]/*controlsfadespeed*/;
-							if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;					
+							if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;
 							if (!time) fadetime = 0;
 							if (fading) fadetime = parseInt10((option[22]/*fadespeed*/)*(3/5));
 							fadeControls (t,fadetime);
@@ -1070,13 +1072,13 @@
 						}
 
 						init = FALSE;
-						
+
 					};
 				}
 			};
 
 			function getRealPos(a) {
-				// Fixes an infinite loop if there are 0 slides in the slider. 
+				// Fixes an infinite loop if there are 0 slides in the slider.
 				if (s == 0) {
 					return 0;
 				}
@@ -1106,7 +1108,7 @@
 		    /*
  			 * Public methods.
 			 */
-			
+
 			// First i just define those i use more than one (with a "public" prefix). Then i just add the others as anonymous functions.
 			function publicDestroy() {
 			    destroyed = TRUE;
@@ -1135,7 +1137,7 @@
 
 			function publicInit(){
 				if (destroyed) {
-					initSudoSlider(obj, destroyT);	
+					initSudoSlider(obj, destroyT);
 				}
 			}
 
@@ -1144,22 +1146,22 @@
 			addMethod("getOption", function(a){
 				return options[a.toLowerCase()];
 			});
-			
+
 			addMethod("setOption", function(a, val){
 				publicDestroy();
 				options[a.toLowerCase()] = val;
 				publicInit();
 			});
-			
+
 			addMethod("insertSlide", function (html, pos, numtext, goToSlide) {
 				publicDestroy();
-				// pos = 0 means before everything else. 
+				// pos = 0 means before everything else.
 				// pos = 1 means after the first slide.
 				if (pos > s) pos = s;
 				var html = '<li>' + html + '</li>';
 				if (!pos || pos == 0) ul.prepend(html);
 				else li.eq(pos -1).after(html);
-				// Finally, we make it work again. 
+				// Finally, we make it work again.
 				if (goToSlide) {
 				    destroyT = goToSlide - 1;
 				} else if (pos <= destroyT || (!pos || pos == 0)) {
@@ -1173,7 +1175,7 @@
 				option[15]/*numerictext*/.splice(pos,0,numtext || parseInt10(pos)+1);
 				publicInit();
 			});
-			
+
 			addMethod("removeSlide", function(pos){
 				pos--; // 1 == the first.
 				publicDestroy();
@@ -1186,34 +1188,34 @@
 
 				publicInit();
 			});
-			
+
 			addMethod("goToSlide", function(a, speed){
 				goToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE, speed);
 			});
-			
+
 			addMethod("block", function(){
 				clickable = FALSE;
 			});
-			
+
 			addMethod("unblock", function(){
 				clickable = TRUE;
 			});
-			
+
 			addMethod("startAuto", function(){
 				option[9]/*auto*/ = TRUE;
 				timeout = startAuto(option[10]/*pause*/);
-			});			
-			
+			});
+
 			addMethod("stopAuto", function(){
 				option[9]/*auto*/ = FALSE;
 				stopAuto();
-			});	
+			});
 
 			addMethod("adjust", function(){
 				autoadjust(t, 0)
 				adjustPosition();
-			});	
-			
+			});
+
 			addMethod("getValue", function(a){
 				return a == 'currentSlide' ?
 						t + 1 :
@@ -1232,9 +1234,9 @@
 			    number = getRealPos(parseInt10(number) - 1);
 			    return getSlideElements(number);
 			});
-			
+
 		});
 	};
 })(jQuery);
-// If you did just read the entire code, congrats. 
+// If you did just read the entire code, congrats.
 // Did you find a bug? I didn't, so plz tell me if you did. (http://webbies.dk/SudoSlider/help/ask-me.html)
