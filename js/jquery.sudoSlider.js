@@ -670,15 +670,24 @@
 			}
 
 			function adjustPosition() {
-				ul.css({
-				    marginLeft : getSlidePosition(t, FALSE),
-				    marginTop : getSlidePosition(t, TRUE)
-                });
+			    setUlMargins(0,0);
+
+			    setUlMargins(
+			        getSlidePosition(t, FALSE),
+			        getSlidePosition(t, TRUE)
+			    )
 			};
+			function setUlMargins(left, top) {
+			    ul.css({
+                    marginLeft : left,
+                    marginTop : top
+                });
+			}
 
 			function getSlidePosition(slide, vertical) {
 			    var slide = liConti.eq(slide + (continuousClones ? option[39]/*slidecount*/ : 0));
-				return slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
+			    var result = slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
+				return result;
 			};
 
 			function adjust() {

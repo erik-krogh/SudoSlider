@@ -102,7 +102,7 @@ Change in docs: Added 2 new demos: Nested sliders and multiple sliders.
 Change in script: Added support for slideCount, ajax and continuous at the same time. Basicly the script just loads everything before initializing the full script. 
 Change in script: Fixed an issue, where the numeric controls wouldn't be set correctly, if continuous is true and slideCount != 1.
 Change in script: Fixed a bug, that made the slider unable to animate anywhere in some cases, if slidecound & continuous & ajax is used. 
-Change in script: Fixed that if slideCount > ½ number of slides, beforeAniFunc would not run on all continuous clones. 
+Change in script: Fixed that if slideCount > number of slides, beforeAniFunc would not run on all continuous clones.
 Change in script: Various internal improvements.
 
 2.0.8
@@ -258,7 +258,7 @@ Change in docs: Updated TouchSwipe to 1.5.0
 2.2.7
 Change in script: Fixed that continuous crashed the script if initialized on an empty slider. 
 Change in docs: Added 3 new demos, fancy stuff 1 + 2 and ticker mode. 
-Change in scipt: Potentially fixed an unconfirmed bug in Firefox on OSX where the width was 1px off. 
+Change in script: Potentially fixed an unconfirmed bug in Firefox on OSX where the width was 1px off.
 Change in docs: Updated the responsive demo, so it know adjust the number of slides being shown depending on window width.
 Change in docs: Updated the touch demo, it now behaves much more nicely after you let go of the finger. 
 Change in script: Fixed fade animation when using slidecount > 1 and vertical. Added the vertical fade demo to reflect this. 
@@ -266,4 +266,5 @@ Change in script: When having slideCount > 1, autoheight and autowidth now scale
 Change in script: AutoHeight and AutoWidth now always complete their animation at the same time as the slide (or fade) animation, even if the height of the slide changes during a slide (happens when an image is done loading during the animation). 
 
 2.2.8
-Change in script: Fixed some situations where IE wouldn't accept the existance of the SudoSlider object in the callback functions. 
+Change in script: Fixed some situations where IE wouldn't accept the existance of the SudoSlider object in the callback functions.
+Change in script: Fixed that Chrome 24 got the position wrong by a pixel.
