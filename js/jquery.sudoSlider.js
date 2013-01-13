@@ -177,7 +177,7 @@
 				// Fix for nested list items
 				ul = obj.children("ul");
 				// Is the ul element there?
-				if (ul.length == 0) obj.append(ul = $("<ul></ul>"));
+				if (!ul.length) obj.append(ul = $("<ul></ul>"));
 
 				li = ul.children("li");
 
@@ -271,8 +271,7 @@
 				}
 
 				controls = FALSE;
-				if(option[0]/*controlsShow*/)
-				{
+				if(option[0]/*controlsShow*/) {
 					// Instead of just generating HTML, i make it a little smarter.
 					controls = $('<span ' + option[36]/*controlsattr*/ + '></span>');
 					$(obj)[option[3]/*insertafter*/ ? 'after' : 'before'](controls);
@@ -436,34 +435,37 @@
 
 			// <strike>Simple function</strike><b>A litle complecated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
 			function goToSlide(i, clicked, speed) {
-                // Stopping, because if its needed then its restarted after the end of the animation.
-			    stopAuto(true);
+			    if (clickable) {
+                    // Stopping, because if its needed then its restarted after the end of the animation.
+                    stopAuto(true);
 
-				beforeanifuncFired = FALSE;
-				if (!destroyed) {
-					if (option[20]/*fade*/) {
-						fadeto(i, clicked, FALSE);
-					} else {
-						if (option[11]/*continuous*/) {
-							var realTarget = filterDir(i);
-							i = realTarget;
-							// Finding the shortest path from where we are to where we are going.
-							var diff = Math.abs(t-realTarget);
-							if (realTarget < option[39]/*slidecount*/-numberOfVisibleSlides+1 && Math.abs(t - realTarget - s)/* t - (realTarget + s) */ < diff) {
-								i = realTarget + s;
-								diff = Math.abs(t - realTarget - s); // Setting the new "standard", for how long the animation can be.
-							}
-							if (realTarget > ts - option[39]/*slidecount*/ && Math.abs(t - realTarget + s)/* t - (realTarget - s) */  < diff) {
-								i = realTarget - s;
-							}
-						} else {
-							i = filterDir(i);
-						}
-						// And now the animation itself.
-						animate(i,clicked,TRUE,FALSE, speed);
-					}
-				}
+                    beforeanifuncFired = FALSE;
+                    if (!destroyed) {
+                        if (option[20]/*fade*/) {
+                            fadeto(i, clicked, FALSE);
+                        } else {
+                            if (option[11]/*continuous*/) {
+                                var realTarget = filterDir(i);
+                                i = realTarget;
+                                // Finding the shortest path from where we are to where we are going.
+                                var diff = MathAbs(t-realTarget);
+                                if (realTarget < option[39]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(t - realTarget - s)/* t - (realTarget + s) */ < diff) {
+                                    i = realTarget + s;
+                                    diff = MathAbs(t - realTarget - s); // Setting the new "standard", for how long the animation can be.
+                                }
+                                if (realTarget > ts - option[39]/*slidecount*/ && MathAbs(t - realTarget + s)/* t - (realTarget - s) */  < diff) {
+                                    i = realTarget - s;
+                                }
+                            } else {
+                                i = filterDir(i);
+                            }
+                            // And now the animation itself.
+                            animate(i,clicked,TRUE,FALSE, speed);
+                        }
+                    }
+                }
 			};
+
 			function fadeControl (fadeOpacity,fadetime,nextcontrol) // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
 			{
 				if (nextcontrol) {
@@ -525,7 +527,7 @@
 						.removeClass("current")
 						.each(function() {
 						    var that = this;
-						    setTimeout(function () {
+						    callAsync(function () {
 							    if (isFunc(option[30]/*uncurrentfunc*/)){ option[30]/*uncurrentfunc*/.call(that, getRelAttribute(that)); }
 							});
 						});
@@ -544,7 +546,7 @@
 						.addClass("current")
 						.each(function() {
 						    var that = this;
-						    setTimeout(function () {
+						    callAsync(function () {
 							    if (isFunc(option[31]/*currentfunc*/)){ option[31]/*currentfunc*/.call(that, getRelAttribute(that)); }
                             });
 						});
@@ -718,9 +720,9 @@
 				i = getRealPos(i);
 				var slideElements = getSlideElements(i);
 				// Wierd fix to let IE accept the existance of the sudoSlider object.
-				setTimeout(function () {
+				callAsync(function () {
 					(after ? afterAniCall : beforeAniCall)(slideElements, i + 1);
-				}, 0);
+				});
 			}
 
 			function afterAniCall(el, a) {
@@ -737,6 +739,11 @@
                     callBackThis = callBackThis.add(callBackList[i][a]);
                 }
                 return callBackThis;
+			}
+
+            // Puts the specified function in a setTimeout([function], 0);
+			function callAsync(func) {
+                setTimeout(func, 0);
 			}
 
 			// Convert the direction into a usefull number.
@@ -788,7 +795,7 @@
 				// parsing the init variable.
 				var ajaxInit = speed === TRUE;
 				var speed = (speed === TRUE) ? 0 : speed;
-				// What speed should the autoheight function animate with?
+
 				var ajaxspeed = (fading) ? (!option[21]/*crossfade*/ ? parseInt10(option[22]/*fadespeed*/ * (2/5)) : option[22]/*fadespeed*/) : speed;
 				var tt = i + 1;
 				var textloaded = FALSE;
@@ -998,7 +1005,7 @@
 					t = dir;
 					if (option[23]/*updateBefore*/ && !fading) setCurrent(t);
 
-					var diff = Math.sqrt(Math.abs(ot-t));
+					var diff = Math.sqrt(MathAbs(ot-t));
 					if (!(speed || speed == 0)) {
 						var speed = (!time) ? 0 : ((!clicked && !option[9]/*auto*/) ? parseInt10(diff*option[17]/*speedhistory*/) : parseInt10(diff*option[7]/*speed*/));
 					}
@@ -1103,6 +1110,10 @@
 
 			function getTimeInMillis() {
 			    return new Date() - 0;
+			}
+
+			function MathAbs(number) {
+			    return n<0?-n:n;
 			}
 
 		    /*

@@ -10,14 +10,10 @@
 		$(document).ready(function(){	
 			// Init
 			$('.upBtn').stop().fadeOut(00);
-			var sliderT = 0;
 			
 			var nestedSliderSettings = {
 				prevNext: false,
-				vertical:true,
-				beforeAniFunc: function(t){ 
-					sliderT = t;
-				}
+				vertical:true
 			};
 			
 			// Launching the nested sliders first, so the main slider doens't read an incorrect height. 
@@ -30,10 +26,12 @@
 			});
 			
 			$('a.custom').live('click', function() {
-				a = $(this).attr('rel');
+				var a = $(this).attr('rel');
 				if (a) {
-					for (var i=0;i<nestedSlider.length;i++) nestedSlider[i].goToSlide(a);
-
+					for (var i=0;i<nestedSlider.length;i++) {
+                        nestedSlider[i].goToSlide(a);
+                    }
+                    var sliderT = nestedSlider[0].getValue("currentSlide");
 					if (sliderT == 3) $('.downBtn').fadeOut(800);
 					else $('.downBtn').stop().fadeIn(800);
 					
@@ -156,20 +154,20 @@
       });
       
       $('a.custom').live('click', function() {
-         a = $(this).attr('rel');
+         var a = $(this).attr('rel');
          if (a) {
-            for(var i=0;i&lt;nestedSlider.length;i++)
-            {
+            for (var i=0;i<nestedSlider.length;i++) {
                nestedSlider[i].goToSlide(a);
             }
+            var sliderT = nestedSlider[0].getValue("currentSlide");
             if (sliderT == 3) $('.downBtn').fadeOut(800);
             else $('.downBtn').stop().fadeIn(800);
-            
+
             if (sliderT == 1) $('.upBtn').stop().fadeOut(800);
             else $('.upBtn').stop().fadeIn(800);
          }
          return false;
-      }); 
+      });
    });	
 &lt;/script&gt;</pre>
 	<h4>The CSS</h4>
