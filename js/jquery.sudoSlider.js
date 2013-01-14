@@ -1113,7 +1113,7 @@
 			}
 
 			function MathAbs(number) {
-			    return n<0?-n:n;
+			    return number < 0 ? - number : number;
 			}
 
 		    /*

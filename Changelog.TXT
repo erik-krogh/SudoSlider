@@ -269,4 +269,4 @@ Change in script: AutoHeight and AutoWidth now always complete their animation a
 Change in script: Fixed some situations where IE wouldn't accept the existance of the SudoSlider object in the callback functions.
 Change in script: Fixed that Chrome 24 got the position wrong by a pixel.
 Change in docs: Made the nested sliders demo work with this version if SudoSlider.
-Change in script: Fixed an issue where clicking the controls, while the slider in "unclickable", made the callbacks not fire.
+Change in script: Fixed an issue where clicking the controls, while the slider is "unclickable", made the callbacks not fire.
