@@ -270,3 +270,7 @@ Change in script: Fixed some situations where IE wouldn't accept the existance o
 Change in script: Fixed that Chrome 24 got the position wrong by a pixel.
 Change in docs: Made the nested sliders demo work with this version if SudoSlider.
 Change in script: Fixed an issue where clicking the controls, while the slider is "unclickable", made the callbacks not fire.
+
+2.2.9
+Change in docs: Upgraded to jQuery 1.9.0
+Change in script: In case of jQuery 1.9.0, the destroy() method will now 
