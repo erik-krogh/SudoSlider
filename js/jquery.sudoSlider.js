@@ -1141,6 +1141,8 @@
 				    }
 				}
 
+				ul.stop();
+
 				adjustPosition();
 			}
 
