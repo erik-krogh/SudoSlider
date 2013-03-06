@@ -272,5 +272,4 @@ Change in docs: Made the nested sliders demo work with this version if SudoSlide
 Change in script: Fixed an issue where clicking the controls, while the slider is "unclickable", made the callbacks not fire.
 
 2.2.9
-Change in docs: Upgraded to jQuery 1.9.0
-Change in script: The destroy() method will know finish the animation when run. Also affecting methods like setOption() that uses destroy().
+Change in docs: Upgraded to jQuery 1.9.1
