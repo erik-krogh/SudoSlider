@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.8 - jQuery plugin
+ *  Sudo Slider ver 2.2.9 - jQuery plugin
  *  Written by Erik Kristensen info@webbies.dk.
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it.
@@ -650,7 +650,7 @@
 			    }
 			    var pixels = 0;
                 for (var slide = i; slide < i + numberOfVisibleSlides; slide++) {
-                    var targetPixels = li.eq(getRealPos(slide))[axis ? "height" : "width"]();
+                    var targetPixels = li.eq(getRealPos(slide))['outer' + (axis ? "Height" : "Width")](true);
                     if (axis == option[6]/*vertical*/) {
                         pixels += targetPixels;
                     } else {
@@ -942,7 +942,7 @@
 								// Adding it to the callbacklist while it exists.
                                 callBackList[ll].push(clone);
 
-								push += clone[option[6]/*vertical*/ ? 'outerHeight' : 'outerWidth'](TRUE);
+								push += clone['outer' + (option[6]/*vertical*/ ? "Height" : "Width")](true);
 							}
 
 							// Now that everything has been set up, i can call the callback.
