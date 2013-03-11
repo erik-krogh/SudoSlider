@@ -62,7 +62,8 @@
 			slidecount:        1, /*  option[39]/*slidecount*/
 			resumepause:       FALSE, /* option[40]/*resumepause*/
 			movecount:         1, /* option[41]/*movecount*/
-			responsive:        FALSE  /* option[42]/*responsive*/
+			responsive:        FALSE,  /* option[42]/*responsive*/
+			customfx:          FALSE  /* option[43]/*customFx*/
 		};
 		// Defining the base element.
 		var baseSlider = this;
@@ -148,7 +149,7 @@
 			dontCountinue,
 			dontCountinueFade,
 			autoOn,
-			continuousClones,
+			continuousClones = FALSE,
 			numberOfVisibleSlides,
 			beforeanifuncFired = FALSE,
 			asyncTimedLoad,
@@ -218,15 +219,24 @@
 
 				// Lets just redefine slidecount
 				numberOfVisibleSlides = option[39]/*slidecount*/;
-				// If fade is on, i do not need extra clones.
-				if (!option[20]/*fade*/) option[39]/*slidecount*/ += option[41]/*movecount*/ - 1;
+
+				option[39]/*slidecount*/ += option[41]/*movecount*/ - 1;
 
 				// startslide can only be a number (and not 0).
 				option[26]/*startslide*/ = parseInt10(option[26]/*startslide*/) || 1;
 
-				// If using fade, continuous clones are only needed if more than one slide is shown at the time.
-				continuousClones = option[11]/*continuous*/ && (!option[20]/*fade*/ || option[39]/*slidecount*/ > 1);
-				if (continuousClones) continuousClones = [];
+				if (!option[43]/*customFx*/) {
+				    if (option[20]/*fade*/) {
+				        if (option[21]/*crossfade*/) {
+				            option[43]/*customFx*/ = crossFade;
+				        } else {
+				            option[43]/*customFx*/ = fadeInOut;
+				        }
+				        option[20]/*fade*/ = FALSE;
+				    }
+				}
+
+				if (option[11]/*continuous*/) continuousClones = [];
 
 				for (var a = 0; a < s; a++) {
 					option[15]/*numerictext*/[a] = option[15]/*numerictext*/[a] || (a+1);
@@ -437,12 +447,12 @@
 			function goToSlide(i, clicked, speed) {
 			    if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
-                    stopAuto(true);
+                    stopAuto(TRUE);
 
                     beforeanifuncFired = FALSE;
                     if (!destroyed) {
-                        if (option[20]/*fade*/) {
-                            fadeto(i, clicked, FALSE);
+                        if (option[43]/*customFx*/) {
+                            customAni(i, clicked, FALSE);
                         } else {
                             if (option[11]/*continuous*/) {
                                 var realTarget = filterDir(i);
@@ -650,7 +660,7 @@
 			    }
 			    var pixels = 0;
                 for (var slide = i; slide < i + numberOfVisibleSlides; slide++) {
-                    var targetPixels = li.eq(getRealPos(slide))['outer' + (axis ? "Height" : "Width")](true);
+                    var targetPixels = li.eq(getRealPos(slide))['outer' + (axis ? "Height" : "Width")](TRUE);
                     if (axis == option[6]/*vertical*/) {
                         pixels += targetPixels;
                     } else {
@@ -710,13 +720,13 @@
 				}
 
 				if (!fading && beforeanifuncFired) {
-				    AniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
+				    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
 				}
 			};
 
 			// This function is called when i need a callback on the current element and it's continuous clones (if they are there).
 			// after:  TRUE == afteranifunc : FALSE == beforeanifunc;
-			function AniCall (i, after) {
+			function aniCall (i, after) {
 				i = getRealPos(i);
 				var slideElements = getSlideElements(i);
 				// Wierd fix to let IE accept the existance of the sudoSlider object.
@@ -796,7 +806,6 @@
 				var ajaxInit = speed === TRUE;
 				var speed = (speed === TRUE) ? 0 : speed;
 
-				var ajaxspeed = (fading) ? (!option[21]/*crossfade*/ ? parseInt10(option[22]/*fadespeed*/ * (2/5)) : option[22]/*fadespeed*/) : speed;
 				var tt = i + 1;
 				var textloaded = FALSE;
 
@@ -862,137 +871,139 @@
 
 				// In some cases, i want to call the beforeanifunc here.
 				if (ajaxCallBack == 2) {
-					AniCall(i, FALSE);
+					aniCall(i, FALSE);
 					if (!beforeanifuncFired) {
-						AniCall(i, TRUE);
+						aniCall(i, TRUE);
 						beforeanifuncFired = TRUE;
 					}
 				}
 
 			};
 
+			function customAni(i, clicked, ajaxcallback) {
+                if (filterDir(i) != t && !destroyed && clickable) {
+                    // The below is just copy paste of the Ajax loading code form Fade:
 
-			function fadeto(i, clicked, ajaxcallback) {
-				if (filterDir(i) != t && !destroyed && clickable) {
-					// Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
-					ajaxloading = FALSE;
-					if (option[23]/*updateBefore*/) setCurrent(filterDir(i));
-					if (!(speed || speed == 0)) {
-					    var speed = (!clicked && !option[9]/*auto*/ && option[16]/*history*/) ? option[22]/*fadespeed*/ * (option[17]/*speedhistory*/ / option[7]/*speed*/) : option[22]/*fadespeed*/;
-					}
-					// I don't want to fade to a continuous clone, i go directly to the target.
-					var ll = filterDir(i);
+                    // Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
+                    ajaxloading = FALSE;
+                    if (option[23]/*updateBefore*/) setCurrent(filterDir(i));
+                    // I don't want to fade to a continuous clone, i go directly to the target.
+                    var ll = filterDir(i);
 
-					if(option[2]/*controlsfade*/) fadeControls (ll,option[1]/*controlsfadespeed*/);
+                    if(option[2]/*controlsfade*/) fadeControls (ll,option[1]/*controlsfadespeed*/);
 
-					if (ajaxcallback) {
-						speed = oldSpeed;
-						if (dontCountinueFade) dontCountinueFade--; // Short for if(dontContinueFade == 0).
-					} else if (option[24]/*ajax*/) {
-						// Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements.
-						dontCountinueFade = 0;
-						oldSpeed = speed;
-						for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
-							if (option[24]/*ajax*/[a]) {
-								ajaxLoad(getRealPos(a), FALSE, speed, function(){
-									fadeto(i, clicked, TRUE);
-								});
-								dontCountinueFade++;
-							}
-						}
-					} else {
-						dontCountinueFade = FALSE;
-					}
-					if (!dontCountinueFade) {
-						clickable = !clicked;
-						autoadjust(ll,option[22]/*fadespeed*/);
+                    if (ajaxcallback) {
+                        speed = oldSpeed;
+                        if (dontCountinueFade) dontCountinueFade--; // Short for if(dontContinueFade == 0).
+                    } else if (option[24]/*ajax*/) {
+                        // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements.
+                        dontCountinueFade = 0;
+                        oldSpeed = speed;
+                        for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
+                            if (option[24]/*ajax*/[a]) {
+                                ajaxLoad(getRealPos(a), FALSE, speed, function(){
+                                    fadeto(i, clicked, TRUE);
+                                });
+                                dontCountinueFade++;
+                            }
+                        }
+                    } else {
+                        dontCountinueFade = FALSE;
+                    }
+                    if (!dontCountinueFade) {
+                        clickable = FALSE;
+                        var fromSlides = $();
+                        var fromSlidesShown = $();
+                        var toSlides = $();
+                        var toSlidesShown = $();
+                        for (var a = 0 ; a < numberOfVisibleSlides; a++) {
+                            if (continuousClones) {
+                                fromSlides = fromSlides.add(getSlideElements(t + a));
+                                fromSlidesShown = fromSlidesShown.add(liConti.eq((t + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
 
-						if (option[21]/*crossfade*/) {
-							var firstRun = TRUE;
-							var push = 0;
+                                toSlides = toSlides.add(getSlideElements(ll + a));
+                                toSlidesShown = toSlidesShown.add(liConti.eq((ll + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
+                            } else {
+                                fromSlides = fromSlides.add(getSlideElements(getRealPos(t + a)));
+                                fromSlidesShown = fromSlides;
 
-							for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
-								// I clone the target, and fade it in, then hide the cloned element while adjusting the slider to show the real target.
-								var clone = li.eq(getRealPos(a)).clone().prependTo(obj);
-								clone.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : option[6]/*vertical*/ ? push : 0, "left" : option[6]/*vertical*/ ? 0 : push}).
-								hide().fadeIn(option[22]/*fadespeed*/, option[8]/*ease*/, function() {
+                                toSlides = toSlides.add(getSlideElements(getRealPos(ll + a)));;
+                                toSlidesShown = toSlides;
+                            }
+                        }
+                        var callObject = {
+                            fromSlides : fromSlides,
+                            fromSlidesShown: fromSlidesShown,
+                            toSlides : toSlides,
+                            toSlidesShown : toSlidesShown,
+                            slider : obj,
+                            options: options,
+                            targetNumber: ll,
+                            adjustDimensionsCall : function (speed) {
+                                autoadjust(ll, speed);
+                            },
+                            callback: function () {
+                                clickable = TRUE;
+                                animate(ll,clicked,FALSE,FALSE);
+                                if(option[16]/*history*/ && clicked) {
+                                    window.location.hash = option[15]/*numerictext*/[t];
+                                }
+                                aniCall(ll, TRUE);
+                                firstRun = FALSE;
+                            }
+                        }
 
-								    // Removing it from the callbacklist.
-								    callBackList[ll].pop();
+                        // beforeAniFunc
+                        aniCall(ll, FALSE);
 
-									fixClearType(this);
+                        option[43]/*customFx*/.call(baseSlider, callObject);
+                    }
+                }
+            };
 
-									clickable = TRUE;
-									fading = TRUE;
-									if (firstRun) {
-										animate(ll,clicked,FALSE,FALSE);
-										if(option[16]/*history*/ && clicked) {
-										    window.location.hash = option[15]/*numerictext*/[t];
-										}
+            function fadeInOut(obj) {
+                var ease = this.getOption("ease");
+                var push = 0;
 
-										AniCall(ll, TRUE);
-										firstRun = FALSE;
-									}
+                obj.adjustDimensionsCall(option[22]/*fadespeed*/);
 
-									$(this).remove();
+                var fadeinspeed = parseInt(option[22]/*fadespeed*/*(3/5), 10);
+                var fadeoutspeed = option[22]/*fadespeed*/ - fadeinspeed;
 
-									fading = FALSE;
-								});
+                obj.fromSlidesShown.animate(
+                    { opacity: 0.0001 },
+                    {
+                        queue: FALSE,
+                        duration:fadeoutspeed,
+                        easing:ease,
+                        complete:function () {
+                            finishFadeFx(obj, fadeinspeed);
+                        }
+                    }
+                );
+            }
 
-								// Adding it to the callbacklist while it exists.
-                                callBackList[ll].push(clone);
+            function crossFade(obj) {
+                obj.adjustDimensionsCall(option[22]/*fadespeed*/);
+                finishFadeFx(obj, option[22]/*fadespeed*/);
+            }
 
-								push += clone['outer' + (option[6]/*vertical*/ ? "Height" : "Width")](true);
-							}
-
-							// Now that everything has been set up, i can call the callback.
-							AniCall(ll, FALSE);
-						} else {
-						    // Executing callback right away. Nothing to set up.
-						    AniCall(ll, FALSE);
-
-							// fadeOut and fadeIn.
-							var fadeinspeed = parseInt10((speed)*(3/5));
-							var fadeoutspeed = speed - fadeinspeed;
-							liConti.each(function () {
-								$(this).animate(
-									{ opacity: 0.0001 },
-									{
-										queue:FALSE,
-										duration:fadeoutspeed,
-										easing:option[8]/*ease*/,
-										complete:function () {
-											// So the animation function knows what to do.
-											clickable = TRUE;
-											fading = TRUE;
-											animate(ll,FALSE,FALSE,FALSE);
-
-											clickable = !clicked;
-
-											$(this).animate(
-												{ opacity: 1 },
-												{
-													queue:FALSE,
-													duration:fadeinspeed,
-													easing:option[8]/*ease*/,
-													complete:function () {
-														fixClearType(this);
-														if(option[16]/*history*/ && clicked) window.location.hash = option[15]/*numerictext*/[t];
-														clickable = TRUE;
-														fading = FALSE;
-														// Now run that after animation function.
-														AniCall(ll, TRUE);
-													}
-												}
-											);
-										}
-									}
-								);
-							});
-						}
-					}
-				}
-			};
+            function finishFadeFx(obj, speed) {
+                var push = 0;
+                obj.toSlidesShown.clone().animate({opacity: 1}, 0).each(function (index) {
+                    var that = $(this);
+                    that.prependTo(obj.slider);
+                    that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : option[6]/*vertical*/ ? push : 0, "left" : option[6]/*vertical*/ ? 0 : push}).
+                    hide().fadeIn(speed, option[8]/*ease*/, function() {
+                        that.remove();
+                        if (index == 0) {
+                            obj.callback();
+                            obj.fromSlidesShown.animate({opacity: 1}, 0);
+                        }
+                    });
+                    push += that['outer' + (option[6]/*vertical*/ ? "Height" : "Width")](TRUE);
+                });
+            }
 
 			// (Direction, did the user click something, is this to be done in >1ms?, is this inside a ajaxCallBack?)
 			function animate(dir, clicked, time, ajaxcallback, speed) {
@@ -1019,7 +1030,7 @@
 					} else if (option[24]/*ajax*/) {
 						// Loading the target slide, if not already loaded.
 						if (option[24]/*ajax*/[i]) {
-							ajaxLoad(i, TRUE, init || speed, 2); // 2 for AniCall
+							ajaxLoad(i, TRUE, init || speed, 2); // 2 for aniCall
 							ajaxloading = TRUE;
 						}
 						// The slider need to have all slides that are scrolled over loaded, before it can do the animation.
@@ -1048,7 +1059,7 @@
 					if (!dontCountinue) {
 						if (!fading && !ajaxloading) {
 							// Lets run the beforeAniCall
-							AniCall(i, FALSE);
+							aniCall(i, FALSE);
 							beforeanifuncFired = TRUE;
 						}
 
