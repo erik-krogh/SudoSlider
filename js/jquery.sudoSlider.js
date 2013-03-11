@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.2.9 - jQuery plugin
+ *  Sudo Slider ver 2.3.0 - jQuery plugin
  *  Written by Erik Kristensen info@webbies.dk.
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it.
@@ -225,6 +225,8 @@
 				// startslide can only be a number (and not 0).
 				option[26]/*startslide*/ = parseInt10(option[26]/*startslide*/) || 1;
 
+
+                // Every animation is defined using customFx.
 				if (!option[43]/*customFx*/) {
 				    if (option[20]/*fade*/) {
 				        if (option[21]/*crossfade*/) {
@@ -233,6 +235,8 @@
 				            option[43]/*customFx*/ = fadeInOut;
 				        }
 				        option[20]/*fade*/ = FALSE;
+				    } else {
+				        option[43]/*customFx*/ = slide;
 				    }
 				}
 
@@ -340,7 +344,7 @@
 					}
 
 					if (destroyT) {
-					    animate(destroyT,FALSE,FALSE,FALSE);
+					    animate(destroyT,FALSE);
 					} else if (option[16]/*history*/) {
 						// I support the jquery.address plugin, Ben Alman's hashchange plugin and Ben Alman's jQuery.BBQ.
 						var window = $(window); // BYTES!
@@ -355,7 +359,7 @@
 						}
 						URLChange();
 					}
-					else animate(option[26]/*startslide*/ - 1,FALSE,FALSE,FALSE);
+					else animate(option[26]/*startslide*/ - 1,FALSE);
 				});
 
 				if (option[25]/*preloadajax*/ === TRUE) {
@@ -389,7 +393,7 @@
 			// Triggered when the URL changes.
 			function URLChange() {
 				var target = filterUrlHash(location.hash.substr(1));
-				if (init) animate(target,FALSE,FALSE,FALSE);
+				if (init) animate(target,FALSE);
 				else if (target != t) goToSlide(target, FALSE);
 			}
 
@@ -444,34 +448,14 @@
 			}
 
 			// <strike>Simple function</strike><b>A litle complecated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
-			function goToSlide(i, clicked, speed) {
+			function goToSlide(i, clicked) {
 			    if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
 
                     beforeanifuncFired = FALSE;
                     if (!destroyed) {
-                        if (option[43]/*customFx*/) {
-                            customAni(i, clicked, FALSE);
-                        } else {
-                            if (option[11]/*continuous*/) {
-                                var realTarget = filterDir(i);
-                                i = realTarget;
-                                // Finding the shortest path from where we are to where we are going.
-                                var diff = MathAbs(t-realTarget);
-                                if (realTarget < option[39]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(t - realTarget - s)/* t - (realTarget + s) */ < diff) {
-                                    i = realTarget + s;
-                                    diff = MathAbs(t - realTarget - s); // Setting the new "standard", for how long the animation can be.
-                                }
-                                if (realTarget > ts - option[39]/*slidecount*/ && MathAbs(t - realTarget + s)/* t - (realTarget - s) */  < diff) {
-                                    i = realTarget - s;
-                                }
-                            } else {
-                                i = filterDir(i);
-                            }
-                            // And now the animation itself.
-                            animate(i,clicked,TRUE,FALSE, speed);
-                        }
+                        customAni(i, clicked, FALSE);
                     }
                 }
 			};
@@ -713,7 +697,7 @@
 				    // Stopping auto if clicked. And also continuing after X seconds of inactivity.
 				    if (buttonclicked) {
 				        stopAuto();
-				        if (option[40]/*resumepause*/) timeout = startAuto( option[40]/*resumepause*/);
+				        if (option[40]/*resumepause*/) timeout = startAuto(option[40]/*resumepause*/);
 				    } else {
 				        timeout = startAuto(option[10]/*pause*/);
 				    }
@@ -886,11 +870,12 @@
 
                     // Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
                     ajaxloading = FALSE;
-                    if (option[23]/*updateBefore*/) setCurrent(filterDir(i));
                     // I don't want to fade to a continuous clone, i go directly to the target.
-                    var ll = filterDir(i);
+                    var dir = filterDir(i);
 
-                    if(option[2]/*controlsfade*/) fadeControls (ll,option[1]/*controlsfadespeed*/);
+                    if (option[23]/*updateBefore*/) setCurrent(dir);
+
+                    if(option[2]/*controlsfade*/) fadeControls (dir,option[1]/*controlsfadespeed*/);
 
                     if (ajaxcallback) {
                         speed = oldSpeed;
@@ -898,8 +883,7 @@
                     } else if (option[24]/*ajax*/) {
                         // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements.
                         dontCountinueFade = 0;
-                        oldSpeed = speed;
-                        for (var a = ll; a < ll + numberOfVisibleSlides; a++) {
+                        for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
                             if (option[24]/*ajax*/[a]) {
                                 ajaxLoad(getRealPos(a), FALSE, speed, function(){
                                     fadeto(i, clicked, TRUE);
@@ -921,16 +905,38 @@
                                 fromSlides = fromSlides.add(getSlideElements(t + a));
                                 fromSlidesShown = fromSlidesShown.add(liConti.eq((t + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
 
-                                toSlides = toSlides.add(getSlideElements(ll + a));
-                                toSlidesShown = toSlidesShown.add(liConti.eq((ll + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
+                                toSlides = toSlides.add(getSlideElements(dir + a));
+                                toSlidesShown = toSlidesShown.add(liConti.eq((dir + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
                             } else {
                                 fromSlides = fromSlides.add(getSlideElements(getRealPos(t + a)));
                                 fromSlidesShown = fromSlides;
 
-                                toSlides = toSlides.add(getSlideElements(getRealPos(ll + a)));;
+                                toSlides = toSlides.add(getSlideElements(getRealPos(dir + a)));;
                                 toSlidesShown = toSlides;
                             }
                         }
+
+                        // Finding a "shortcut", used for calculating the offsets.
+                        if (option[11]/*continuous*/) {
+                            var realTarget = dir;
+                            i = realTarget;
+                            // Finding the shortest path from where we are to where we are going.
+                            var diff = MathAbs(t-realTarget);
+                            if (realTarget < option[39]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(t - realTarget - s)/* t - (realTarget + s) */ < diff) {
+                                i = realTarget + s;
+                                diff = MathAbs(t - realTarget - s); // Setting the new "standard", for how long the animation can be.
+                            }
+                            if (realTarget > ts - option[39]/*slidecount*/ && MathAbs(t - realTarget + s)/* t - (realTarget - s) */  < diff) {
+                                i = realTarget - s;
+                            }
+                        } else {
+                            i = filterDir(i);
+                        }
+
+
+                        var leftOffset = getSlidePosition(t, FALSE) - getSlidePosition(i, FALSE);
+                        var topOffset = getSlidePosition(t, TRUE) - getSlidePosition(i, TRUE);
+
                         var callObject = {
                             fromSlides : fromSlides,
                             fromSlidesShown: fromSlidesShown,
@@ -938,31 +944,60 @@
                             toSlidesShown : toSlidesShown,
                             slider : obj,
                             options: options,
-                            targetNumber: ll,
+                            toSlideNumber: dir + 1,
+                            fromSlideNumber: t + 1,
+                            offset: {
+                                left: leftOffset,
+                                top: topOffset
+                            },
                             adjustDimensionsCall : function (speed) {
-                                autoadjust(ll, speed);
+                                autoadjust(dir, speed);
                             },
                             callback: function () {
                                 clickable = TRUE;
-                                animate(ll,clicked,FALSE,FALSE);
+                                animate(dir,clicked);
                                 if(option[16]/*history*/ && clicked) {
                                     window.location.hash = option[15]/*numerictext*/[t];
                                 }
-                                aniCall(ll, TRUE);
+                                aniCall(dir, TRUE);
                                 firstRun = FALSE;
                             }
                         }
 
-                        // beforeAniFunc
-                        aniCall(ll, FALSE);
+                        var extraClone = option[43]/*customFx*/.call(baseSlider, callObject);
 
-                        option[43]/*customFx*/.call(baseSlider, callObject);
+                        if (extraClone) {
+                            callBackList[dir].push(extraClone);
+                        }
+
+                        // beforeAniFunc
+                        aniCall(dir, FALSE);
+
+                        if (extraClone) {
+                            callBackList[dir].pop();
+                        }
                     }
                 }
             };
 
+            function slide(obj) {
+                var left = parseInt10(ul.css("marginLeft")) - obj.offset.left;
+                var top = parseInt10(ul.css("marginTop")) - obj.offset.top;
+
+                ul.animate(
+                    { marginTop: top, marginLeft: left},
+                    {
+                        queue: false,
+                        duration: option[7]/*speed*/,
+                        easing: option[8]/*ease*/,
+                        complete: function () {
+                            obj.callback();
+                        }
+                    }
+                );
+            }
+
             function fadeInOut(obj) {
-                var ease = this.getOption("ease");
                 var push = 0;
 
                 obj.adjustDimensionsCall(option[22]/*fadespeed*/);
@@ -974,9 +1009,9 @@
                     { opacity: 0.0001 },
                     {
                         queue: FALSE,
-                        duration:fadeoutspeed,
-                        easing:ease,
-                        complete:function () {
+                        duration: fadeoutspeed,
+                        easing: option[8]/*ease*/,
+                        complete: function () {
                             finishFadeFx(obj, fadeinspeed);
                         }
                     }
@@ -985,12 +1020,13 @@
 
             function crossFade(obj) {
                 obj.adjustDimensionsCall(option[22]/*fadespeed*/);
-                finishFadeFx(obj, option[22]/*fadespeed*/);
+                return finishFadeFx(obj, option[22]/*fadespeed*/);
             }
 
             function finishFadeFx(obj, speed) {
                 var push = 0;
-                obj.toSlidesShown.clone().animate({opacity: 1}, 0).each(function (index) {
+                var clones = obj.toSlidesShown.clone();
+                clones.animate({opacity: 1}, 0).each(function (index) {
                     var that = $(this);
                     that.prependTo(obj.slider);
                     that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : option[6]/*vertical*/ ? push : 0, "left" : option[6]/*vertical*/ ? 0 : push}).
@@ -1003,96 +1039,41 @@
                     });
                     push += that['outer' + (option[6]/*vertical*/ ? "Height" : "Width")](TRUE);
                 });
+                return clones.get(0);
             }
 
 			// (Direction, did the user click something, is this to be done in >1ms?, is this inside a ajaxCallBack?)
-			function animate(dir, clicked, time, ajaxcallback, speed) {
-				if ((clickable && !destroyed && (dir != t || init)) && s >  getRealPos(dir) || ajaxcallback) {
-					if (!ajaxcallback) ajaxloading = FALSE;
+			function animate(dir, clicked) {
+				if ((clickable && !destroyed && (dir != t || init))) {
 					clickable = !clicked && !option[9]/*auto*/;
 					// to the adjust function.
 					buttonclicked = clicked;
 					ot = t;
 					t = dir;
-					if (option[23]/*updateBefore*/ && !fading) setCurrent(t);
 
-					var diff = Math.sqrt(MathAbs(ot-t));
-					if (!(speed || speed == 0)) {
-						var speed = (!time) ? 0 : ((!clicked && !option[9]/*auto*/) ? parseInt10(diff*option[17]/*speedhistory*/) : parseInt10(diff*option[7]/*speed*/));
-					}
+                    ul.animate(
+                        { marginTop: getSlidePosition(t, TRUE), marginLeft: getSlidePosition(t, FALSE)},
+                        {
+                            queue:FALSE,
+                            duration:0,
+                            complete: adjust
+                        }
+                    );
 
-					// Ajax begins here
-					var i = getRealPos(t);
-					if (ajaxcallback) {
-						speed = oldSpeed;
-						// Do a check if it can continue.
-						if (dontCountinue) dontCountinue--;
-					} else if (option[24]/*ajax*/) {
-						// Loading the target slide, if not already loaded.
-						if (option[24]/*ajax*/[i]) {
-							ajaxLoad(i, TRUE, init || speed, 2); // 2 for aniCall
-							ajaxloading = TRUE;
-						}
-						// The slider need to have all slides that are scrolled over loaded, before it can do the animation.
-						// That's not easy, because the slider is only loaded once a callback is fired.
-						if (!fading) {
-							var aa = (ot>t) ? t : ot;
-							var ab = (ot>t) ? ot : t;
-							dontCountinue = 0;
-							oldSpeed = speed;
-							for (var a = aa; a <= ab; a++) {
-								if (a<=ts && a>=0 && option[24]/*ajax*/[a]) {
-									ajaxLoad(a, FALSE, speed, function(){
-										animate(dir,clicked,time, TRUE);
-									});
-									dontCountinue++;
-								}
-							}
-						}
-						// Then we have to preload the next ones.
-						for (var a = i+1; a <= i + numberOfVisibleSlides; a++) {
-							if (option[24]/*ajax*/[a]) {
-							    ajaxLoad(a, FALSE, 0, FALSE);
-							}
-						}
-					}
-					if (!dontCountinue) {
-						if (!fading && !ajaxloading) {
-							// Lets run the beforeAniCall
-							aniCall(i, FALSE);
-							beforeanifuncFired = TRUE;
-						}
+                    if(option[2]/*controlsfade*/) {
+                        var fadetime = option[1]/*controlsfadespeed*/;
+                        if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;
+                        if (!time) fadetime = 0;
+                        fadeControls (t,fadetime);
+                    }
 
-						if (!fading) {
-						    autoadjust(t, speed);
-						}
+                    if (init && !option[24]/*ajax*/[i]) {
+                        startAsyncDelayedLoad();
+                    }
 
-						ul.animate(
-							{ marginTop: getSlidePosition(t, TRUE), marginLeft: getSlidePosition(t, FALSE)},
-							{
-								queue:FALSE,
-								duration:speed,
-								easing: option[8]/*ease*/,
-								complete: adjust
-							}
-						);
+                    init = FALSE;
 
-						if(option[2]/*controlsfade*/) {
-							var fadetime = option[1]/*controlsfadespeed*/;
-							if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;
-							if (!time) fadetime = 0;
-							if (fading) fadetime = parseInt10((option[22]/*fadespeed*/)*(3/5));
-							fadeControls (t,fadetime);
-						}
-
-						if (init && !option[24]/*ajax*/[i]) {
-						    startAsyncDelayedLoad();
-						}
-
-						init = FALSE;
-
-					};
-				}
+                };
 			};
 
 			function getRealPos(a) {
@@ -1211,8 +1192,8 @@
 				publicInit();
 			});
 
-			addMethod("goToSlide", function(a, speed){
-				goToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE, speed);
+			addMethod("goToSlide", function(a){
+				goToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE);
 			});
 
 			addMethod("block", function(){

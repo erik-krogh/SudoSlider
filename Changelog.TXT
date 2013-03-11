@@ -273,3 +273,7 @@ Change in script: Fixed an issue where clicking the controls, while the slider i
 
 2.2.9
 Change in docs: Upgraded to jQuery 1.9.1
+Change in script: Using outerHeight and outerWidth to calculate where slides should be positioned. Thereby supporting slides with margins and paddings.
+
+2.3.0
+Change in script: Added the customFx option. Read about it in the docs.
