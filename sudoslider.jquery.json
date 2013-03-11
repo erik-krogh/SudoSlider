@@ -34,6 +34,7 @@
     "homepage": "http://webbies.dk/SudoSlider/",
     "docs": "http://webbies.dk/SudoSlider/help/",
     "download": "http://webbies.dk/SudoSlider/download.html",
+	"demo": "http://webbies.dk/SudoSlider/demos.html",
     "dependencies": {
         "jquery": ">=1.7"
     }
