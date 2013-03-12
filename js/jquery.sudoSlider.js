@@ -133,7 +133,6 @@
 			ts,
 			clickable,
 			buttonclicked,
-			fading,
 			ajaxloading,
 			numericControls,
 			numericContainer,
@@ -203,7 +202,6 @@
 
 				clickable = TRUE;
 				buttonclicked = FALSE;
-				fading = FALSE;
 				ajaxloading = FALSE;
 				numericControls = [];
 				destroyed = FALSE;
@@ -687,6 +685,7 @@
 			};
 
 			function adjust() {
+			    autoadjust(t, 0);
                 t = getRealPos(t); // Going to the real slide, away from the clone.
 				if(!option[23]/*updateBefore*/) setCurrent(t);
 				adjustPosition();
@@ -703,7 +702,7 @@
 				    }
 				}
 
-				if (!fading && beforeanifuncFired) {
+				if (beforeanifuncFired) {
 				    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
 				}
 			};
@@ -864,10 +863,9 @@
 
 			};
 
+            // TODO: Rewrite comments
 			function customAni(i, clicked, ajaxcallback) {
                 if (filterDir(i) != t && !destroyed && clickable) {
-                    // The below is just copy paste of the Ajax loading code form Fade:
-
                     // Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
                     ajaxloading = FALSE;
                     // I don't want to fade to a continuous clone, i go directly to the target.
@@ -897,22 +895,14 @@
                     if (!dontCountinueFade) {
                         clickable = FALSE;
                         var fromSlides = $();
-                        var fromSlidesShown = $();
                         var toSlides = $();
-                        var toSlidesShown = $();
                         for (var a = 0 ; a < numberOfVisibleSlides; a++) {
                             if (continuousClones) {
-                                fromSlides = fromSlides.add(getSlideElements(t + a));
-                                fromSlidesShown = fromSlidesShown.add(liConti.eq((t + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
-
-                                toSlides = toSlides.add(getSlideElements(dir + a));
-                                toSlidesShown = toSlidesShown.add(liConti.eq((dir + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
+                                fromSlides = fromSlides.add(liConti.eq((t + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
+                                toSlides = toSlides.add(liConti.eq((dir + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
                             } else {
                                 fromSlides = fromSlides.add(getSlideElements(getRealPos(t + a)));
-                                fromSlidesShown = fromSlides;
-
                                 toSlides = toSlides.add(getSlideElements(getRealPos(dir + a)));;
-                                toSlidesShown = toSlides;
                             }
                         }
 
@@ -939,11 +929,9 @@
 
                         var callObject = {
                             fromSlides : fromSlides,
-                            fromSlidesShown: fromSlidesShown,
                             toSlides : toSlides,
-                            toSlidesShown : toSlidesShown,
                             slider : obj,
-                            options: options,
+                            options: jQuery.extend(true, {}, options), // Making a copy, to enforce read-only.
                             toSlideNumber: dir + 1,
                             fromSlideNumber: t + 1,
                             offset: {
@@ -983,6 +971,8 @@
             function slide(obj) {
                 var left = parseInt10(ul.css("marginLeft")) - obj.offset.left;
                 var top = parseInt10(ul.css("marginTop")) - obj.offset.top;
+
+                obj.adjustDimensionsCall(option[7]/*speed*/);
 
                 ul.animate(
                     { marginTop: top, marginLeft: left},
@@ -1042,7 +1032,6 @@
                 return clones.get(0);
             }
 
-			// (Direction, did the user click something, is this to be done in >1ms?, is this inside a ajaxCallBack?)
 			function animate(dir, clicked) {
 				if ((clickable && !destroyed && (dir != t || init))) {
 					clickable = !clicked && !option[9]/*auto*/;
@@ -1063,11 +1052,10 @@
                     if(option[2]/*controlsfade*/) {
                         var fadetime = option[1]/*controlsfadespeed*/;
                         if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;
-                        if (!time) fadetime = 0;
                         fadeControls (t,fadetime);
                     }
 
-                    if (init && !option[24]/*ajax*/[i]) {
+                    if (init && !option[24]/*ajax*/[getRealPos(t)]) {
                         startAsyncDelayedLoad();
                     }
 
@@ -1242,4 +1230,4 @@
 	};
 })(jQuery);
 // If you did just read the entire code, congrats.
-// Did you find a bug? I didn't, so plz tell me if you did. (http://webbies.dk/SudoSlider/help/ask-me.html)
+// Did you find a bug? I didn't, so plz tell me if you did. (https://github.com/webbiesdk/SudoSlider/issues)
