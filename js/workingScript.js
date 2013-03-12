@@ -5,6 +5,21 @@ $(document).ready(function(){
         slideCount: 1
     });
 });
+// TODO: Effect where each row is shuffled.
+function randomRich(obj) {
+    var effects = [
+        pushUp,
+        pushRight,
+        pushDown,
+        pushLeft,
+        slide,
+        fadeInOut,
+        crossFade,
+        show
+    ];
+    var func = effects[Math.floor(Math.random()*effects.length)];
+    return func(obj);
+}
 function random(obj) {
     var effects = [
         pushUp,
@@ -14,22 +29,29 @@ function random(obj) {
         slide,
         fadeInOut,
         crossFade,
-        slideDown,
-        slideUp,
         show,
         // From here down, only images are supported.
         fold,
+        foldReverse,
+        foldRandom,
         boxRain,
         boxRainGrow,
         boxRainReverse,
         boxRainGrowReverse,
         boxRandom,
+        boxRandomGrow,
         sliceUp,
         sliceUpLeft,
         sliceDown,
         sliceDownLeft,
         sliceUpDown,
-        sliceUpDownLeft
+        sliceUpDownLeft,
+        barsUp,
+        barsDown,
+        boxesDown,
+        boxesDownGrow,
+        boxesUp,
+        boxesUpGrow
     ];
     var func = effects[Math.floor(Math.random()*effects.length)];
     return func(obj);
@@ -54,18 +76,27 @@ function sliceUpDownLeft(obj) {
     sliceUpDownTemplate(obj, 3, true);
 }
 
+function barsUp(obj) {
+    sliceUpDownTemplate(obj, 2, false, true);
+}
+function barsDown(obj) {
+    sliceUpDownTemplate(obj, 1, false, true);
+}
 
 
-function sliceUpDownTemplate(obj, dir, reverse) { // Dir: 1 == down, 2 == up, 3 == up/down.
+
+function sliceUpDownTemplate(obj, dir, reverse, randomize) { // Dir: 1 == down, 2 == up, 3 == up/down.
     var numberOfSlices = 10;
     var speed = obj.options.speed;
-    var src = $(obj.toSlides.get(0)).find('img').attr('src');
-    createSlices(obj.slider, numberOfSlices, src);
+    var target = $(obj.toSlides.get(0));
+    var src = target.find('img').attr('src');
+    createSlices(target, obj.slider, numberOfSlices, src);
     var timeBuff = 0;
     var i = 0;
     var v = 0;
     var slices = $('.nivo-slice', obj.slider);
     if (reverse) slices = $('.nivo-slice', obj.slider)._reverse();
+    if (randomize) slices = shuffle(slices);
     slices.each(function () {
         var slice = $(this);
         if (dir == 3) {
@@ -103,41 +134,62 @@ function sliceUpDownTemplate(obj, dir, reverse) { // Dir: 1 == down, 2 == up, 3 
         v++;
     });
 }
-
 function boxRandom(obj) {
+    boxRandomTemplate(obj, false);
+}
+
+function boxRandomGrow(obj) {
+    boxRandomTemplate(obj, true);
+}
+
+function boxRandomTemplate(obj, grow) {
     var speed = obj.options.speed;
-    var options = {
-        boxRows : 10,
-        boxCols: 10
-    }
-    var src = $(obj.toSlides.get(0)).find('img').attr('src');
-    createBoxes(obj.slider, options.boxRows, options.boxCols, src);
-    var totalBoxes = options.boxRows * options.boxCols;
+    var boxRows = obj.options.boxrows;
+    var boxCols = obj.options.boxcols;
+    var target = $(obj.toSlides.get(0));
+    var src = target.find('img').attr('src');
+    createBoxes(target, obj.slider, boxCols, boxRows, src);
     var i = 0;
     var timeBuff = 0;
-    //var boxes = shuffle($('.nivo-box', obj));
     var boxes = shuffle($('.nivo-box', obj.slider));
+    var count = 0;
     boxes.each(function () {
         var box = $(this);
-        if (i == totalBoxes - 1) {
-            setTimeout(function () {
-                box.animate({
-                    opacity: '1'
-                }, speed, '', function () {
+        var w = box.width();
+        var h = box.height();
+        if (grow) {
+            box.width(0).height(0);
+        }
+        count++;
+        setTimeout(function () {
+            box.animate({
+                opacity: '1',
+                width: w,
+                height: h
+            }, speed, '', function () {
+                count--;
+                if (count == 0) {
                     obj.callback();
                     $('.nivo-box', obj.slider).remove();
-                });
-            }, (100 + timeBuff));
-        } else {
-            setTimeout(function () {
-                box.animate({
-                    opacity: '1'
-                }, speed);
-            }, (100 + timeBuff));
-        }
+                }
+            });
+        }, (100 + timeBuff));
         timeBuff += 20;
         i++;
     });
+}
+
+function boxesDown(obj) {
+    boxRainTemplate(obj, false, false, true);
+}
+function boxesDownGrow(obj) {
+    boxRainTemplate(obj, true, false, true);
+}
+function boxesUp(obj) {
+    boxRainTemplate(obj, false, true, true);
+}
+function boxesUpGrow(obj) {
+    boxRainTemplate(obj, true, true, true);
 }
 
 function boxRain(obj) {
@@ -153,16 +205,16 @@ function boxRainGrowReverse(obj) {
     boxRainTemplate(obj, true, true);
 }
 
-function boxRainTemplate(obj, grow, reverse) {
+function boxRainTemplate(obj, grow, reverse, randomizeRows) {
     var speed = obj.options.speed;
     // Note: rows must be greater than or equal to cols.
-    var options = {
-        boxRows : 10,
-        boxCols: 10
-    }
-    var src = $(obj.toSlides.get(0)).find('img').attr('src');
-    createBoxes(obj.slider, options.boxRows, options.boxCols, src);
-    var totalBoxes = options.boxRows * options.boxCols;
+    // TODO: Programming fuckup..
+    var boxRows = obj.options.boxrows;
+    var boxCols = obj.options.boxcols;
+    var target = $(obj.toSlides.get(0));
+    var src = target.find('img').attr('src');
+    createBoxes(target, obj.slider, boxCols, boxRows, src);
+    var totalBoxes = boxRows * boxCols;
     var i = 0;
     var timeBuff = 0;
     var rowIndex = 0;
@@ -174,45 +226,51 @@ function boxRainTemplate(obj, grow, reverse) {
         boxes = $('.nivo-box', obj.slider)._reverse();
     }
     boxes.each(function () {
-        box2Darr[rowIndex][colIndex] = $(this);
+        box2Darr[rowIndex][colIndex] = this;
         colIndex++;
-        if (colIndex == options.boxCols) {
+        if (colIndex == boxCols) {
+            if (randomizeRows) {
+                box2Darr[rowIndex] = shuffle(box2Darr[rowIndex]);
+            }
             rowIndex++;
             colIndex = 0;
             box2Darr[rowIndex] = new Array();
         }
     });
-    for (var cols = 0; cols < (options.boxCols * 2); cols++) {
+    if (reverse && randomizeRows) {
+        // box2Darr = box2Darr.reverse();
+    }
+    var count = 0;
+    for (var cols = 0; cols < (boxCols * 2) + 1; cols++) {
         var prevCol = cols;
-        for (var rows = 0; rows < options.boxRows; rows++) {
-            if (prevCol >= 0 && prevCol < options.boxCols) {
+        for (var rows = 0; rows < boxRows; rows++) {
+            if (prevCol >= 0 && prevCol < boxCols) {
                 (function (row, col, time, i, totalBoxes) {
-                    var box = $(box2Darr[col][row]);
+                    var rawBox = box2Darr[row][col];
+                    if (!rawBox) {
+                        console.log(col + " " + row)
+                        return;
+                    }
+                    var box = $(rawBox);
                     var w = box.width();
                     var h = box.height();
                     if (grow) {
                         box.width(0).height(0);
                     }
-                    if (i == totalBoxes - 1) {
-                        setTimeout(function () {
-                            box.animate({
-                                opacity: 1,
-                                width: w,
-                                height: h
-                            }, speed / 1.3, '', function () {
+                    count++;
+                    setTimeout(function () {
+                        box.animate({
+                            opacity: 1,
+                            width: w,
+                            height: h
+                        }, speed / 1.3, function () {
+                            count--;
+                            if (count == 0) {
                                 $('.nivo-box', obj.slider).remove();
                                 obj.callback();
-                            });
-                        }, (100 + time));
-                    } else {
-                        setTimeout(function () {
-                            box.animate({
-                                opacity: 1,
-                                width: w,
-                                height: h
-                            }, speed / 1.3);
-                        }, (100 + time));
-                    }
+                            }
+                        });
+                    }, (100 + time));
                 })(rows, prevCol, timeBuff, i, totalBoxes);
                 i++;
             }
@@ -223,11 +281,27 @@ function boxRainTemplate(obj, grow, reverse) {
 }
 
 function fold(obj) {
+    foldTemplate(obj, false);
+}
+
+function foldReverse(obj) {
+    foldTemplate(obj, true);
+}
+
+function foldRandom(obj) {
+    foldTemplate(obj, false, true);
+}
+
+function foldTemplate(obj, reverse, randomize) {
     var slides = 10;
     var speed = obj.options.speed;
-    var src = $(obj.toSlides.get(0)).find('img').attr('src');
-    createSlices(obj.slider, slides, src);
-    $('.nivo-slice', obj.slider).each(function (i) {
+    var target = $(obj.toSlides.get(0));
+    var src = target.find('img').attr('src');
+    createSlices(target, obj.slider, slides, src);
+    var slicesElement = $('.nivo-slice', obj.slider);
+    if (reverse) slicesElement = slicesElement._reverse();
+    if (randomize) slicesElement = shuffle(slicesElement);
+    slicesElement.each(function (i) {
         var timeBuff = 100 + (50 * i);
         var slice = $(this);
         var origWidth = slice.width();
@@ -264,8 +338,6 @@ function show(obj) {
     var ease = obj.options.ease;
     var speed = obj.options.speed;
 
-    obj.adjustDimensionsCall(speed);
-
     var push = 0;
     var clones = obj.toSlides.clone();
     clones.each(function (index) {
@@ -281,54 +353,6 @@ function show(obj) {
             that.remove();
         })
         push += extraPush;
-    });
-    return clones.get(0);
-}
-
-function slideUp(obj) {
-    var vertical = true;
-    var ease = obj.options.ease;
-    var speed = obj.options.speed;
-
-    obj.adjustDimensionsCall(speed);
-
-    var push = 0;
-    var clones = obj.toSlides.clone();
-    clones.each(function (index) {
-        var that = $(this);
-        that.prependTo(obj.slider);
-        that.css({'z-index' : 5, 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : 0, "left" : vertical ? 0 : push});
-        push += that['outer' + (vertical ? "Height" : "Width")](true);
-    });
-    obj.fromSlides.css("z-index", 10).animate({height: 0}, speed, function () {
-        clones.remove();
-        obj.fromSlides.css("z-index", "auto").css("height", "auto");
-        obj.callback();
-    })
-    return clones.get(0);
-}
-
-function slideDown(obj) {
-    var vertical = true;
-    var ease = obj.options.ease;
-    var speed = obj.options.speed;
-
-    obj.adjustDimensionsCall(speed);
-
-    var push = 0;
-    var clones = obj.toSlides.clone();
-    clones.each(function (index) {
-        var that = $(this);
-        that.prependTo(obj.slider);
-        that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : 0, "left" : vertical ? 0 : push});
-        that.slideUp(0);
-        that.slideDown(speed, function () {
-            if (index == 0) {
-                obj.callback();
-            }
-            that.remove();
-        })
-        push += that['outer' + (vertical ? "Height" : "Width")](true);
     });
     return clones.get(0);
 }
@@ -351,11 +375,9 @@ function push(obj, direction) {
     var vertical = direction == 2 || direction == 4;
     var negative = (direction == 2 || direction == 3) ? -1 : 1;
     var ease = obj.options.ease;
-    var height = obj.toSlides.height();
-    var width = obj.toSlides.width();
+    var height = Math.max(obj.toSlides.height(), obj.fromSlides.height());
+    var width = Math.max(obj.toSlides.width(), obj.fromSlides.width());
     var speed = obj.options.speed;
-
-    obj.adjustDimensionsCall(speed);
 
     var push = 0;
     var clones = obj.toSlides.clone();
@@ -379,8 +401,6 @@ function slide(obj) {
     var ease = obj.options.ease;
     var speed = obj.options.speed;
 
-    obj.adjustDimensionsCall(speed);
-
 
     var left = parseInt(ul.css("marginLeft"), 10) - obj.offset.left;
     var top = parseInt(ul.css("marginTop"), 10) - obj.offset.top;
@@ -399,14 +419,14 @@ function slide(obj) {
 }
 
 function fadeInOut(obj) {
-    var fadeSpeed = obj.options.fadespeed;
+    var fadeSpeed = obj.options.speed;
     var ease = obj.options.ease;
     var push = 0;
 
-    obj.adjustDimensionsCall(fadeSpeed);
-
     var fadeinspeed = parseInt(fadeSpeed*(3/5), 10);
     var fadeoutspeed = fadeSpeed - fadeinspeed;
+
+    var clones = obj.toSlides.clone();
 
     obj.fromSlides.animate(
         { opacity: 0.0001 },
@@ -415,24 +435,25 @@ function fadeInOut(obj) {
             duration:fadeoutspeed,
             easing:ease,
             complete:function () {
-                finishFadeFx(obj, fadeSpeed);
+                finishFadeFx(obj, fadeSpeed, clones);
             }
         }
     );
+    return clones.get(0);
 }
 
 
 function crossFade(obj) {
-    var fadeSpeed = obj.options.fadespeed;
-    obj.adjustDimensionsCall(fadeSpeed);
-    return finishFadeFx(obj, fadeSpeed);
+    var fadeSpeed = obj.options.speed;
+    var clones = obj.toSlides.clone();
+    finishFadeFx(obj, fadeSpeed, clones);
+    return clones.get(0);
 }
 
-function finishFadeFx(obj, speed) {
+function finishFadeFx(obj, speed, clones) {
     var vertical = obj.options.vertical;
     var ease = obj.options.ease;
     var push = 0;
-    var clones = obj.toSlides.clone();
     clones.animate({opacity: 1}, 0).each(function (index) {
         var that = $(this);
         that.prependTo(obj.slider);
@@ -446,12 +467,11 @@ function finishFadeFx(obj, speed) {
         });
         push += that['outer' + (vertical ? "Height" : "Width")](true);
     });
-    return clones.get(0);
 }
 
-function createSlices(obj, slices, imageUrl) {
+function createSlices(target, obj, slices, imageUrl) {
     for (var i = 0; i < slices; i++) {
-        var sliceWidth = Math.round(obj.width() / slices);
+        var sliceWidth = Math.round(target.width() / slices);
         if (i == slices - 1) {
             obj.append($('<div class="nivo-slice"></div>').css({
                 left: (sliceWidth * i) + 'px',
@@ -472,11 +492,12 @@ function createSlices(obj, slices, imageUrl) {
     }
 }
 
-function createBoxes(obj, numberOfCols, numberOfCols, imageUrl) {
-    var boxWidth = Math.round(obj.width() / numberOfCols);
-    var boxHeight = Math.round(obj.height() / numberOfCols);
-    for (var rows = 0; rows < numberOfCols; rows++) {
+function createBoxes(target, obj, numberOfCols, numberOfRows, imageUrl) {
+    var boxWidth = Math.round(target.width() / numberOfCols);
+    var boxHeight = Math.round(target.height() / numberOfRows);
+    for (var rows = 0; rows < numberOfRows; rows++) {
         for (var cols = 0; cols < numberOfCols; cols++) {
+            console.log("Test");
             if (cols == numberOfCols - 1) {
                 obj.append($('<div class="nivo-box"></div>').css({
                     opacity: 0,

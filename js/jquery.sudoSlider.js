@@ -63,7 +63,10 @@
 			resumepause:       FALSE, /* option[40]/*resumepause*/
 			movecount:         1, /* option[41]/*movecount*/
 			responsive:        FALSE,  /* option[42]/*responsive*/
-			customfx:          FALSE  /* option[43]/*customFx*/
+			customfx:          FALSE,  /* option[43]/*customFx*/
+			slices:            15,  /* option[44]/*slices*/
+            boxcols:           8,  /* option[45]/*boxCols*/
+            boxrows:           4,  /* option[46]/*boxRows*/
 		};
 		// Defining the base element.
 		var baseSlider = this;
@@ -233,9 +236,12 @@
 				            option[43]/*customFx*/ = fadeInOut;
 				        }
 				        option[20]/*fade*/ = FALSE;
+				        option[7]/*speed*/ = option[22]/*fadespeed*/;
 				    } else {
 				        option[43]/*customFx*/ = slide;
 				    }
+				} else if (typeof option[43]/*customFx*/ === "string") {
+
 				}
 
 				if (option[11]/*continuous*/) continuousClones = [];
@@ -938,9 +944,6 @@
                                 left: leftOffset,
                                 top: topOffset
                             },
-                            adjustDimensionsCall : function (speed) {
-                                autoadjust(dir, speed);
-                            },
                             callback: function () {
                                 clickable = TRUE;
                                 animate(dir,clicked);
@@ -960,6 +963,8 @@
 
                         // beforeAniFunc
                         aniCall(dir, FALSE);
+
+                        autoadjust(dir, option[7]/*speed*/);
 
                         if (extraClone) {
                             callBackList[dir].pop();
