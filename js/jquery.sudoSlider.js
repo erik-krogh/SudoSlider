@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider ver 2.3.0 - jQuery plugin
+ *  Sudo Slider ver 3.0.0 - jQuery plugin
  *  Written by Erik Kristensen info@webbies.dk.
  *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
  *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it.
@@ -12,12 +12,11 @@
  *
  */
 (function($) {
+    var undefined; // Makes sure that undefined really is undefined within this scope.
+    var FALSE = !1;
+    var TRUE = !0;
 	$.fn.sudoSlider = function(optionsOrg) {
 		// Saves space in the minified version.
-		// It might look complicated, but it isn't. It's easy to make using "replace all" and it saves a bit in the minified version (only .1KB after i started using Closure Compiler).
-		var undefined; // Makes sure that undefined really is undefined within this scope.
-		var FALSE = !1;
-		var TRUE = !0;
 		// default configuration properties
 		var defaults = {
 			controlsshow:      TRUE, /* option[0]/*controlsShow*/
@@ -66,7 +65,7 @@
 			customfx:          FALSE,  /* option[43]/*customFx*/
 			slices:            15,  /* option[44]/*slices*/
             boxcols:           8,  /* option[45]/*boxCols*/
-            boxrows:           4,  /* option[46]/*boxRows*/
+            boxrows:           4  /* option[46]/*boxRows*/
 		};
 		// Defining the base element.
 		var baseSlider = this;
@@ -228,21 +227,22 @@
 
 
                 // Every animation is defined using customFx.
+                // This if statement keeps backward compatibility.
 				if (!option[43]/*customFx*/) {
+				    option[43]/*customFx*/ = "slide";
 				    if (option[20]/*fade*/) {
 				        if (option[21]/*crossfade*/) {
-				            option[43]/*customFx*/ = crossFade;
+				            option[43]/*customFx*/ = "crossFade";
 				        } else {
-				            option[43]/*customFx*/ = fadeInOut;
+				            option[43]/*customFx*/ = "fadeInOut";
 				        }
 				        option[20]/*fade*/ = FALSE;
 				        option[7]/*speed*/ = option[22]/*fadespeed*/;
 				    } else {
 				        option[43]/*customFx*/ = slide;
 				    }
-				} else if (typeof option[43]/*customFx*/ === "string") {
-
 				}
+				option[43]/*customFx*/ = $.fn.sudoSlider.effects[option[43]/*customFx*/];
 
 				if (option[11]/*continuous*/) continuousClones = [];
 
@@ -869,12 +869,11 @@
 
 			};
 
-            // TODO: Rewrite comments
 			function customAni(i, clicked, ajaxcallback) {
                 if (filterDir(i) != t && !destroyed && clickable) {
                     // Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
                     ajaxloading = FALSE;
-                    // I don't want to fade to a continuous clone, i go directly to the target.
+
                     var dir = filterDir(i);
 
                     if (option[23]/*updateBefore*/) setCurrent(dir);
@@ -885,7 +884,7 @@
                         speed = oldSpeed;
                         if (dontCountinueFade) dontCountinueFade--; // Short for if(dontContinueFade == 0).
                     } else if (option[24]/*ajax*/) {
-                        // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation includes cloning of the target elements.
+                        // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation may include cloning of the target elements.
                         dontCountinueFade = 0;
                         for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
                             if (option[24]/*ajax*/[a]) {
@@ -937,7 +936,7 @@
                             fromSlides : fromSlides,
                             toSlides : toSlides,
                             slider : obj,
-                            options: jQuery.extend(true, {}, options), // Making a copy, to enforce read-only.
+                            options: jQuery.extend(TRUE, {}, options), // Making a copy, to enforce read-only.
                             toSlideNumber: dir + 1,
                             fromSlideNumber: t + 1,
                             offset: {
@@ -950,8 +949,8 @@
                                 if(option[16]/*history*/ && clicked) {
                                     window.location.hash = option[15]/*numerictext*/[t];
                                 }
+                                // afterAniFunc
                                 aniCall(dir, TRUE);
-                                firstRun = FALSE;
                             }
                         }
 
@@ -972,70 +971,6 @@
                     }
                 }
             };
-
-            function slide(obj) {
-                var left = parseInt10(ul.css("marginLeft")) - obj.offset.left;
-                var top = parseInt10(ul.css("marginTop")) - obj.offset.top;
-
-                obj.adjustDimensionsCall(option[7]/*speed*/);
-
-                ul.animate(
-                    { marginTop: top, marginLeft: left},
-                    {
-                        queue: false,
-                        duration: option[7]/*speed*/,
-                        easing: option[8]/*ease*/,
-                        complete: function () {
-                            obj.callback();
-                        }
-                    }
-                );
-            }
-
-            function fadeInOut(obj) {
-                var push = 0;
-
-                obj.adjustDimensionsCall(option[22]/*fadespeed*/);
-
-                var fadeinspeed = parseInt(option[22]/*fadespeed*/*(3/5), 10);
-                var fadeoutspeed = option[22]/*fadespeed*/ - fadeinspeed;
-
-                obj.fromSlidesShown.animate(
-                    { opacity: 0.0001 },
-                    {
-                        queue: FALSE,
-                        duration: fadeoutspeed,
-                        easing: option[8]/*ease*/,
-                        complete: function () {
-                            finishFadeFx(obj, fadeinspeed);
-                        }
-                    }
-                );
-            }
-
-            function crossFade(obj) {
-                obj.adjustDimensionsCall(option[22]/*fadespeed*/);
-                return finishFadeFx(obj, option[22]/*fadespeed*/);
-            }
-
-            function finishFadeFx(obj, speed) {
-                var push = 0;
-                var clones = obj.toSlidesShown.clone();
-                clones.animate({opacity: 1}, 0).each(function (index) {
-                    var that = $(this);
-                    that.prependTo(obj.slider);
-                    that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : option[6]/*vertical*/ ? push : 0, "left" : option[6]/*vertical*/ ? 0 : push}).
-                    hide().fadeIn(speed, option[8]/*ease*/, function() {
-                        that.remove();
-                        if (index == 0) {
-                            obj.callback();
-                            obj.fromSlidesShown.animate({opacity: 1}, 0);
-                        }
-                    });
-                    push += that['outer' + (option[6]/*vertical*/ ? "Height" : "Width")](TRUE);
-                });
-                return clones.get(0);
-            }
 
 			function animate(dir, clicked) {
 				if ((clickable && !destroyed && (dir != t || init))) {
@@ -1081,25 +1016,9 @@
 				return position % s;
 			}
 
-			function isFunc(func) {
-				return $.isFunction(func);
-			}
-
-			function parseInt10(num) {
-				return parseInt(num, 10);
-			}
-
 			function fixClearType (element) {
-				if (screen.fontSmoothingEnabled) element.style.removeAttribute("filter"); // Fix cleartype
-			}
-
-			function getTimeInMillis() {
-			    return new Date() - 0;
-			}
-
-			function MathAbs(number) {
-			    return number < 0 ? - number : number;
-			}
+                if (screen.fontSmoothingEnabled) element.style.removeAttribute("filter"); // Fix cleartype
+            }
 
 		    /*
  			 * Public methods.
@@ -1233,6 +1152,576 @@
 
 		});
 	};
+	/*
+	 * End generic slider. Start animations.
+	 */
+
+    // Start by defining everything, the implementations is below.
+	var richEffects = {
+	    pushUp : pushUp,
+        pushRight : pushRight,
+        pushDown : pushDown,
+        pushLeft : pushLeft,
+        slide : slide,
+        fadeInOut : fadeInOut,
+        crossFade : crossFade,
+        show : show
+	}
+
+	var imageEffects = {
+	    fold : fold,
+        foldReverse : foldReverse,
+        foldRandom : foldRandom,
+        boxes : boxes,
+        boxesGrow : boxesGrow,
+        boxesReverse : boxesReverse,
+        boxesGrowReverse : boxesGrowReverse,
+        boxRain : boxRain,
+        boxRainGrow : boxRainGrow,
+        boxRainReverse: boxRainReverse,
+        boxRainGrowReverse : boxRainGrowReverse,
+        boxRandom : boxRandom,
+        boxRandomGrow : boxRandomGrow,
+        sliceUp : sliceUp,
+        sliceUpLeft : sliceUpLeft,
+        sliceDown : sliceDown,
+        sliceDownLeft : sliceDownLeft,
+        sliceUpDown : sliceUpDown,
+        sliceUpDownLeft : sliceUpDownLeft,
+        barsUp : barsUp,
+        barsDown : barsDown,
+        boxesDown : boxesDown,
+        boxesDownGrow : boxesDownGrow,
+        boxesUp : boxesUp,
+        boxesUpGrow : boxesUpGrow
+	}
+
+	var allEffects = mergeObjects(richEffects, imageEffects);
+
+	var randomEffects = {
+	    random: function (obj) {
+	        var effect = pickRandomValue(allEffects);
+            return effect(obj);
+	    },
+	    randomImage: function (obj) {
+	        var effect = pickRandomValue(imageEffects);
+            return effect(obj);
+	    },
+	    randomRich: function (obj) {
+	        var effect = pickRandomValue(richEffects);
+            return effect(obj);
+	    }
+	}
+    // Saving it
+	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
+
+    // The implementations
+    function sliceUp(obj) {
+        sliceUpDownTemplate(obj, 1, FALSE);
+    }
+    function sliceUpLeft(obj) {
+        sliceUpDownTemplate(obj, 1, TRUE);
+    }
+    function sliceDown(obj) {
+        sliceUpDownTemplate(obj, 2, FALSE);
+    }
+    function sliceDownLeft(obj) {
+        sliceUpDownTemplate(obj, 2, TRUE);
+    }
+    function sliceUpDown(obj) {
+        sliceUpDownTemplate(obj, 3, FALSE);
+    }
+    function sliceUpDownLeft(obj) {
+        sliceUpDownTemplate(obj, 3, TRUE);
+    }
+
+    function barsUp(obj) {
+        sliceUpDownTemplate(obj, 2, FALSE, TRUE);
+    }
+    function barsDown(obj) {
+        sliceUpDownTemplate(obj, 1, FALSE, TRUE);
+    }
+
+    function sliceUpDownTemplate(obj, dir, reverse, randomize) { // Dir: 1 == down, 2 == up, 3 == up/down.
+        var numberOfSlices = obj.options.slices;
+        var speed = obj.options.speed;
+        var target = $(obj.toSlides.get(0));
+        var slices = createSlices(target, obj.slider, numberOfSlices);
+        var timeBuff = 0;
+        var i = 0;
+        var v = 0;
+        if (reverse) slices = slices._reverse();
+        if (randomize) slices = shuffle(slices);
+        var count = 0;
+        slices.each(function () {
+            var slice = $(this);
+            var bottom = TRUE;
+            if (dir == 3) {
+                if (i == 0) {
+                    bottom = FALSE;
+                    i++;
+                } else {
+                    i = 0;
+                }
+            } else if (dir == 2) {
+                bottom = FALSE;
+            }
+            slice.css(bottom ? 'bottom' : 'top', '0px');
+            count++;
+            setTimeout(function () {
+                slice.animate({
+                    height: '100%',
+                    opacity: 1
+                }, speed, '', function () {
+                    count--;
+                    if (count == 0) {
+                        obj.callback();
+                        slices.remove();
+                    }
+                });
+            }, (100 + timeBuff));
+            timeBuff += 50;
+            v++;
+        });
+    }
+    function boxes(obj) {
+        boxTemplate(obj, FALSE, FALSE);
+    }
+    function boxesGrow(obj) {
+        boxTemplate(obj, FALSE, TRUE);
+    }
+    function boxesReverse(obj) {
+        boxTemplate(obj, FALSE, FALSE, TRUE);
+    }
+    function boxesGrowReverse(obj) {
+        boxTemplate(obj, FALSE, TRUE, TRUE);
+    }
+
+    function boxRandom(obj) {
+        boxTemplate(obj, TRUE, FALSE);
+    }
+
+    function boxRandomGrow(obj) {
+        boxTemplate(obj, TRUE, TRUE);
+    }
+
+    function boxTemplate(obj, random, grow, reverse) {
+        var speed = obj.options.speed;
+        var boxRows = obj.options.boxrows;
+        var boxCols = obj.options.boxcols;
+        var target = $(obj.toSlides.get(0));
+        var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
+        if (random) {
+            boxes = shuffle(boxes);
+        }
+        if (reverse) {
+            boxes = boxes._reverse();
+        }
+        var i = 0;
+        var timeBuff = 0;
+        var count = 0;
+        boxes.each(function () {
+            var box = $(this);
+            var w = box.width();
+            var h = box.height();
+            if (grow) {
+                box.width(0).height(0);
+            }
+            count++;
+            setTimeout(function () {
+                box.animate({
+                    opacity: 1,
+                    width: w,
+                    height: h
+                }, speed, '', function () {
+                    count--;
+                    if (count == 0) {
+                        obj.callback();
+                        boxes.remove();
+                    }
+                });
+            }, (100 + timeBuff));
+            timeBuff += 20;
+            i++;
+        });
+    }
+
+    function boxesDown(obj) {
+        boxRainTemplate(obj, FALSE, FALSE, TRUE);
+    }
+    function boxesDownGrow(obj) {
+        boxRainTemplate(obj, TRUE, FALSE, TRUE);
+    }
+    function boxesUp(obj) {
+        boxRainTemplate(obj, FALSE, TRUE, TRUE);
+    }
+    function boxesUpGrow(obj) {
+        boxRainTemplate(obj, TRUE, TRUE, TRUE);
+    }
+
+    function boxRain(obj) {
+        boxRainTemplate(obj, FALSE, FALSE);
+    }
+    function boxRainGrow(obj) {
+        boxRainTemplate(obj, TRUE, FALSE);
+    }
+    function boxRainReverse(obj) {
+        boxRainTemplate(obj, FALSE, TRUE);
+    }
+    function boxRainGrowReverse(obj) {
+        boxRainTemplate(obj, TRUE, TRUE);
+    }
+
+    function boxRainTemplate(obj, grow, reverse, randomizeRows) {
+        var speed = obj.options.speed;
+        var boxRows = obj.options.boxrows;
+        var boxCols = obj.options.boxcols;
+        var target = $(obj.toSlides.get(0));
+        var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
+        var totalBoxes = boxes.length;
+        var i = 0;
+        var timeBuff = 0;
+        var rowIndex = 0;
+        var colIndex = 0;
+        var box2Darr = new Array();
+        box2Darr[rowIndex] = new Array();
+        if (reverse) {
+            boxes = boxes._reverse();
+        }
+        boxes.each(function () {
+            box2Darr[rowIndex][colIndex] = this;
+            colIndex++;
+            if (colIndex == boxCols) {
+                if (randomizeRows) {
+                    box2Darr[rowIndex] = shuffle(box2Darr[rowIndex]);
+                }
+                rowIndex++;
+                colIndex = 0;
+                box2Darr[rowIndex] = new Array();
+            }
+        });
+        var count = 0;
+        for (var cols = 0; cols < (boxCols * 2) + 1; cols++) {
+            var prevCol = cols;
+            for (var rows = 0; rows < boxRows; rows++) {
+                if (prevCol >= 0 && prevCol < boxCols) {
+                    (function (row, col, time, i, totalBoxes) {
+                        var rawBox = box2Darr[row][col];
+                        if (!rawBox) {
+                            return;
+                        }
+                        var box = $(rawBox);
+                        var w = box.width();
+                        var h = box.height();
+                        if (grow) {
+                            box.width(0).height(0);
+                        }
+                        count++;
+                        setTimeout(function () {
+                            box.animate({
+                                opacity: 1,
+                                width: w,
+                                height: h
+                            }, speed / 1.3, function () {
+                                count--;
+                                if (count == 0) {
+                                    boxes.remove();
+                                    obj.callback();
+                                }
+                            });
+                        }, (100 + time));
+                    })(rows, prevCol, timeBuff, i, totalBoxes);
+                    i++;
+                }
+                prevCol--;
+            }
+            timeBuff += 100;
+        }
+    }
+
+    function fold(obj) {
+        foldTemplate(obj, FALSE);
+    }
+
+    function foldReverse(obj) {
+        foldTemplate(obj, TRUE);
+    }
+
+    function foldRandom(obj) {
+        foldTemplate(obj, FALSE, TRUE);
+    }
+
+    function foldTemplate(obj, reverse, randomize) {
+        var slides = obj.options.slices;
+        var speed = obj.options.speed;
+        var target = $(obj.toSlides.get(0));
+        var slicesElement = createSlices(target, obj.slider, slides);
+        var count = 0;
+        if (reverse) slicesElement = slicesElement._reverse();
+        if (randomize) slicesElement = shuffle(slicesElement);
+        slicesElement.each(function (i) {
+            var timeBuff = 100 + (50 * i);
+            var slice = $(this);
+            var origWidth = slice.width();
+            slice.css({
+                top: '0px',
+                height: '100%',
+                width: '0px'
+            });
+            count++;
+            setTimeout(function () {
+                slice.animate({
+                    width: origWidth,
+                    opacity: 1
+                }, speed, '', function () {
+                    count--;
+                    if (count == 0) {
+                        slicesElement.remove();
+                        obj.callback();
+                    }
+                });
+            }, (100 + timeBuff));
+        });
+    }
+
+    function show(obj) {
+        var vertical = obj.options.vertical;
+        var ease = obj.options.ease;
+        var speed = obj.options.speed;
+
+        var push = 0;
+        var clones = obj.toSlides.clone();
+        clones.each(function (index) {
+            var that = $(this);
+            that.prependTo(obj.slider);
+            var extraPush = that['outer' + (vertical ? "Height" : "Width")](TRUE);
+            that.css({'z-index' : 10000, 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : 0, "left" : vertical ? 0 : push});
+            that.hide(0);
+            that.show(speed, function () {
+                if (index == 0) {
+                    obj.callback();
+                }
+                that.remove();
+            })
+            push += extraPush;
+        });
+        return clones.get(0);
+    }
+
+    function pushUp(obj) {
+        push(obj, 1);
+    }
+    function pushRight(obj) {
+        push(obj, 2);
+    }
+    function pushDown(obj) {
+        push(obj, 3);
+    }
+    function pushLeft(obj) {
+        push(obj, 4);
+    }
+
+    // 1: up, 2: right, 3: down, 4, left:
+    function push(obj, direction) {
+        var vertical = direction == 2 || direction == 4;
+        var negative = (direction == 2 || direction == 3) ? -1 : 1;
+        var ease = obj.options.ease;
+        var height = Math.max(obj.toSlides.height(), obj.fromSlides.height());
+        var width = Math.max(obj.toSlides.width(), obj.fromSlides.width());
+        var speed = obj.options.speed;
+
+        var push = 0;
+        var clones = obj.toSlides.clone();
+        clones.each(function (index) {
+            var that = $(this);
+            that.prependTo(obj.slider);
+            that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : negative * height, "left" : vertical ? negative * width : push});
+            that.animate(vertical ? {left: 0} : {top: 0}, speed, function () {
+                if (index == 0) {
+                    obj.callback();
+                }
+                that.remove();
+            })
+            push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
+        });
+        return clones.get(0);
+    }
+
+    function slide(obj) {
+        var ul = obj.slider.children("ul");
+        var ease = obj.options.ease;
+        var speed = obj.options.speed;
+
+
+        var left = parseInt(ul.css("marginLeft"), 10) - obj.offset.left;
+        var top = parseInt(ul.css("marginTop"), 10) - obj.offset.top;
+
+        ul.animate(
+            { marginTop: top, marginLeft: left},
+            {
+                queue:FALSE,
+                duration:speed,
+                easing: ease,
+                complete: function () {
+                    obj.callback();
+                }
+            }
+        );
+    }
+
+    function fadeInOut(obj) {
+        var fadeSpeed = obj.options.speed;
+        var ease = obj.options.ease;
+        var push = 0;
+
+        var fadeinspeed = parseInt(fadeSpeed*(3/5), 10);
+        var fadeoutspeed = fadeSpeed - fadeinspeed;
+
+        var clones = obj.toSlides.clone();
+
+        obj.fromSlides.animate(
+            { opacity: 0.0001 },
+            {
+                queue: FALSE,
+                duration:fadeoutspeed,
+                easing:ease,
+                complete:function () {
+                    finishFadeFx(obj, fadeSpeed, clones);
+                }
+            }
+        );
+        return clones.get(0);
+    }
+
+
+    function crossFade(obj) {
+        var fadeSpeed = obj.options.speed;
+        var clones = obj.toSlides.clone();
+        finishFadeFx(obj, fadeSpeed, clones);
+        return clones.get(0);
+    }
+
+    function finishFadeFx(obj, speed, clones) {
+        var vertical = obj.options.vertical;
+        var ease = obj.options.ease;
+        var push = 0;
+        clones.animate({opacity: 1}, 0).each(function (index) {
+            var that = $(this);
+            that.prependTo(obj.slider);
+            that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : 0, "left" : vertical ? 0 : push}).
+            hide().fadeIn(speed, ease, function() {
+                that.remove();
+                if (index == 0) {
+                    obj.callback();
+                    obj.fromSlides.animate({opacity: 1}, 0);
+                }
+            });
+            push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
+        });
+    }
+
+    function createSlices(target, obj, slices) {
+        var result = $();
+        var imageUrl = findImgUrl(target);
+        for (var i = 0; i < slices; i++) {
+            var sliceWidth = Math.round(target.width() / slices);
+            var width;
+            if (i == slices - 1) {
+                width = obj.width() - (sliceWidth * i)
+            } else {
+                width = sliceWidth;
+            }
+            var slice = $('<div class="nivo-slice"></div>').css({
+                position: "absolute",
+                'z-index': 10000,
+                left: (sliceWidth * i) + 'px',
+                width: width + 'px',
+                height: '0px',
+                opacity: 0,
+                background: 'url("' + imageUrl + '") no-repeat -' + ((sliceWidth + (i * sliceWidth)) - sliceWidth) + 'px 0%'
+            })
+            obj.append(slice);
+            result = result.add(slice);
+        }
+        return result;
+    }
+
+    function createBoxes(target, obj, numberOfCols, numberOfRows) {
+        var result = $();
+        var boxWidth = Math.round(target.width() / numberOfCols);
+        var boxHeight = Math.round(target.height() / numberOfRows);
+        var imageUrl = findImgUrl(target);
+        for (var rows = 0; rows < numberOfRows; rows++) {
+            for (var cols = 0; cols < numberOfCols; cols++) {
+                var width;
+                if (cols == numberOfCols - 1) {
+                    width = (obj.width() - (boxWidth * cols));
+                } else {
+                    width = boxWidth;
+                }
+                var box = $('<div></div>').css({
+                    position: "absolute",
+                    'z-index': 10000,
+                    opacity: 0,
+                    left: (boxWidth * cols) + 'px',
+                    top: (boxHeight * rows) + 'px',
+                    width: width + 'px',
+                    height: boxHeight + 'px',
+                    background: 'url("' + imageUrl + '") no-repeat -' + ((boxWidth + (cols * boxWidth)) - boxWidth) + 'px -' + ((boxHeight + (rows * boxHeight)) - boxHeight) + 'px'
+                });
+                obj.append(box);
+                result = result.add(box);
+            }
+        }
+        return result;
+    }
+
+    function findImgUrl(slide) {
+        return slide.find('img').attr('src');
+    }
+
+	/*
+     * Util scripts.
+     */
+    $.fn._reverse = [].reverse;
+
+    function shuffle(arr) {
+        for (var j, x, i = arr.length; i; j = parseInt(Math.random() * i), x = arr[--i], arr[i] = arr[j], arr[j] = x){}
+        return arr;
+    }
+
+    function isFunc(func) {
+        return $.isFunction(func);
+    }
+
+    function parseInt10(num) {
+        return parseInt(num, 10);
+    }
+
+    function getTimeInMillis() {
+        return new Date() - 0;
+    }
+
+    function MathAbs(number) {
+        return number < 0 ? - number : number;
+    }
+
+    function mergeObjects(obj1, obj2){
+        var obj3 = {};
+        for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+        for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+        return obj3;
+    }
+
+    function pickRandomValue(obj) {
+        var result;
+        var count = 0;
+        for (var prop in obj)
+            if (Math.random() < 1/++count)
+               result = prop;
+        return obj[result];
+    }
+
 })(jQuery);
 // If you did just read the entire code, congrats.
 // Did you find a bug? I didn't, so plz tell me if you did. (https://github.com/webbiesdk/SudoSlider/issues)
