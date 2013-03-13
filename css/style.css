@@ -35,3 +35,5 @@ ol li a:focus, .prevBtn a:focus, .nextBtn a:focus{outline:none;}
 
 /* Some demos use this line */
 #slider2 ul, #slider2 li{margin:0;padding:0;list-style:none;position:relative;display:block;} #slider2, #slider2 li {width:696px;overflow:hidden;}
+
+pre {white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }

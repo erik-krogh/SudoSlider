@@ -6,7 +6,7 @@
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="../js/jquery.touchSwipe.js"></script>
-	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
 	<script type="text/javascript">
 	
 		var power = 1;
@@ -24,12 +24,7 @@
 			var sudoSlider = $("#slider").sudoSlider({
 				continuous: true,
 				prevNext: false,
-				ease: "kineticOut",
-				afterAniFunc: function ()
-				{
-					ulMarginLeft = $("#slider ul").css("marginLeft");
-					ulMarginLeft = Number(ulMarginLeft.substring(0, ulMarginLeft.length - 2));
-				}
+				ease: "kineticOut"
 			});
 			$("#slider").swipe({
 				swipeStatus:swipeStatus,
@@ -45,16 +40,21 @@
 				$("#slider ul").css("marginLeft",(ulMarginLeft + procent*slideWidth) + "px");
 			}
 
-			var N = 10;
+			var N = 20;
 			var positionsBuffer = new Array(N);;
 			var timeBuffer = [];
+            var gotUlPosition = false;
 			function swipeStatus(event, phase, direction, distance)
 			{
 				if (sudoSlider.getValue('clickable'))
 				{
 					if (phase == "move" && (direction == "left" || direction == "right"))
 					{
-						
+						if (!gotUlPosition) {
+                            gotUlPosition = true;
+                            ulMarginLeft = $("#slider ul").css("marginLeft");
+                            ulMarginLeft = parseInt(ulMarginLeft, 10);
+                        }
 						positionsBuffer = positionsBuffer.slice(1, N);
 						timeBuffer = timeBuffer.slice(1, N);
 						positionsBuffer.push(Math.abs(lastDistance - Number(distance)));
@@ -77,10 +77,11 @@
 						}
 						lastDistance = 0;
 						lasttime = new Date() - 0;
-						starttime = new Date();	
+						starttime = new Date();
 					}
 					else if (phase == "end" || phase == "cancel")
 					{
+                        gotUlPosition = false;
 						var maxSpeed = 5;
 						var time = 0; 
 						var distance = 0;
@@ -97,8 +98,8 @@
 						
 						// TODO: Find direction. 
 						
-						power = Math.sqrt(((maxSpeed - speed) / maxSpeed)) * 1.3 + 0.7
-						
+						power = Math.sqrt(((maxSpeed - speed) / maxSpeed)) * 1.3 + 0.2
+						console.log(power);
 						sudoSlider.goToSlide((direction == "left") ? 'next' : 'prev', duration);
 					}
 				}

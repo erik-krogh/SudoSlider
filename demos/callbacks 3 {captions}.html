@@ -31,14 +31,14 @@
 			            .css("position","relative")
 			            .append('<div class="caption" >' + imagestext[t-1] + '</div>');
 			    },
-			    beforeAniFunc: function(t){ 
-			        $(this).children('.caption').hide();	
+			    beforeAniFunc: function(t){
+			        $(this).children('.caption').hide();
 			    },
-			    afterAniFunc: function(t){ 
+			    afterAniFunc: function(t){
 			        $(this).children('.caption').slideDown(400);
 			    }
 			});
-		});	
+		});
 	</script>
 	<style>
 	.caption {
@@ -55,17 +55,14 @@
 	    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#a3ffffff,endColorstr=#a3ffffff);
 	    zoom: 1;
 	}
-	#slider ul li {
-	    position:relative;
-	}
 	</style>
 
 
-	
+
 </head>
 <body>
 <div id="container">
-	<h1>Sudo Slider jQuery Plugin - Callbacks 3 (captions) demo</h1> 
+	<h1>Sudo Slider jQuery Plugin - Callbacks 3 (captions) demo</h1>
 	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
 	<div style="position:relative;">
 		<div id="slider"></div>
@@ -78,22 +75,22 @@
 	<h4>The Javascript to start it.</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
-    $(document).ready(function(){	
+    $(document).ready(function(){
         var ajaximages = [
-            '../images/01.jpg', 
-            '../images/04.jpg', 
-            '../images/02.jpg', 
-            '../images/03.jpg', 
+            '../images/01.jpg',
+            '../images/04.jpg',
+            '../images/02.jpg',
+            '../images/03.jpg',
             '../images/05.jpg'
         ];
         var imagestext = [
-            'Just another beautiful sunset', 
+            'Just another beautiful sunset',
             'Behind another beautiful sunset',
-            'Mountains in the Alps', 
+            'Mountains in the Alps',
             'Road and mountains in the Alps',
             'A goat in norway',
         ];
-        var sudoSlider = $("#slider").sudoSlider({ 
+        var sudoSlider = $("#slider").sudoSlider({
             fade:true,
             continuous:true,
             ajax: ajaximages,

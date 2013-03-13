@@ -192,7 +192,7 @@
 					// Do we have enough list elements to fill out all the ajax documents.
 					if (option[24]/*ajax*/.length > s) {
 						for (var a = 1; a <= option[24]/*ajax*/.length - s; a++) {
-							ul.append("<li><p>" +  option[34]/*loadingtext*/ + "</p></li>");
+							ul.append("<li>" +  option[34]/*loadingtext*/ + "</li>");
 						}
 						li = ul.children("li");
 						s = li.length;
@@ -377,14 +377,15 @@
 					else animate(option[26]/*startslide*/ - 1,FALSE);
 				});
 
+                if (option[24]/*ajax*/[0]) {
+                    ajaxLoad(0, FALSE, 0, FALSE);
+                }
 				if (option[25]/*preloadajax*/ === TRUE) {
 				    for (var i = 0; i <= ts; i++) {
 				        if (option[24]/*ajax*/[i] && option[26]/*startslide*/ - 1 != i) {
 				            ajaxLoad(i, FALSE, 0, FALSE);
 				        }
 				    }
-				} else if (option[24]/*ajax*/[0]) {
-				    ajaxLoad(0, FALSE, 0, FALSE);
 				}
 			}
 			/*
@@ -950,8 +951,8 @@
                         }
 
 
-                        var leftOffset = getSlidePosition(t, FALSE) - getSlidePosition(i, FALSE);
-                        var topOffset = getSlidePosition(t, TRUE) - getSlidePosition(i, TRUE);
+                        var leftOffset = parseInt10(ul.css("marginLeft")) - getSlidePosition(i, FALSE);
+                        var topOffset = parseInt10(ul.css("marginTop")) - getSlidePosition(i, TRUE);
 
                         var callObject = {
                             fromSlides : fromSlides,
@@ -1019,6 +1020,7 @@
                     if(option[2]/*controlsfade*/) {
                         var fadetime = option[1]/*controlsfadespeed*/;
                         if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;
+                        if (init) fadetime = 0;
                         fadeControls (t,fadetime);
                     }
 
@@ -1730,16 +1732,25 @@
         return number < 0 ? - number : number;
     }
 
-    function mergeObjects(obj1, obj2){
-        var obj3 = {};
-        for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
-        for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
-        return obj3;
+    function mergeObjects(){
+        var result = {};
+        var args = arguments;
+        for (a in args) {
+            var obj = args[a];
+            for (var attrname in obj) {
+                result[attrname] = obj[attrname];
+            }
+        }
+        return result;
     }
 
     function pickRandomValue(obj) {
-        var keys = Object.keys(obj)
-        return obj[keys[Math.floor(keys.length * Math.random())]];
+        var result;
+        var count = 0;
+        for (var prop in obj)
+            if (Math.random() < 1/++count)
+                result = prop;
+        return obj[result];
     }
 
 })(jQuery);
