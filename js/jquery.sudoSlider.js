@@ -53,7 +53,7 @@
 			currentfunc:       FALSE, /* option[31]/*currentfunc*/
 			prevhtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[32]/*prevhtml*/
 			nexthtml:          '<a href="#" class="nextBtn"> next </a>', /* option[33]/*nexthtml*/
-			loadingtext:       'Loading Content...', /* option[34]/*loadingtext*/
+			loadingtext:       '', /* option[34]/*loadingtext*/
 			firsthtml:         '<a href="#" class="firstBtn"> first </a>', /* option[35]/*firsthtml*/
 			controlsattr:      'id="controls"', /* option[36]/*controlsattr*/
 			lasthtml:          '<a href="#" class="lastBtn"> last </a>', /* option[37]/*lasthtml*/
@@ -158,6 +158,8 @@
 			finishedAdjustingTo = FALSE, // This variable teels if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff.
             adjustingTo, // This one tells what slide we are adjusting to, to make sure that we do not adjust to something we shouldn't.
             adjustTargetTime = 0, // This one holds the time that the autoadjust animation should complete.
+            currentlyAnimating = FALSE,
+            awaitingAjaxLoads = [],
 
 			// Making a "private" copy that i put the "public" options in. The private options can then be changed if i wan't to.
 			options = optionsOrg,
@@ -237,8 +239,6 @@
 				        }
 				        option[20]/*fade*/ = FALSE;
 				        option[7]/*speed*/ = option[22]/*fadespeed*/;
-				    } else {
-				        option[43]/*customFx*/ = slide;
 				    }
 				}
 				var sudoSliderEffects = $.fn.sudoSlider.effects;
@@ -383,6 +383,8 @@
 				            ajaxLoad(i, FALSE, 0, FALSE);
 				        }
 				    }
+				} else if (option[24]/*ajax*/[0]) {
+				    ajaxLoad(0, FALSE, 0, FALSE);
 				}
 			}
 			/*
@@ -803,7 +805,6 @@
 				var target = option[24]/*ajax*/[i];
 				var targetslide = li.eq(i);
 				// parsing the init variable.
-				var ajaxInit = speed === TRUE;
 				var speed = (speed === TRUE) ? 0 : speed;
 
 				var tt = i + 1;
@@ -812,12 +813,19 @@
 				$.ajax({
 					url: target,
 					success: function(data, textStatus, jqXHR){
-						var type = jqXHR.getResponseHeader('Content-Type').substr(0,1);
-						if (type != "i") {
-							textloaded = TRUE;
-							targetslide.html(data);
-							ajaxAdjust(i, speed, ajaxCallBack, adjust, ajaxInit, FALSE);
-						}
+					    var completeFunction = function () {
+					        var type = jqXHR.getResponseHeader('Content-Type').substr(0,1);
+                            if (type != "i") {
+                                textloaded = TRUE;
+                                targetslide.html(data);
+                                ajaxAdjust(i, speed, ajaxCallBack, adjust, FALSE);
+                            }
+					    }
+					    if (currentlyAnimating) {
+					        awaitingAjaxLoads.push(completeFunction);
+					    } else {
+					        completeFunction();
+					    }
 					},
 					complete: function(jqXHR){
 						// Some browsers wont load images this way, so i treat an error as an image.
@@ -828,7 +836,7 @@
 							targetslide.html('').append(image);
 							image.src = target;
 							// Lets just make some adjustments
-							ajaxAdjust(i, speed, ajaxCallBack, adjust, ajaxInit, TRUE);
+							ajaxAdjust(i, speed, ajaxCallBack, adjust, TRUE);
 						}
 					}
 				});
@@ -837,7 +845,7 @@
 				// It is the only option that i need to change for good.
 				options.ajax[i] = FALSE;
 			};
-			function ajaxAdjust(i, speed, ajaxCallBack, adjust, ajaxInit, img){
+			function ajaxAdjust(i, speed, ajaxCallBack, adjust, img){
 			    var target = li.eq(i);
 			    var callbackTarget = target;
 				// Now to see if the generated content needs to be inserted anywhere else.
@@ -860,8 +868,10 @@
 
 				if (adjust || finishedAdjustingTo == i) autoadjust(i, speed);
 
+                adjustPosition();
+
 				runOnImagesLoaded (target, TRUE, function(){
-					if (ajaxInit === TRUE) adjustPosition();// Doing this little trick after the images are done.
+					adjustPosition();
 					// And the callback.
 					if (isFunc(ajaxCallBack)) ajaxCallBack();
 					startAsyncDelayedLoad();
@@ -899,8 +909,8 @@
                         dontCountinue = 0;
                         for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
                             if (option[24]/*ajax*/[a]) {
-                                ajaxLoad(getRealPos(a), FALSE, speed, function(){
-                                    fadeto(i, clicked, TRUE);
+                                ajaxLoad(getRealPos(a), FALSE, option[7]/*speed*/, function(){
+                                    customAni(i, clicked, TRUE);
                                 });
                                 dontCountinue++;
                             }
@@ -955,6 +965,7 @@
                                 top: topOffset
                             },
                             callback: function () {
+                                currentlyAnimating = FALSE;
                                 clickable = TRUE;
                                 animate(dir,clicked);
                                 if(option[16]/*history*/ && clicked) {
@@ -962,8 +973,13 @@
                                 }
                                 // afterAniFunc
                                 aniCall(dir, TRUE);
+
+                                while (awaitingAjaxLoads.length) {
+                                    awaitingAjaxLoads.pop()();
+                                }
                             }
                         }
+                        currentlyAnimating = TRUE;
 
                         var extraClone = option[43]/*customFx*/.call(baseSlider, callObject);
 
@@ -1004,10 +1020,6 @@
                         var fadetime = option[1]/*controlsfadespeed*/;
                         if (!clicked && !option[9]/*auto*/) fadetime = (option[17]/*speedhistory*/ / option[7]/*speed*/) * option[1]/*controlsfadespeed*/;
                         fadeControls (t,fadetime);
-                    }
-
-                    if (init && !option[24]/*ajax*/[getRealPos(t)]) {
-                        startAsyncDelayedLoad();
                     }
 
                     init = FALSE;
