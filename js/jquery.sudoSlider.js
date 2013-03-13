@@ -242,7 +242,19 @@
 				        option[43]/*customFx*/ = slide;
 				    }
 				}
-				option[43]/*customFx*/ = $.fn.sudoSlider.effects[option[43]/*customFx*/];
+				var sudoSliderEffects = $.fn.sudoSlider.effects;
+				if ($.isArray(option[43]/*customFx*/)) {
+				    var array = option[43]/*customFx*/;
+                    option[43]/*customFx*/ = function (obj) {
+                        var effect = pickRandomValue(array);
+                        if (!isFunc(effect)) {
+                            effect = sudoSliderEffects[effect];
+                        }
+                        return effect(obj);
+                    }
+				} else {
+				    option[43]/*customFx*/ = sudoSliderEffects[option[43]/*customFx*/];
+				}
 
 				if (option[11]/*continuous*/) continuousClones = [];
 
@@ -1200,16 +1212,16 @@
 
 	var randomEffects = {
 	    random: function (obj) {
-	        var effect = pickRandomValue(allEffects);
-            return effect(obj);
+	        var effectFunction = pickRandomValue(allEffects);
+            return effectFunction(obj);
 	    },
 	    randomImage: function (obj) {
-	        var effect = pickRandomValue(imageEffects);
-            return effect(obj);
+	        var effectFunction = pickRandomValue(imageEffects);
+            return effectFunction(obj);
 	    },
 	    randomRich: function (obj) {
-	        var effect = pickRandomValue(richEffects);
-            return effect(obj);
+	        var effectFunction = pickRandomValue(richEffects);
+            return effectFunction(obj);
 	    }
 	}
     // Saving it
@@ -1279,8 +1291,8 @@
                         slices.remove();
                     }
                 });
-            }, (100 + timeBuff));
-            timeBuff += 50;
+            }, timeBuff);
+            timeBuff += (speed / numberOfSlices);
             v++;
         });
     }
@@ -1311,6 +1323,7 @@
         var boxCols = obj.options.boxcols;
         var target = $(obj.toSlides.get(0));
         var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
+        var totalBoxes = boxes.length;
         if (random) {
             boxes = shuffle(boxes);
         }
@@ -1340,8 +1353,8 @@
                         boxes.remove();
                     }
                 });
-            }, (100 + timeBuff));
-            timeBuff += 20;
+            }, timeBuff);
+            timeBuff += (speed / totalBoxes);
             i++;
         });
     }
@@ -1429,13 +1442,13 @@
                                     obj.callback();
                                 }
                             });
-                        }, (100 + time));
+                        }, time);
                     })(rows, prevCol, timeBuff, i, totalBoxes);
                     i++;
                 }
                 prevCol--;
             }
-            timeBuff += 100;
+            timeBuff += (speed / boxCols);
         }
     }
 
@@ -1460,7 +1473,7 @@
         if (reverse) slicesElement = slicesElement._reverse();
         if (randomize) slicesElement = shuffle(slicesElement);
         slicesElement.each(function (i) {
-            var timeBuff = 100 + (50 * i);
+            var timeBuff = 100 + ((speed / slides) * i);
             var slice = $(this);
             var origWidth = slice.width();
             slice.css({
@@ -1480,7 +1493,7 @@
                         obj.callback();
                     }
                 });
-            }, (100 + timeBuff));
+            }, timeBuff);
         });
     }
 
@@ -1714,12 +1727,8 @@
     }
 
     function pickRandomValue(obj) {
-        var result;
-        var count = 0;
-        for (var prop in obj)
-            if (Math.random() < 1/++count)
-               result = prop;
-        return obj[result];
+        var keys = Object.keys(obj)
+        return obj[keys[Math.floor(keys.length * Math.random())]];
     }
 
 })(jQuery);

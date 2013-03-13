@@ -6,11 +6,10 @@
     <link rel="STYLESHEET" type="text/css" href="../css/style.css">
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
-    <script type="text/javascript" src="../js/workingScript.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
             var sudoSlider = $("#slider").sudoSlider({
-                customFx: "randomImage",
+                customFx: ["boxRainGrow", "boxRainGrowReverse"],
                 continuous: true,
                 slideCount: 1
             });
