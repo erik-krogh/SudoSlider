@@ -148,7 +148,6 @@
 			timeout,
 			oldSpeed,
 			dontCountinue,
-			dontCountinueFade,
 			autoOn,
 			continuousClones = FALSE,
 			numberOfVisibleSlides,
@@ -894,22 +893,22 @@
 
                     if (ajaxcallback) {
                         speed = oldSpeed;
-                        if (dontCountinueFade) dontCountinueFade--; // Short for if(dontContinueFade == 0).
+                        if (dontCountinue) dontCountinue--; // Short for if(dontCountinue == 0).
                     } else if (option[24]/*ajax*/) {
                         // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation may include cloning of the target elements.
-                        dontCountinueFade = 0;
+                        dontCountinue = 0;
                         for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
                             if (option[24]/*ajax*/[a]) {
                                 ajaxLoad(getRealPos(a), FALSE, speed, function(){
                                     fadeto(i, clicked, TRUE);
                                 });
-                                dontCountinueFade++;
+                                dontCountinue++;
                             }
                         }
                     } else {
-                        dontCountinueFade = FALSE;
+                        dontCountinue = FALSE;
                     }
-                    if (!dontCountinueFade) {
+                    if (!dontCountinue) {
                         clickable = FALSE;
                         var fromSlides = $();
                         var toSlides = $();
