@@ -1226,6 +1226,7 @@
 	var randomEffects = {
 	    random: function (obj) {
 	        var effectFunction = pickRandomValue(allEffects);
+	        console.log(effectFunction.name);
             return effectFunction(obj);
 	    },
 	    randomImage: function (obj) {
@@ -1291,7 +1292,10 @@
             } else if (dir == 2) {
                 bottom = FALSE;
             }
-            slice.css(bottom ? 'bottom' : 'top', '0px');
+            slice.css(bottom ? 'bottom' : 'top', '0px')
+                .css(bottom ? 'top' : 'bottom', "auto")
+                .height(0);
+
             count++;
             setTimeout(function () {
                 slice.animate({
@@ -1646,26 +1650,27 @@
         });
     }
 
+    // TODO: Make it support multiple target slides the efficient way.
     function createSlices(target, obj, slices) {
         var result = $();
-        var imageUrl = findImgUrl(target);
+        var width = target.width();
+        var height = target.height();
+        var sliceWidth = Math.round(width / slices);
         for (var i = 0; i < slices; i++) {
-            var sliceWidth = Math.round(target.width() / slices);
-            var width;
-            if (i == slices - 1) {
-                width = obj.width() - (sliceWidth * i)
+            var thisSliceWidth;
+            if(i == slices -1){
+                thisSliceWidth = width-(sliceWidth*i);
             } else {
-                width = sliceWidth;
+                thisSliceWidth = sliceWidth;
             }
-            var slice = $('<div class="nivo-slice"></div>').css({
-                position: "absolute",
-                'z-index': 10000,
-                left: (sliceWidth * i) + 'px',
-                width: width + 'px',
-                height: '0px',
-                opacity: 0,
-                background: 'url("' + imageUrl + '") no-repeat -' + ((sliceWidth + (i * sliceWidth)) - sliceWidth) + 'px 0%'
-            })
+            var slice = makeBox(
+                target, // target
+                0, // top
+                i * sliceWidth, // left
+                height, // height
+                thisSliceWidth // width
+            );
+
             obj.append(slice);
             result = result.add(slice);
         }
@@ -1674,9 +1679,10 @@
 
     function createBoxes(target, obj, numberOfCols, numberOfRows) {
         var result = $();
-        var boxWidth = Math.round(target.width() / numberOfCols);
-        var boxHeight = Math.round(target.height() / numberOfRows);
-        var imageUrl = findImgUrl(target);
+        var targetWidth = target.width();
+        var targetHeight = target.height();
+        var boxWidth = Math.round(targetWidth / numberOfCols);
+        var boxHeight = Math.round(targetHeight / numberOfRows);
         for (var rows = 0; rows < numberOfRows; rows++) {
             for (var cols = 0; cols < numberOfCols; cols++) {
                 var width;
@@ -1685,16 +1691,13 @@
                 } else {
                     width = boxWidth;
                 }
-                var box = $('<div></div>').css({
-                    position: "absolute",
-                    'z-index': 10000,
-                    opacity: 0,
-                    left: (boxWidth * cols) + 'px',
-                    top: (boxHeight * rows) + 'px',
-                    width: width + 'px',
-                    height: boxHeight + 'px',
-                    background: 'url("' + imageUrl + '") no-repeat -' + ((boxWidth + (cols * boxWidth)) - boxWidth) + 'px -' + ((boxHeight + (rows * boxHeight)) - boxHeight) + 'px'
-                });
+                var box = makeBox(
+                    target, // target
+                    boxHeight * rows, // top
+                    boxWidth * cols, // left
+                    boxHeight, // height
+                    width // width
+                );
                 obj.append(box);
                 result = result.add(box);
             }
@@ -1702,11 +1705,31 @@
         return result;
     }
 
-    function findImgUrl(slide) {
-        return slide.find('img').attr('src');
+    function makeBox(target, top, left, height, width) {
+        var innerBox = target.clone().css({
+            position: "absolute",
+            width: target.width() + "px",
+            height: "auto",
+            display: "block",
+            top: - top,
+            left: - left + "px"
+        });
+        var box = $('<div></div>').css({
+             left: left + 'px',
+             top: top + 'px',
+             width: width+'px',
+             height: height+'px',
+             opacity:0,
+             overflow:'hidden',
+             position: "absolute",
+             'z-index': 10000
+        });
+        box.append(innerBox);
+        return box;
     }
 
-	/*
+
+    /*
      * Util scripts.
      */
     $.fn._reverse = [].reverse;
