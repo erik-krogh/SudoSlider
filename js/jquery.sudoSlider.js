@@ -251,7 +251,7 @@
                         }
                         return effect(obj);
                     }
-				} else {
+				} else if (!isFunc(option[43]/*customFx*/)) {
 				    option[43]/*customFx*/ = sudoSliderEffects[option[43]/*customFx*/];
 				}
 
@@ -932,6 +932,8 @@
                                 toSlides = toSlides.add(getSlideElements(getRealPos(dir + a)));;
                             }
                         }
+
+
 
                         // Finding a "shortcut", used for calculating the offsets.
                         if (option[11]/*continuous*/) {
@@ -1650,7 +1652,6 @@
         });
     }
 
-    // TODO: Make it support multiple target slides the efficient way.
     function createSlices(target, obj, slices) {
         var result = $();
         var width = target.width();
