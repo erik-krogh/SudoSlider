@@ -478,8 +478,8 @@
                 }
 			};
 
-			function fadeControl (fadeOpacity,fadetime,nextcontrol) // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
-			{
+            // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
+			function fadeControl (fadeOpacity,fadetime,nextcontrol) {
 				if (nextcontrol) {
 					var eA = nextbutton,
 					eB = lastbutton,
@@ -524,6 +524,7 @@
 				// The new way of doing it.
 				fadeControl(a < s - numberOfVisibleSlides, fadetime, TRUE);
 			};
+
 			// Updating the 'current' class
 			function setCurrent(i) {
 				i = getRealPos(i) + 1;
@@ -691,6 +692,7 @@
 			        getSlidePosition(t, TRUE)
 			    )
 			};
+
 			function setUlMargins(left, top) {
 			    ul.css({
                     marginLeft : left,
@@ -846,6 +848,7 @@
 				// It is the only option that i need to change for good.
 				options.ajax[i] = FALSE;
 			};
+
 			function ajaxAdjust(i, speed, ajaxCallBack, adjust, img){
 			    var target = li.eq(i);
 			    var callbackTarget = target;
@@ -960,7 +963,7 @@
                             fromSlides : fromSlides,
                             toSlides : toSlides,
                             slider : obj,
-                            options: jQuery.extend(TRUE, {}, options), // Making a copy, to enforce read-only.
+                            options: $.extend(TRUE, {}, options), // Making a copy, to enforce read-only.
                             toSlideNumber: dir + 1,
                             fromSlideNumber: t + 1,
                             offset: {
@@ -974,6 +977,8 @@
                                 if(option[16]/*history*/ && clicked) {
                                     window.location.hash = option[15]/*numerictext*/[t];
                                 }
+                                fixClearType(toSlides);
+
                                 // afterAniFunc
                                 aniCall(dir, TRUE);
 
@@ -1183,6 +1188,7 @@
 	 * End generic slider. Start animations.
 	 */
 
+    // TODO: Merge these two, all effects are rich effects now
     // Start by defining everything, the implementations is below.
 	var richEffects = {
 	    pushUp : pushUp,
@@ -1192,7 +1198,9 @@
         slide : slide,
         fadeInOut : fadeInOut,
         crossFade : crossFade,
-        show : show
+        show : show,
+        pushInUp : pushInUp,
+        pushInRight : pushInRight
 	}
 
 	var imageEffects = {
@@ -1215,12 +1223,14 @@
         sliceDownLeft : sliceDownLeft,
         sliceUpDown : sliceUpDown,
         sliceUpDownLeft : sliceUpDownLeft,
-        barsUp : barsUp,
-        barsDown : barsDown,
+        slicesRandomUp : slicesRandomUp,
+        slicesRandomDown : slicesRandomDown,
         boxesDown : boxesDown,
         boxesDownGrow : boxesDownGrow,
         boxesUp : boxesUp,
-        boxesUpGrow : boxesUpGrow
+        boxesUpGrow : boxesUpGrow,
+        slicesFade: slicesFade,
+        slicesFadeReverse: slicesFadeReverse
 	}
 
 	var allEffects = mergeObjects(richEffects, imageEffects);
@@ -1228,15 +1238,6 @@
 	var randomEffects = {
 	    random: function (obj) {
 	        var effectFunction = pickRandomValue(allEffects);
-	        console.log(effectFunction.name);
-            return effectFunction(obj);
-	    },
-	    randomImage: function (obj) {
-	        var effectFunction = pickRandomValue(imageEffects);
-            return effectFunction(obj);
-	    },
-	    randomRich: function (obj) {
-	        var effectFunction = pickRandomValue(richEffects);
             return effectFunction(obj);
 	    }
 	}
@@ -1263,10 +1264,10 @@
         sliceUpDownTemplate(obj, 3, TRUE);
     }
 
-    function barsUp(obj) {
+    function slicesRandomUp(obj) {
         sliceUpDownTemplate(obj, 2, FALSE, TRUE);
     }
-    function barsDown(obj) {
+    function slicesRandomDown(obj) {
         sliceUpDownTemplate(obj, 1, FALSE, TRUE);
     }
 
@@ -1471,6 +1472,14 @@
         }
     }
 
+    function slicesFade(obj) {
+        foldTemplate(obj, FALSE, FALSE, TRUE);
+    }
+
+    function slicesFadeReverse(obj) {
+        foldTemplate(obj, TRUE, FALSE, TRUE);
+    }
+
     function fold(obj) {
         foldTemplate(obj, FALSE);
     }
@@ -1483,7 +1492,7 @@
         foldTemplate(obj, FALSE, TRUE);
     }
 
-    function foldTemplate(obj, reverse, randomize) {
+    function foldTemplate(obj, reverse, randomize, onlyFade) {
         var slides = obj.options.slices;
         var speed = obj.options.speed;
         var target = $(obj.toSlides.get(0));
@@ -1498,7 +1507,7 @@
             slice.css({
                 top: '0px',
                 height: '100%',
-                width: '0px'
+                width: (onlyFade ? origWidth : '0') + 'px'
             });
             count++;
             setTimeout(function () {
@@ -1568,13 +1577,47 @@
             var that = $(this);
             that.prependTo(obj.slider);
             that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : negative * height, "left" : vertical ? negative * width : push});
-            that.animate(vertical ? {left: 0} : {top: 0}, speed, function () {
+            that.animate(vertical ? {left: 0} : {top: 0}, speed, ease, function () {
                 if (index == 0) {
                     obj.callback();
                 }
                 that.remove();
             })
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
+        });
+        return clones.get(0);
+    }
+
+    function pushInUp(obj) {
+        pushInTemplate(obj, FALSE);
+    }
+
+    function pushInRight(obj) {
+        pushInTemplate(obj, TRUE);
+    }
+
+    function pushInTemplate(obj, vertical) {
+        var ease = obj.options.ease;
+        var speed = obj.options.speed;
+
+        var clones = obj.toSlides.clone();
+        clones.each(function (index) {
+            var that = $(this);
+            that.prependTo(obj.slider);
+            var orgWidth = that.width();
+            var orgHeight = that.height();
+            that.css({'z-index': '10000', 'position': 'absolute', 'list-style': 'none'});
+            if (vertical) {
+                that.css({"width": 0, top: 0});
+            } else {
+                that.css({"height": 0, left: 0});
+            }
+            that.animate({width: orgWidth, height: orgHeight}, speed, ease, function () {
+                if (index == 0) {
+                    obj.callback();
+                }
+                that.remove();
+            });
         });
         return clones.get(0);
     }
@@ -1715,7 +1758,7 @@
             top: - top,
             left: - left + "px"
         });
-        var box = $('<div></div>').css({
+        var box = $('<div>').css({
              left: left + 'px',
              top: top + 'px',
              width: width+'px',
