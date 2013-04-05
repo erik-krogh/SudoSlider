@@ -15,6 +15,18 @@
     var undefined; // Makes sure that undefined really is undefined within this scope.
     var FALSE = !1;
     var TRUE = !0;
+
+    // Constants
+    var PAGES_MARKER_STRING = "pages";
+    var NEXT_STRING = "next";
+    var PREV_STRING = "prev";
+    var LAST_STRING = "last";
+    var FIRST_STRING = "first";
+    var HIDDEN_SELECTOR_STRING = ":hidden";
+    var SELECTED_SELECTOR_STRING = ":visible";
+    var ABSOLUTE_STRING = "absolute";
+    var Z_INDEX_VALUE = 10000;
+
 	$.fn.sudoSlider = function(optionsOrg) {
 		// Saves space in the minified version.
 		// default configuration properties
@@ -111,18 +123,9 @@
 			for (var key in obj)
 				ret[key.toLowerCase()] = obj[key];
 			return ret;
-		};
+		}
 
 		optionsOrg = $.extend(defaults, objectToLowercase(optionsOrg));
-
-		// Constants
-		var PAGES_MARKER_STRING = "pages";
-		var NEXT_STRING = "next";
-		var PREV_STRING = "prev";
-		var LAST_STRING = "last";
-		var FIRST_STRING = "first";
-		var HIDDEN_SELECTOR_STRING = ":hidden";
-		var SELECTED_SELECTOR_STRING = ":visible";
 
 		return this.each(function() {
 		    var init,
@@ -167,10 +170,10 @@
 			initSudoSlider(obj, FALSE);
 			function initSudoSlider(obj, destroyT) {
 				// Storing the public options in an array.
-				var i = 0;
-				for (a in options) {
-					option[i] = options[a];
-					i++;
+				var optionIndex = 0;
+				for (key in options) {
+					option[optionIndex] = options[key];
+                    optionIndex++;
 				}
 
 				destroyed = FALSE;
@@ -216,7 +219,7 @@
 				// Float items to the left, and make sure that all elements are shown.
 				li.css({'float': "left", 'display': 'block'});
 
-				option[39]/*slidecount*/ = parseInt10(option[39]/*slidecount*/)
+				option[39]/*slidecount*/ = parseInt10(option[39]/*slidecount*/);
 
 				// Lets just redefine slidecount
 				numberOfVisibleSlides = option[39]/*slidecount*/;
@@ -315,7 +318,7 @@
 								goToSlide(getRelAttribute(this) - 1, TRUE);
 								return FALSE;
 							});
-						};
+						}
 					}
 					if(option[4]/*firstshow*/) firstbutton = makecontrol(option[35]/*firsthtml*/, FIRST_STRING);
 					if(option[5]/*lastshow*/) lastbutton = makecontrol(option[37]/*lasthtml*/, LAST_STRING);
@@ -323,7 +326,7 @@
 						nextbutton = makecontrol(option[33]/*nexthtml*/, NEXT_STRING);
 						prevbutton = makecontrol(option[32]/*prevhtml*/, PREV_STRING);
 					}
-				};
+				}
 
 
 				// Lets make those fast/normal/fast into some numbers we can make calculations with.
@@ -456,7 +459,7 @@
 					speed == 'slow' ?
 						600 :
 					400;
-			};
+			}
 
 			function makecontrol(html, action) {
 			    return $(html).prependTo(controls).click(function () {
@@ -476,7 +479,7 @@
                         customAni(i, clicked, FALSE);
                     }
                 }
-			};
+			}
 
             // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
 			function fadeControl (fadeOpacity,fadetime,nextcontrol) {
@@ -515,7 +518,7 @@
 				        $(option[19]/*customlink*/).filter(filterFunction).filter(SELECTED_SELECTOR_STRING).fadeOut(fadetime);
 				    }
 				}
-			};
+			}
 
 			// Fade the controls, if we are at the end of the slide.
 			// It's all the different kind of controls.
@@ -523,14 +526,14 @@
 				fadeControl (a,fadetime,FALSE); // abusing that the number 0 == FALSE.
 				// The new way of doing it.
 				fadeControl(a < s - numberOfVisibleSlides, fadetime, TRUE);
-			};
+			}
 
 			// Updating the 'current' class
 			function setCurrent(i) {
 				i = getRealPos(i) + 1;
 				if (option[13]/*numeric*/) for (a in numericControls) setCurrentElement(numericControls[a], i);
 				if(option[19]/*customlink*/) setCurrentElement($(option[19]/*customlink*/), i);
-			};
+			}
 
 			function setCurrentElement(element,i) {
 				if (element.filter)
@@ -564,7 +567,7 @@
                             });
 						});
 					}
-			};
+			}
 
 			function filterUrlHash(a) {
 				for (i in option[15]/*numerictext*/) {
@@ -573,7 +576,7 @@
 				    }
 				}
 				return a ? t : 0;
-			};
+			}
 
 			function runOnImagesLoaded (target, allSlides, callback) {
 				var elems = target.add(target.find("img")).filter("img");
@@ -655,7 +658,7 @@
 						adjustHeightWidth (i, axis);
 					});
 				});
-			};
+			}
 
 			function adjustHeightWidth (i, axis) {
 			    if (i != adjustingTo) {
@@ -691,7 +694,7 @@
 			        getSlidePosition(t, FALSE),
 			        getSlidePosition(t, TRUE)
 			    )
-			};
+			}
 
 			function setUlMargins(left, top) {
 			    ul.css({
@@ -702,9 +705,8 @@
 
 			function getSlidePosition(slide, vertical) {
 			    var slide = liConti.eq(slide + (continuousClones ? option[39]/*slidecount*/ : 0));
-			    var result = slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
-				return result;
-			};
+			    return slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
+			}
 
 			function adjust() {
 			    autoadjust(t, 0);
@@ -727,7 +729,7 @@
 				if (beforeanifuncFired) {
 				    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
 				}
-			};
+			}
 
 			// This function is called when i need a callback on the current element and it's continuous clones (if they are there).
 			// after:  TRUE == afteranifunc : FALSE == beforeanifunc;
@@ -774,7 +776,8 @@
 				} else {
 					return limitDir(parseInt10(dir), dir);
 				}
-			};
+			}
+
 			// If continuous is off, we sometimes do not want to move to far.
 			// This method was added in 2.1.8, se the changelog as to why.
 			function limitDir(i, dir) {
@@ -810,7 +813,6 @@
 				// parsing the init variable.
 				var speed = (speed === TRUE) ? 0 : speed;
 
-				var tt = i + 1;
 				var textloaded = FALSE;
 
 				$.ajax({
@@ -823,14 +825,14 @@
                                 targetslide.html(data);
                                 ajaxAdjust(i, speed, ajaxCallBack, adjust, FALSE);
                             }
-					    }
+					    };
 					    if (currentlyAnimating) {
 					        awaitingAjaxLoads.push(completeFunction);
 					    } else {
 					        completeFunction();
 					    }
 					},
-					complete: function(jqXHR){
+					complete: function(){
 						// Some browsers wont load images this way, so i treat an error as an image.
 						// There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
 						if (!textloaded) {
@@ -847,7 +849,7 @@
 				option[24]/*ajax*/[i] = FALSE;
 				// It is the only option that i need to change for good.
 				options.ajax[i] = FALSE;
-			};
+			}
 
 			function ajaxAdjust(i, speed, ajaxCallBack, adjust, img){
 			    var target = li.eq(i);
@@ -892,7 +894,7 @@
 					}
 				}
 
-			};
+			}
 
 			function customAni(i, clicked, ajaxcallback) {
                 if (filterDir(i) != t && !destroyed && clickable) {
@@ -932,7 +934,7 @@
                                 toSlides = toSlides.add(liConti.eq((dir + a) + (continuousClones ? option[39]/*slidecount*/ : 0)));
                             } else {
                                 fromSlides = fromSlides.add(getSlideElements(getRealPos(t + a)));
-                                toSlides = toSlides.add(getSlideElements(getRealPos(dir + a)));;
+                                toSlides = toSlides.add(getSlideElements(getRealPos(dir + a)));
                             }
                         }
 
@@ -940,16 +942,15 @@
 
                         // Finding a "shortcut", used for calculating the offsets.
                         if (option[11]/*continuous*/) {
-                            var realTarget = dir;
-                            i = realTarget;
+                            i = dir;
                             // Finding the shortest path from where we are to where we are going.
-                            var diff = MathAbs(t-realTarget);
-                            if (realTarget < option[39]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(t - realTarget - s)/* t - (realTarget + s) */ < diff) {
-                                i = realTarget + s;
-                                diff = MathAbs(t - realTarget - s); // Setting the new "standard", for how long the animation can be.
+                            var diff = MathAbs(t-dir);
+                            if (dir < option[39]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(t - dir - s)/* t - (realTarget + s) */ < diff) {
+                                i = dir + s;
+                                diff = MathAbs(t - dir - s); // Setting the new "standard", for how long the animation can be.
                             }
-                            if (realTarget > ts - option[39]/*slidecount*/ && MathAbs(t - realTarget + s)/* t - (realTarget - s) */  < diff) {
-                                i = realTarget - s;
+                            if (dir > ts - option[39]/*slidecount*/ && MathAbs(t - dir + s)/* t - (realTarget - s) */  < diff) {
+                                i = dir - s;
                             }
                         } else {
                             i = filterDir(i);
@@ -986,7 +987,7 @@
                                     awaitingAjaxLoads.pop()();
                                 }
                             }
-                        }
+                        };
                         currentlyAnimating = TRUE;
 
                         var extraClone = option[43]/*customFx*/.call(baseSlider, callObject);
@@ -1005,7 +1006,7 @@
                         }
                     }
                 }
-            };
+            }
 
 			function animate(dir, clicked) {
 				if ((clickable && !destroyed && (dir != t || init))) {
@@ -1033,8 +1034,8 @@
 
                     init = FALSE;
 
-                };
-			};
+                }
+	    	}
 
 			function getRealPos(a) {
 				// Fixes an infinite loop if there are 0 slides in the slider.
@@ -1159,7 +1160,7 @@
 			});
 
 			addMethod("adjust", function(){
-				autoadjust(t, 0)
+				autoadjust(t, 0);
 				adjustPosition();
 			});
 
@@ -1188,9 +1189,8 @@
 	 * End generic slider. Start animations.
 	 */
 
-    // TODO: Merge these two, all effects are rich effects now
     // Start by defining everything, the implementations is below.
-	var richEffects = {
+	var allEffects = {
 	    pushUp : pushUp,
         pushRight : pushRight,
         pushDown : pushDown,
@@ -1200,10 +1200,7 @@
         crossFade : crossFade,
         show : show,
         pushInUp : pushInUp,
-        pushInRight : pushInRight
-	}
-
-	var imageEffects = {
+        pushInRight : pushInRight,
 	    fold : fold,
         foldReverse : foldReverse,
         foldRandom : foldRandom,
@@ -1231,16 +1228,14 @@
         boxesUpGrow : boxesUpGrow,
         slicesFade: slicesFade,
         slicesFadeReverse: slicesFadeReverse
-	}
-
-	var allEffects = mergeObjects(richEffects, imageEffects);
+	};
 
 	var randomEffects = {
 	    random: function (obj) {
 	        var effectFunction = pickRandomValue(allEffects);
             return effectFunction(obj);
 	    }
-	}
+	};
     // Saving it
 	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
@@ -1411,13 +1406,12 @@
         var boxCols = obj.options.boxcols;
         var target = $(obj.toSlides.get(0));
         var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
-        var totalBoxes = boxes.length;
         var i = 0;
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
-        var box2Darr = new Array();
-        box2Darr[rowIndex] = new Array();
+        var box2Darr = [];
+        box2Darr[rowIndex] = [];
         if (reverse) {
             boxes = boxes._reverse();
         }
@@ -1430,7 +1424,7 @@
                 }
                 rowIndex++;
                 colIndex = 0;
-                box2Darr[rowIndex] = new Array();
+                box2Darr[rowIndex] = [];
             }
         });
         var count = 0;
@@ -1438,7 +1432,7 @@
             var prevCol = cols;
             for (var rows = 0; rows < boxRows; rows++) {
                 if (prevCol >= 0 && prevCol < boxCols) {
-                    (function (row, col, time, i, totalBoxes) {
+                    (function (row, col, time) {
                         var rawBox = box2Darr[row][col];
                         if (!rawBox) {
                             return;
@@ -1463,7 +1457,7 @@
                                 }
                             });
                         }, time);
-                    })(rows, prevCol, timeBuff, i, totalBoxes);
+                    })(rows, prevCol, timeBuff);
                     i++;
                 }
                 prevCol--;
@@ -1507,7 +1501,7 @@
             slice.css({
                 top: '0px',
                 height: '100%',
-                width: (onlyFade ? origWidth : '0') + 'px'
+                width: (onlyFade ? origWidth : 0) + 'px'
             });
             count++;
             setTimeout(function () {
@@ -1527,7 +1521,6 @@
 
     function show(obj) {
         var vertical = obj.options.vertical;
-        var ease = obj.options.ease;
         var speed = obj.options.speed;
 
         var push = 0;
@@ -1536,14 +1529,14 @@
             var that = $(this);
             that.prependTo(obj.slider);
             var extraPush = that['outer' + (vertical ? "Height" : "Width")](TRUE);
-            that.css({'z-index' : 10000, 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : 0, "left" : vertical ? 0 : push});
+            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, listStyle : 'none', top : vertical ? push : 0, left : vertical ? 0 : push});
             that.hide(0);
             that.show(speed, function () {
                 if (index == 0) {
                     obj.callback();
                 }
                 that.remove();
-            })
+            });
             push += extraPush;
         });
         return clones.get(0);
@@ -1576,13 +1569,13 @@
         clones.each(function (index) {
             var that = $(this);
             that.prependTo(obj.slider);
-            that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : negative * height, "left" : vertical ? negative * width : push});
+            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, listStyle : 'none', top : vertical ? push : negative * height, left : vertical ? negative * width : push});
             that.animate(vertical ? {left: 0} : {top: 0}, speed, ease, function () {
                 if (index == 0) {
                     obj.callback();
                 }
                 that.remove();
-            })
+            });
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
         });
         return clones.get(0);
@@ -1606,11 +1599,11 @@
             that.prependTo(obj.slider);
             var orgWidth = that.width();
             var orgHeight = that.height();
-            that.css({'z-index': '10000', 'position': 'absolute', 'list-style': 'none'});
+            that.css({zIndex: Z_INDEX_VALUE, position: ABSOLUTE_STRING, listStyle: 'none'});
             if (vertical) {
-                that.css({"width": 0, top: 0});
+                that.css({width: 0, top: 0});
             } else {
-                that.css({"height": 0, left: 0});
+                that.css({height: 0, left: 0});
             }
             that.animate({width: orgWidth, height: orgHeight}, speed, ease, function () {
                 if (index == 0) {
@@ -1647,7 +1640,6 @@
     function fadeInOut(obj) {
         var fadeSpeed = obj.options.speed;
         var ease = obj.options.ease;
-        var push = 0;
 
         var fadeinspeed = parseInt(fadeSpeed*(3/5), 10);
         var fadeoutspeed = fadeSpeed - fadeinspeed;
@@ -1683,7 +1675,7 @@
         clones.animate({opacity: 1}, 0).each(function (index) {
             var that = $(this);
             that.prependTo(obj.slider);
-            that.css({'z-index' : '10000', 'position' : 'absolute', 'list-style' : 'none', "top" : vertical ? push : 0, "left" : vertical ? 0 : push}).
+            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, listStyle : 'none', top : vertical ? push : 0, left : vertical ? 0 : push}).
             hide().fadeIn(speed, ease, function() {
                 that.remove();
                 if (index == 0) {
@@ -1751,7 +1743,7 @@
 
     function makeBox(target, top, left, height, width) {
         var innerBox = target.clone().css({
-            position: "absolute",
+            position: ABSOLUTE_STRING,
             width: target.width() + "px",
             height: "auto",
             display: "block",
@@ -1764,9 +1756,9 @@
              width: width+'px',
              height: height+'px',
              opacity:0,
-             overflow:'hidden',
-             position: "absolute",
-             'z-index': 10000
+             overflow: "hidden",
+             position: ABSOLUTE_STRING,
+             zIndex: Z_INDEX_VALUE
         });
         box.append(innerBox);
         return box;
