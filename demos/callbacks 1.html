@@ -10,16 +10,22 @@
 		$(document).ready(function(){	
 			var sudoSlider = $("#slider").sudoSlider({ 
 				numeric: true,
-				beforeAniFunc: function(t){ 
-					$('div.descrip-text #anistate').text('Animating to slide ' + t).show(600);
-					
+				beforeAniFunc: function(slide){
+					$('div.descrip-text #anistate').text('Animating to slide ' + slide).show(600);
 				},
-				afterAniFunc: function(t){ 
+				afterAniFunc: function(slide){
 					$('div.descrip-text #anistate').hide(400);
-					$('div.descrip-text #slidenumber').text(t);
+					$('div.descrip-text #slidenumber').text(slide);
 					var text = $(this).children().attr('src');
 					$('div.descrip-text #slidehtml').text(text);
-				}
+				},
+                initCallback: function() {
+                    var slide = this.getValue("currentSlide");
+                    $('div.descrip-text #slidenumber').text(slide);
+
+                    var text = this.getSlide(slide).children().attr('src');
+                    $('div.descrip-text #slidehtml').text(text);
+                }
 			});
 		});
 	</script>
@@ -42,7 +48,7 @@
 					<li><img src="../images/05.jpg" alt="image description"></li>		
 				</ul>			
 			</div>
-			<div class="descrip-text"><p id="anistate" style="display: none; ">Animating to slide 1</p>Slide:<span id="slidenumber">1</span> of 5 <br> The src of the image: <span id="slidehtml">images/01.jpg</span></div>
+			<div class="descrip-text"><p id="anistate" style="display: none; "></p>Slide:<span id="slidenumber"></span> of 5 <br> The src of the image: <span id="slidehtml"></span></div>
 		</div>
 	<h3>Usage</h3>
 	<h4>Include the javascripts</h4>
@@ -52,21 +58,27 @@
 	<h4>The Javascript to start it.</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
-    $(document).ready(function(){	
-        var sudoSlider = $("#slider").sudoSlider({
-           prevNext: false,
-           numeric: true,
-           beforeAniFunc: function(t){ 
-              $('div.descrip-text #anistate').text('Animating to slide ' + t).show(600);
-           },
-           afterAniFunc: function(t){ 
-              $('div.descrip-text #anistate').hide(400);
-              $('div.descrip-text #slidenumber').text(t);
-              var text = $(this).children().attr('src');
-              $('div.descrip-text #slidehtml').text(text);
-           }
-        });
-    });
+   $(document).ready(function(){
+      var sudoSlider = $("#slider").sudoSlider({
+         numeric: true,
+         beforeAniFunc: function(slide){
+            $('div.descrip-text #anistate').text('Animating to slide ' + slide).show(600);
+         },
+         afterAniFunc: function(slide){
+            $('div.descrip-text #anistate').hide(400);
+            $('div.descrip-text #slidenumber').text(slide);
+            var text = $(this).children().attr('src');
+            $('div.descrip-text #slidehtml').text(text);
+         },
+         initCallback: function() {
+            var slide = this.getValue("currentSlide");
+            $('div.descrip-text #slidenumber').text(slide);
+
+            var text = this.getSlide(slide).children().attr('src');
+            $('div.descrip-text #slidehtml').text(text);
+         }
+      });
+   });
 &lt;/script&gt;</pre>
 	<h4>The CSS</h4>
 	<pre>
@@ -98,9 +110,9 @@
         &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;	
     &lt;/ul&gt;
 &lt;/div&gt;
-&lt;div class="descrip-text"&gt;&lt;p id="anistate" style="display: none; "&gt;Animating to slide 1&lt;/p&gt;
-Slide:&lt;span id="slidenumber"&gt;1&lt;/span&gt; of 5 &lt;br&gt; The src of the image: 
-&lt;span id="slidehtml"&gt;images/01.jpg&lt;/span&gt;&lt;/div&gt;
+&lt;div class="descrip-text"&gt;&lt;p id="anistate" style="display: none; "&gt;&lt;/p&gt;
+Slide:&lt;span id="slidenumber"&gt;&lt;/span&gt; of 5 &lt;br&gt; The src of the image:
+&lt;span id="slidehtml"&gt;&lt;/span&gt;&lt;/div&gt;
 </pre>
 </div>
 

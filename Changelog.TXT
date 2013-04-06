@@ -277,4 +277,6 @@ Change in script: Using outerHeight and outerWidth to calculate where slides sho
 
 3.0.0
 Change in script: Added the customFx option. Read about it in the docs.
+Change in script: Added lots of effects that can be used with customFx, also added an "explorer effects" demo to showcase them.
+Change in script: beforeAniFunc and afterAniFunc no longer runs on initialization. Instead there's an initCallback, that runs when the slider is ready and the shown slide is loaded.
 Change in script: Changed the default loadingText to an empty string.
