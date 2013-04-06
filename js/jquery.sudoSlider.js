@@ -1,8 +1,6 @@
 /*
  *  Sudo Slider verion 3.0.0 - jQuery plugin
- *  Written by Erik Kristensen info@webbies.dk.
- *  Based on Easy Slider 1.7 by Alen Grakalic http://cssglobe.com/post/5780/easy-slider-17-numeric-navigation-jquery-slider
- *  The two scripts doesn't share much code anymore (if any). But Sudo Slider is still based on it.
+ *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
  *	 and GPL licenses.
@@ -149,7 +147,7 @@
 			lastbutton,
 			nextbutton,
 			prevbutton,
-			timeout,
+			autoTimeout,
 			oldSpeed,
 			dontCountinue,
 			autoOn,
@@ -169,7 +167,7 @@
 			options = optionsOrg,
 			option = [];
             // The call to the init function is after the definition of all the functions.
-			function initSudoSlider(destroyT) {
+            function initSudoSlider(destroyT) {
 				// Storing the public options in an array.
 				var optionIndex = 0;
 				for (key in options) {
@@ -244,19 +242,8 @@
 				        option[7]/*speed*/ = option[22]/*fadespeed*/;
 				    }
 				}
-				var sudoSliderEffects = $.fn.sudoSlider.effects;
-				if ($.isArray(option[43]/*customFx*/)) {
-				    var array = option[43]/*customFx*/;
-                    option[43]/*customFx*/ = function (obj) {
-                        var effect = pickRandomValue(array);
-                        if (!isFunc(effect)) {
-                            effect = sudoSliderEffects[effect];
-                        }
-                        return effect(obj);
-                    }
-				} else if (!isFunc(option[43]/*customFx*/)) {
-				    option[43]/*customFx*/ = sudoSliderEffects[option[43]/*customFx*/];
-				}
+
+                option[43]/*customFx*/ = getEffectMethod(option[43]/*customFx*/);
 
 				if (option[11]/*continuous*/) continuousClones = [];
 
@@ -344,7 +331,7 @@
 								stopAuto();
 							}
 							else if (target == "start") {
-								timeout = startAuto(option[10]/*pause*/);
+								autoTimeout = startAuto(option[10]/*pause*/);
 								option[9]/*auto*/ = TRUE;
 							}
 							else if (target == 'block') clickable = FALSE;
@@ -357,7 +344,7 @@
 
 				runOnImagesLoaded(liConti.slice(0,option[39]/*slidecount*/), TRUE, function () {
 					if (option[9]/*auto*/) {
-					    timeout = startAuto(option[10]/*pause*/);
+					    autoTimeout = startAuto(option[10]/*pause*/);
 					}
 
 					if (destroyT) {
@@ -393,6 +380,31 @@
 			/*
 			 * The functions do the magic.
 			 */
+
+            function arrayToRandomEffect(array) {
+                return function (obj) {
+                    var effect = pickRandomValue(array);
+                    return getEffectMethod(effect)(obj);
+                }
+            }
+
+            function getEffectMethod(inputEffect) {
+                var sudoSliderEffects = $.fn.sudoSlider.effects;
+                if ($.isArray(inputEffect)) {
+                    var array = inputEffect;
+                    return arrayToRandomEffect(array);
+                } else if (isFunc(inputEffect)) {
+                    return inputEffect
+                } else {
+                    if (inputEffect.indexOf(",") != -1) {
+                        var array = inputEffect.split(",");
+                        return arrayToRandomEffect(array);
+                    } else {
+                        return sudoSliderEffects[inputEffect];
+                    }
+                }
+            }
+
 			// Adjusts the slider when a change in layout has happened.
 			function adjustResponsiveLayout() {
 				liConti.width(getResponsiveWidth());
@@ -444,7 +456,7 @@
 			}
 
 			function stopAuto(autoPossibleStillOn) {
-				clearTimeout(timeout);
+				clearTimeout(autoTimeout);
 				if (!autoPossibleStillOn) autoOn = FALSE;
 			}
 
@@ -719,9 +731,9 @@
 				    // Stopping auto if clicked. And also continuing after X seconds of inactivity.
 				    if (clicked) {
 				        stopAuto();
-				        if (option[40]/*resumepause*/) timeout = startAuto(option[40]/*resumepause*/);
+				        if (option[40]/*resumepause*/) autoTimeout = startAuto(option[40]/*resumepause*/);
 				    } else {
-				        timeout = startAuto(option[10]/*pause*/);
+				        autoTimeout = startAuto(option[10]/*pause*/);
 				    }
 				}
 
@@ -943,17 +955,19 @@
 
 
                         // Finding a "shortcut", used for calculating the offsets.
-                        var diff = MathAbs(t-dir);
+                        var diff = -(t-dir);
                         if (option[11]/*continuous*/) {
+                            var diffAbs = MathAbs(diff);
                             i = dir;
                             // Finding the shortest path from where we are to where we are going.
-                            var newDiff = MathAbs(t - dir - s)/* t - (realTarget + s) */;
-                            if (dir < option[39]/*slidecount*/-numberOfVisibleSlides+1 && newDiff < diff) {
+                            var newDiff = -(t - dir - s) /* t - (realTarget + s) */;
+                            if (dir < option[39]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(newDiff) < diffAbs) {
                                 i = dir + s;
-                                diff = newDiff; // Setting the new "standard", for how long the animation can be.
+                                diff = newDiff;
+                                diffAbs = MathAbs(diff);
                             }
-                            newDiff = MathAbs(t - dir + s)/* t - (realTarget - s) */;
-                            if (dir > ts - option[39]/*slidecount*/ && newDiff  < diff) {
+                            newDiff = -(t - dir + s)/* t - (realTarget - s) */;
+                            if (dir > ts - option[39]/*slidecount*/ && MathAbs(newDiff)  < diffAbs) {
                                 i = dir - s;
                                 diff = newDiff;
                             }
@@ -996,7 +1010,12 @@
                         };
                         currentlyAnimating = TRUE;
 
-                        var extraClone = option[43]/*customFx*/.call(baseSlider, callObject);
+                        var effect = option[43]/*customFx*/;
+                        var slideSpecificEffect = li.eq(dir).attr("data-transition");
+                        if (slideSpecificEffect) {
+                            effect = getEffectMethod(slideSpecificEffect);
+                        }
+                        var extraClone = effect.call(baseSlider, callObject);
 
                         if (extraClone) {
                             callBackList[dir].push(extraClone);
@@ -1151,7 +1170,7 @@
 
 			addMethod("startAuto", function(){
 				option[9]/*auto*/ = TRUE;
-				timeout = startAuto(option[10]/*pause*/);
+				autoTimeout = startAuto(option[10]/*pause*/);
 			});
 
 			addMethod("stopAuto", function(){
@@ -1622,7 +1641,7 @@
         var ul = obj.slider.children("ul");
         var ease = obj.options.ease;
         var speed = obj.options.speed;
-        speed *= Math.sqrt(obj.diff);
+        speed *= Math.sqrt(MathAbs(obj.diff));
 
         var left = parseInt(ul.css("marginLeft"), 10) - obj.offset.left;
         var top = parseInt(ul.css("marginTop"), 10) - obj.offset.top;

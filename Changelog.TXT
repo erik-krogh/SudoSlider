@@ -279,4 +279,5 @@ Change in script: Using outerHeight and outerWidth to calculate where slides sho
 Change in script: Added the customFx option. Read about it in the docs.
 Change in script: Added lots of effects that can be used with customFx, also added an "explorer effects" demo to showcase them.
 Change in script: beforeAniFunc and afterAniFunc no longer runs on initialization. Instead there's an initCallback, that runs when the slider is ready and the shown slide is loaded.
+Change in script: If you set the attribute "data-transition" on a slides <li>, it will now force that animation to run when animating to that slide.
 Change in script: Changed the default loadingText to an empty string.
