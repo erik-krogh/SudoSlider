@@ -12,8 +12,8 @@
 (function($) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
-    var FALSE = !1;
-    var TRUE = !0;
+    var FALSE = false;
+    var TRUE = true;
 
     // Constants
     var PAGES_MARKER_STRING = "pages";
@@ -50,9 +50,9 @@
 			prevnext:          TRUE, /*  option[17]/*prevnext*/
 			numeric:           FALSE, /* option[18]/*numeric*/
 			numerictext:       [], /*    option[19]/*numerictext*/
-            slices:            15,  /* option[20]/*slices*/
-            boxcols:           8,  /*  option[21]/*boxCols*/
-            boxrows:           4,  /*  option[22]/*boxRows*/
+            slices:            15,  /*   option[20]/*slices*/
+            boxcols:           8,  /*    option[21]/*boxCols*/
+            boxrows:           4,  /*    option[22]/*boxRows*/
             initcallback:      EMPTY_FUNCTION, /* option[23]/*initCallback*/
             ajaxload:          EMPTY_FUNCTION, /* option[24]/*ajaxload*/
             beforeanimation:   EMPTY_FUNCTION, /* option[25]/*beforeanimation*/
@@ -152,6 +152,8 @@
             adjustTargetTime = 0, // This one holds the time that the autoadjust animation should complete.
             currentlyAnimating = FALSE,
             awaitingAjaxLoads = [],
+            animateToAfterCompletion = FALSE,
+            animateToAfterCompletionClicked,
 
 			// Making a "private" copy that i put the "public" options in. The private options can then be changed if i wan't to.
 			options = optionsOrg,
@@ -468,6 +470,9 @@
                     if (!destroyed) {
                         customAni(i, clicked, FALSE);
                     }
+                } else {
+                    animateToAfterCompletion = i;
+                    animateToAfterCompletionClicked = clicked;
                 }
 			}
 
@@ -704,6 +709,12 @@
 				if (beforeanimationFired) {
 				    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
 				}
+
+                if (animateToAfterCompletion != FALSE) {
+                    var animateTo = animateToAfterCompletion;
+                    animateToAfterCompletion = FALSE;
+                    animateToSlide(animateTo, animateToAfterCompletionClicked);
+                }
 			}
 
 			// This function is called when i need a callback on the current element and it's continuous clones (if they are there).
