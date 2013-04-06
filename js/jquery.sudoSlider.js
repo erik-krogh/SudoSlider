@@ -30,7 +30,7 @@
     $.fn.sudoSlider = function(optionsOrg) {
         // default configuration properties
         var defaults = {
-            customfx:          FALSE,  /*option[0]/*customFx*/
+            effect:            FALSE,  /*option[0]/*effect*/
             speed:             800, /*   option[1]/*speed*/
             customlink:        FALSE, /* option[2]/*customlink*/
 			controlsshow:      TRUE, /*  option[3]/*controlsShow*/
@@ -54,22 +54,20 @@
             boxcols:           8,  /*  option[21]/*boxCols*/
             boxrows:           4,  /*  option[22]/*boxRows*/
             initcallback:      EMPTY_FUNCTION, /* option[23]/*initCallback*/
-            ajaxloadfunction:  EMPTY_FUNCTION, /* option[24]/*ajaxloadfunction*/
-            beforeanifunc:     EMPTY_FUNCTION, /* option[25]/*beforeanifunc*/
-            afteranifunc:      EMPTY_FUNCTION, /* option[26]/*afteranifunc*/
-            uncurrentfunc:     EMPTY_FUNCTION, /* option[27]/*uncurrentfunc*/
-            currentfunc:       EMPTY_FUNCTION, /* option[28]/*currentfunc*/
-			history:           FALSE, /* option[29]/*history*/
-			autoheight:        TRUE, /*  option[30]/*autoheight*/
-            autowidth:         TRUE, /*  option[31]/*autowidth*/
-			updatebefore:      FALSE, /* option[32]/*updateBefore*/
-			ajax:              FALSE, /* option[33]/*ajax*/
-			preloadajax:       100, /*   option[34]/*preloadajax*/
-            loadingtext:       '', /*    option[35]/*loadingtext*/
-			prevhtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[36]/*prevhtml*/
-			nexthtml:          '<a href="#" class="nextBtn"> next </a>', /* option[37]/*nexthtml*/
-			controlsattr:      'id="controls"', /* option[38]/*controlsattr*/
-            numericattr:       'class="controls"' /* option[39]/*numericattr*/
+            ajaxload:          EMPTY_FUNCTION, /* option[24]/*ajaxload*/
+            beforeanimation:   EMPTY_FUNCTION, /* option[25]/*beforeanimation*/
+            afteranimation:    EMPTY_FUNCTION, /* option[26]/*afteranimation*/
+			history:           FALSE, /* option[27]/*history*/
+			autoheight:        TRUE, /*  option[28]/*autoheight*/
+            autowidth:         TRUE, /*  option[29]/*autowidth*/
+			updatebefore:      FALSE, /* option[30]/*updateBefore*/
+			ajax:              FALSE, /* option[31]/*ajax*/
+			preloadajax:       100, /*   option[32]/*preloadajax*/
+            loadingtext:       '', /*    option[33]/*loadingtext*/
+			prevhtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
+			nexthtml:          '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
+			controlsattr:      'id="controls"', /* option[36]/*controlsattr*/
+            numericattr:       'class="controls"' /* option[37]/*numericattr*/
 		};
 		// Defining the base element.
 		var baseSlider = this;
@@ -145,7 +143,7 @@
 			autoOn,
 			continuousClones = FALSE,
 			numberOfVisibleSlides,
-			beforeanifuncFired = FALSE,
+			beforeanimationFired = FALSE,
 			asyncTimedLoad,
 			callBackList,
 			obj = $(this),
@@ -182,11 +180,11 @@
 
 				// Now we are going to fix the document, if it's 'broken'. (No <li>).
 				// I assume that it's can only be broken, if ajax is enabled. If it's broken without Ajax being enabled, the script doesn't have anything to fill the holes.
-				if (option[33]/*ajax*/) {
+				if (option[31]/*ajax*/) {
 					// Do we have enough list elements to fill out all the ajax documents.
-					if (option[33]/*ajax*/.length > s) {
-						for (var a = 1; a <= option[33]/*ajax*/.length - s; a++) {
-							ul.append("<li>" +  option[35]/*loadingtext*/ + "</li>");
+					if (option[31]/*ajax*/.length > s) {
+						for (var a = 1; a <= option[31]/*ajax*/.length - s; a++) {
+							ul.append("<li>" +  option[33]/*loadingtext*/ + "</li>");
 						}
 						li = ul.children("li");
 						s = li.length;
@@ -220,19 +218,19 @@
 				option[10]/*startslide*/ = parseInt10(option[10]/*startslide*/) || 1;
 
 
-                // Every animation is defined using customFx.
+                // Every animation is defined using effect.
                 // This if statement keeps backward compatibility.
-				if (!option[0]/*customFx*/) {
-				    option[0]/*customFx*/ = "slide";
+				if (!option[0]/*effect*/) {
+				    option[0]/*effect*/ = "slide";
 				}
 
-                option[0]/*customFx*/ = getEffectMethod(option[0]/*customFx*/);
+                option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
 
 				if (option[16]/*continuous*/) continuousClones = [];
 
 				for (var a = 0; a < s; a++) {
 					option[19]/*numerictext*/[a] = option[19]/*numerictext*/[a] || (a+1);
-					option[33]/*ajax*/[a] = option[33]/*ajax*/[a] || FALSE;
+					option[31]/*ajax*/[a] = option[31]/*ajax*/[a] || FALSE;
 				}
 
 				callBackList = [];
@@ -266,7 +264,7 @@
 				liConti = ul.children("li");
 
 				// If responsive is turned on, autowidth doesn't work.
-				option[31]/*autowidth*/ = option[31]/*autowidth*/ && !option[11]/*responsive*/;
+				option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
 
 				if (option[11]/*responsive*/) {
 					$(window).on("resize focus", adjustResponsiveLayout).resize();
@@ -275,11 +273,11 @@
 				controls = FALSE;
 				if(option[3]/*controlsShow*/) {
 					// Instead of just generating HTML, i make it a little smarter.
-					controls = $('<span ' + option[38]/*controlsattr*/ + '></span>');
+					controls = $('<span ' + option[36]/*controlsattr*/ + '></span>');
 					$(obj)[option[6]/*insertafter*/ ? 'after' : 'before'](controls);
 
 					if(option[18]/*numeric*/) {
-						numericContainer = controls.prepend('<ol '+ option[39]/*numericattr*/ +'></ol>').children();
+						numericContainer = controls.prepend('<ol '+ option[37]/*numericattr*/ +'></ol>').children();
 						var distanceBetweenPages = option[18]/*numeric*/ == PAGES_MARKER_STRING ? numberOfVisibleSlides : 1;
 						for(var a = 0; a < s - ((option[16]/*continuous*/ || option[18]/*numeric*/ == PAGES_MARKER_STRING) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
 							numericControls[a] = $("<li rel='" + (a+1) + "'><a href='#'><span>"+ option[19]/*numerictext*/[a] +"</span></a></li>")
@@ -291,8 +289,8 @@
 						}
 					}
 					if(option[17]/*prevnext*/){
-						nextbutton = makecontrol(option[37]/*nexthtml*/, NEXT_STRING);
-						prevbutton = makecontrol(option[36]/*prevhtml*/, PREV_STRING);
+						nextbutton = makecontrol(option[35]/*nexthtml*/, NEXT_STRING);
+						prevbutton = makecontrol(option[34]/*prevhtml*/, PREV_STRING);
 					}
 				}
 
@@ -330,7 +328,7 @@
 
 					if (destroyT) {
 					    goToSlide(destroyT,FALSE);
-					} else if (option[29]/*history*/) {
+					} else if (option[27]/*history*/) {
 						// I support the jquery.address plugin, Ben Alman's hashchange plugin and Ben Alman's jQuery.BBQ.
 						var window = $(window); // BYTES!
 						var hashPlugin;
@@ -347,12 +345,12 @@
 					else goToSlide(option[10]/*startslide*/ - 1,FALSE);
 				});
 
-                if (option[33]/*ajax*/[0]) {
+                if (option[31]/*ajax*/[0]) {
                     ajaxLoad(0, FALSE, 0);
                 }
-				if (option[34]/*preloadajax*/ === TRUE) {
+				if (option[32]/*preloadajax*/ === TRUE) {
 				    for (var i = 0; i <= ts; i++) {
-				        if (option[33]/*ajax*/[i] && option[10]/*startslide*/ - 1 != i) {
+				        if (option[31]/*ajax*/[i] && option[10]/*startslide*/ - 1 != i) {
 				            ajaxLoad(i, FALSE, 0);
 				        }
 				    }
@@ -411,8 +409,8 @@
 			}
 
 			function startAsyncDelayedLoad () {
-				if (option[33]/*ajax*/ && parseInt10(option[34]/*preloadajax*/)) {
-					for (a in option[33]/*ajax*/) {
+				if (option[31]/*ajax*/ && parseInt10(option[32]/*preloadajax*/)) {
+					for (a in option[31]/*ajax*/) {
 						if (option[24][a]) {
 							clearTimeout(asyncTimedLoad);
 							asyncTimedLoad = setTimeout(function(){
@@ -421,7 +419,7 @@
 								} else {
 									startAsyncDelayedLoad();
 								}
-							}, parseInt10(option[34]/*preloadajax*/));
+							}, parseInt10(option[32]/*preloadajax*/));
 
 							break;
 						}
@@ -466,7 +464,7 @@
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
 
-                    beforeanifuncFired = FALSE;
+                    beforeanimationFired = FALSE;
                     if (!destroyed) {
                         customAni(i, clicked, FALSE);
                     }
@@ -526,17 +524,10 @@
 			}
 
 			function setCurrentElement(element,i) {
-				if (element.filter)
-				{
+				if (element.filter) {
 					element
 						.filter(".current")
-						.removeClass("current")
-						.each(function() {
-						    var that = this;
-						    callAsync(function () {
-							    option[27]/*uncurrentfunc*/.call(that, getRelAttribute(that));
-							});
-						});
+						.removeClass("current");
 
 					element
 						.filter(function() {
@@ -549,13 +540,7 @@
 							else return elementTarget == i;
 							return FALSE;
 						})
-						.addClass("current")
-						.each(function() {
-						    var that = this;
-						    callAsync(function () {
-							    option[28]/*currentfunc*/.call(that, getRelAttribute(that));
-                            });
-						});
+						.addClass("current");
 					}
 			}
 
@@ -636,8 +621,8 @@
 				}
 
 				// Both autoheight and autowidth can be enabled at the same time. It's a kind of magic.
-				if (option[30]/*autoheight*/) autoheightwidth(i, TRUE);//autoheight(i, speed);
-				if (option[31]/*autowidth*/) autoheightwidth(i, FALSE);//autowidth(i, speed);
+				if (option[28]/*autoheight*/) autoheightwidth(i, TRUE);//autoheight(i, speed);
+				if (option[29]/*autowidth*/) autoheightwidth(i, FALSE);//autowidth(i, speed);
 			}
 
 			// Axis: TRUE == height, FALSE == width.
@@ -701,10 +686,10 @@
 			function adjust(clicked) {
 			    autoadjust(t, 0);
                 t = getRealPos(t); // Going to the real slide, away from the clone.
-				if(!option[32]/*updateBefore*/) setCurrent(t);
+				if(!option[30]/*updateBefore*/) setCurrent(t);
 				adjustPosition();
 				clickable = TRUE;
-				if(option[29]/*history*/ && clicked) window.location.hash = option[19]/*numerictext*/[t];
+				if(option[27]/*history*/ && clicked) window.location.hash = option[19]/*numerictext*/[t];
 
 				if (option[13]/*auto*/) {
 				    // Stopping auto if clicked. And also continuing after X seconds of inactivity.
@@ -716,13 +701,13 @@
 				    }
 				}
 
-				if (beforeanifuncFired) {
+				if (beforeanimationFired) {
 				    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
 				}
 			}
 
 			// This function is called when i need a callback on the current element and it's continuous clones (if they are there).
-			// after:  TRUE == afteranifunc : FALSE == beforeanifunc;
+			// after:  TRUE == afteranimation : FALSE == beforeanimation;
 			function aniCall (i, after) {
 				i = getRealPos(i);
 				var slideElements = getSlideElements(i);
@@ -733,11 +718,11 @@
 			}
 
 			function afterAniCall(el, a) {
-				option[26]/*afteranifunc*/.call(el, a);
+				option[26]/*afteranimation*/.call(el, a);
 			}
 
 			function beforeAniCall(el, a) {
-				option[25]/*beforeanifunc*/.call(el, a);
+				option[25]/*beforeanimation*/.call(el, a);
 			}
 
 			function getSlideElements(i) {
@@ -798,7 +783,7 @@
 			// But then try to upload it to a server, and see it shine.
 			function ajaxLoad(i, adjust, speed, ajaxCallBack) {
 				if (asyncTimedLoad) clearTimeout(asyncTimedLoad);// I dont want it to run to often.
-				var target = option[33]/*ajax*/[i];
+				var target = option[31]/*ajax*/[i];
 				var targetslide = li.eq(i);
 
 				var textloaded = FALSE;
@@ -834,7 +819,7 @@
 					}
 				});
 				// It is loaded, we dont need to do that again.
-				option[33]/*ajax*/[i] = FALSE;
+				option[31]/*ajax*/[i] = FALSE;
 				// It is the only option that i need to change for good.
 				options.ajax[i] = FALSE;
 			}
@@ -870,7 +855,7 @@
 					if (ajaxCallBack) ajaxCallBack();
 					startAsyncDelayedLoad();
 				    // If we want, we can launch a function here.
-					option[24]/*ajaxloadfunction*/.call(callbackTarget, parseInt10(i) + 1, img);
+					option[24]/*ajaxload*/.call(callbackTarget, parseInt10(i) + 1, img);
 
                     if (init) {
                         option[23]/*initCallback*/.call(baseSlider);
@@ -878,12 +863,12 @@
                     }
 				});
 
-				// In some cases, i want to call the beforeanifunc here.
+				// In some cases, i want to call the beforeanimation here.
 				if (ajaxCallBack == 2) {
 					aniCall(i, FALSE);
-					if (!beforeanifuncFired) {
+					if (!beforeanimationFired) {
 						aniCall(i, TRUE);
-						beforeanifuncFired = TRUE;
+						beforeanimationFired = TRUE;
 					}
 				}
 
@@ -896,18 +881,18 @@
 
                     var dir = filterDir(i);
 
-                    if (option[32]/*updateBefore*/) setCurrent(dir);
+                    if (option[30]/*updateBefore*/) setCurrent(dir);
 
                     if(option[5]/*controlsfade*/) fadeControls (dir,option[4]/*controlsfadespeed*/);
 
                     if (ajaxcallback) {
                         speed = oldSpeed;
                         if (dontCountinue) dontCountinue--; // Short for if(dontCountinue == 0).
-                    } else if (option[33]/*ajax*/) {
+                    } else if (option[31]/*ajax*/) {
                         // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation may include cloning of the target elements.
                         dontCountinue = 0;
                         for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
-                            if (option[33]/*ajax*/[a]) {
+                            if (option[31]/*ajax*/[a]) {
                                 ajaxLoad(getRealPos(a), FALSE, option[1]/*speed*/, function(){
                                     customAni(i, clicked, TRUE);
                                 });
@@ -974,12 +959,12 @@
                                 currentlyAnimating = FALSE;
                                 clickable = TRUE;
                                 goToSlide(dir,clicked);
-                                if(option[29]/*history*/ && clicked) {
+                                if(option[27]/*history*/ && clicked) {
                                     window.location.hash = option[19]/*numerictext*/[t];
                                 }
                                 fixClearType(toSlides);
 
-                                // afterAniFunc
+                                // afteranimation
                                 aniCall(dir, TRUE);
 
                                 while (awaitingAjaxLoads.length) {
@@ -989,7 +974,7 @@
                         };
                         currentlyAnimating = TRUE;
 
-                        var effect = option[0]/*customFx*/;
+                        var effect = option[0]/*effect*/;
                         var slideSpecificEffect = li.eq(dir).attr("data-transition");
                         if (slideSpecificEffect) {
                             effect = getEffectMethod(slideSpecificEffect);
@@ -1000,7 +985,7 @@
                             callBackList[dir].push(extraClone);
                         }
 
-                        // beforeAniFunc
+                        // beforeanimation
                         aniCall(dir, FALSE);
 
                         autoadjust(dir, option[1]/*speed*/);
@@ -1027,7 +1012,7 @@
                         if (init) fadetime = 0;
                         fadeControls (t,fadetime);
                     }
-                    if (init && !option[33]/*ajax*/[t]) {
+                    if (init && !option[31]/*ajax*/[t]) {
                         option[23]/*initCallback*/.call(baseSlider);
                         init = FALSE;
                     }

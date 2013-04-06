@@ -276,12 +276,14 @@ Change in docs: Upgraded to jQuery 1.9.1
 Change in script: Using outerHeight and outerWidth to calculate where slides should be positioned. Thereby supporting slides with margins and paddings.
 
 3.0.0
-Change in script: Added the customFx option. Read about it in the docs.
-Change in script: Added lots of effects that can be used with customFx, also added an "explorer effects" demo to showcase them.
+Change in script: Added the effect option. Read about it in the docs.
+Change in script: Added lots of effects that can be used with effect, also added an "explorer effects" demo to showcase them.
 Change in script: beforeAniFunc and afterAniFunc no longer runs on initialization. Instead there's an initCallback, that runs when the slider is ready and the shown slide is loaded.
 Change in script: If you set the attribute "data-transition" on a slides <li>, it will now force that animation to run when animating to that slide.
 Change in script: Changed the default loadingText to an empty string.
 Change in script: Removed the build in "first" and "last" buttons. You can still make equivalent buttons using customLink
-Change in script: Removed all options related to fade. You can make equivalent sliders using customFx
+Change in script: Removed all options related to fade. You can make equivalent sliders using effect
 Change in script: Lowered the default wait between slide loads to 100ms. (Only relevant when using Ajax)
 Change in script: Removed the speedHistory option. Since it no longer worked with the new effects functionality.
+Change in script: Renamed a bunch of options. (ajaxloadfunction -> ajaxload, beforeanifunc -> beforeanimation, afteranifunc -> afteranimation
+Change in script: Removed the uncurrentfunc and oncurrent func. Since you can emulate them using afterAnimation and beforeAnimation)
