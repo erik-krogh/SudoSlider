@@ -1186,7 +1186,7 @@
 
     // Start by defining everything, the implementations is below.
 	var nonReversibleEffects = {
-        push: push,
+        push: push, // generic
 	    pushUp : pushUp,
         pushRight : pushRight,
         pushDown : pushDown,
@@ -1195,18 +1195,12 @@
         fadeInOut : fadeInOut,
         crossFade : crossFade,
         show : show,
-        pushIn: pushIn,
+        pushIn: pushIn, // generic
         pushInUp : pushInUp,
         pushInRight : pushInRight,
         foldRandom : foldRandom,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
-        sliceUp : sliceUp,
-        sliceUpLeft : sliceUpLeft,
-        sliceDown : sliceDown,
-        sliceDownLeft : sliceDownLeft,
-        sliceUpDown : sliceUpDown,
-        sliceUpDownLeft : sliceUpDownLeft,
         slicesRandomUp : slicesRandomUp,
         slicesRandomDown : slicesRandomDown,
         boxesDown : boxesDown,
@@ -1215,6 +1209,7 @@
         boxesUpGrow : boxesUpGrow
 	};
 
+    // The functions here must have an "reverse" argument as the second argument in the function.
     var reversibleEffects = {
         fold : fold,
         curtain1: curtain1,
@@ -1224,7 +1219,10 @@
         boxesGrow : boxesGrow,
         boxRain : boxRain,
         boxRainGrow : boxRainGrow,
-        slicesFade: slicesFade
+        slicesFade: slicesFade,
+        sliceUp : sliceUp,
+        sliceDown : sliceDown,
+        sliceUpDown : sliceUpDown
     }
 
     function makeReversedEffects(reversibleEffects) {
@@ -1251,23 +1249,14 @@
 	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    function sliceUp(obj) {
-        sliceUpDownTemplate(obj, 1, FALSE);
+    function sliceUp(obj, reverse) {
+        sliceUpDownTemplate(obj, 1, reverse);
     }
-    function sliceUpLeft(obj) {
-        sliceUpDownTemplate(obj, 1, TRUE);
+    function sliceDown(obj, reverse) {
+        sliceUpDownTemplate(obj, 2, reverse);
     }
-    function sliceDown(obj) {
-        sliceUpDownTemplate(obj, 2, FALSE);
-    }
-    function sliceDownLeft(obj) {
-        sliceUpDownTemplate(obj, 2, TRUE);
-    }
-    function sliceUpDown(obj) {
-        sliceUpDownTemplate(obj, 3, FALSE);
-    }
-    function sliceUpDownLeft(obj) {
-        sliceUpDownTemplate(obj, 3, TRUE);
+    function sliceUpDown(obj, reverse) {
+        sliceUpDownTemplate(obj, 3, reverse);
     }
 
     function slicesRandomUp(obj) {
