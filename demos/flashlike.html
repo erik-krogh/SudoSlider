@@ -26,7 +26,7 @@
 				slideCount:2,
 				ease:ease,
 				speed:anispeed,
-				beforeAniFunc: function(t){ 
+				beforeAnimation: function(t){ 
 					var width = $(this).width();
 					var parentWidth = $("#slider").parent().width();
 					var marginleft = (parentWidth - width) / 2;
@@ -35,7 +35,7 @@
 					firstRun = false;
 					$('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:anitime,easing:ease});
 				},
-				afterAniFunc: function(t){ 
+				afterAnimation: function(t){ 
 					
 				}
 			});

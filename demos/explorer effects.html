@@ -9,25 +9,23 @@
     <script type="text/javascript">
         $(document).ready(function(){
             var effects = $.fn.sudoSlider.effects;
-            var useEffect = function () {
+            var useEffect = function (obj) {
                 alert("Effect not specified");
+                obj.callback();
             };
 
             var sudoSlider = $("#slider").sudoSlider({
-                customFx: function (obj) {
+                effect: function (obj) {
                     useEffect(obj);
                 },
-                prevNext: false
+                prevNext: true
             });
             var container = $("#effectLinksHolder");
-            var counter = 1;
             $.each(effects, function (effectName, effect) {
-                var effectLink = $("<a> " + effectName + " </a> <span>|</span> ");
-                effectLink.click(function () {
+                container.append($("<a> " + effectName + " </a> <span>|</span> ").click(function () {
                     useEffect = effect;
                     sudoSlider.goToSlide("next");
-                });
-                container.prepend(effectLink)
+                }))
             });
         });
     </script>

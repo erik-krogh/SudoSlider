@@ -26,7 +26,7 @@
             });
 
             var sudoSlider = $("#slider").sudoSlider({
-                beforeanifunc: function () {
+                beforeAnimation: function () {
                     $("#slider ul li").children().each(function () {
                         $(this).tubeplayer("pause");
                     });

@@ -26,15 +26,15 @@
 				fade:true,
 			    continuous:true,
 			    ajax: ajaximages,
-			    ajaxLoadFunction: function(t){
+                ajaxLoad: function(t){
 			        $(this)
 			            .css("position","relative")
 			            .append('<div class="caption" >' + imagestext[t-1] + '</div>');
 			    },
-			    beforeAniFunc: function(t){
+			    beforeAnimation: function(t){
 			        $(this).children('.caption').hide();
 			    },
-			    afterAniFunc: function(t){
+			    afterAnimation: function(t){
 			        $(this).children('.caption').slideDown(400);
 			    }
 			});
@@ -63,7 +63,7 @@
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Callbacks 3 (captions) demo</h1>
-	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
+	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAnimation">afterAnimation & beforeAnimation in docs</a>
 	<div style="position:relative;">
 		<div id="slider"></div>
 	</div>
@@ -94,15 +94,15 @@
             fade:true,
             continuous:true,
             ajax: ajaximages,
-            ajaxLoadFunction: function(t){
+            ajaxLoad: function(t){
                 $(this)
                     .css("position","relative")
                     .append('&lt;div class="caption" &gt;' + imagestext[t-1] + '&lt;/div&gt;');
             },
-            beforeAniFunc: function(t){ 
+            beforeAnimation: function(t){ 
                 $(this).children('.caption').hide();	
             },
-            afterAniFunc: function(t){ 
+            afterAnimation: function(t){ 
                 $(this).children('.caption').slideDown(400);
             }
         });

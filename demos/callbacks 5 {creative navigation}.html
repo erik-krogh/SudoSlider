@@ -10,7 +10,7 @@
 		$(document).ready(function(){	
 		    var oldt = 0;
 		    var sudoSlider = $("#slider").sudoSlider({ 
-		        beforeAniFunc: function(t){ 
+		        beforeAnimation: function(t){ 
 		            var substract = $('#slidemenu ul').offset();
 					var posi = $('#slidemenu ul li').eq(t-1).offset();
 					var left =  posi.left - substract.left;
@@ -40,7 +40,7 @@
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Callbacks 5 (creative navigation) demo</h1> 
-	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
+	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAnimation">afterAnimation & beforeAnimation in docs</a>
 	<div style="position:relative;">
 		<div id="slidemenu">
 			<ul style="position:relative;">
@@ -73,7 +73,7 @@
 $(document).ready(function(){   
    var oldt = 0;
    var sudoSlider = $("#slider").sudoSlider({ 
-      beforeAniFunc: function(t){ 
+      beforeAnimation: function(t){ 
          var substract = $('#slidemenu ul').offset();
          var posi = $('#slidemenu ul li').eq(t-1).offset();
          var left =  posi.left - substract.left;

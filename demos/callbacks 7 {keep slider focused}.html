@@ -12,7 +12,7 @@
 		    var sudoSlider = $("#slider").sudoSlider({ 
 				prevNext:false,
 				numeric:true,
-				beforeAniFunc: function(t){ 
+				beforeAnimation: function(t){ 
 					var sliderPos = $("#slider").offset().top;
 					var scrolledDown = $(window).scrollTop();
 					if (sliderPos < scrolledDown)
@@ -32,7 +32,7 @@
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Keep slider focused</h1> 
     <h2>Try to scroll a bit down, and then press one of the slider controls. </h2>
-	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
+	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAnimation">afterAnimation & beforeAnimation in docs</a>
 	<div style="position:relative;">
 		<div id="slider">
 			<ul>				
@@ -56,7 +56,7 @@ $(document).ready(function(){
    var sudoSlider = $("#slider").sudoSlider({ 
       prevNext:false,
       numeric:true,
-      beforeAniFunc: function(t){ 
+      beforeAnimation: function(t){ 
          var sliderPos = $("#slider").offset().top;
          var scrolledDown = $(window).scrollTop();
          if (sliderPos < scrolledDown)

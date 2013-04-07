@@ -13,7 +13,7 @@
 		    var sudoSlider = $("#slider").sudoSlider({ 
 				customLink: '.custom',
 				prevNext:false,
-				beforeAniFunc: function(t){ 
+				beforeAnimation: function(t){ 
 					var scroll = -t+2;
 					if (scroll == 1) scroll = 0;
 					if (scroll < -2) scroll = -2;
@@ -42,7 +42,7 @@
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Navigation in slider</h1> 
-	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
+	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAnimation">afterAnimation & beforeAnimation in docs</a>
 	<div style="position:relative;">
 		<div id="slider">
 			<ul>				
@@ -86,7 +86,7 @@ $(document).ready(function(){
     var sudoSlider = $("#slider").sudoSlider({ 
       customLink: '.custom',
       prevNext:false,
-      beforeAniFunc: function(t){ 
+      beforeAnimation: function(t){ 
          var scroll = -t+2;
          if (scroll == 1) scroll = 0;
          if (scroll < -2) scroll = -2;

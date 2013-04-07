@@ -65,7 +65,7 @@
 	                controlsFade: false,
 	                ajax: ajaximages,
 	                // numeric: true,
-	                ajaxLoadFunction: function (t) {
+                    ajaxLoad: function (t) {
 	                    // Starts the slider on an appropiate time. 
 	                    if (t == startAutoOnSlide) {
 	                        initializing = false;
@@ -105,7 +105,7 @@
 	                    $img.css("margin-left", margin);
 
 	                },
-	                beforeAniFunc: function (t) {
+	                beforeAnimation: function (t) {
 	                    // Caption
 	                    // $(this).children('.caption').hide();
 
@@ -119,7 +119,7 @@
 	                        controlsSlider.goToSlide(t - 1);
 	                    }
 	                },
-	                afterAniFunc: function (t) {
+	                afterAnimation: function (t) {
 	                    // Caption. 
 	                    // $(this).children('.caption').slideDown(400);
 	                }

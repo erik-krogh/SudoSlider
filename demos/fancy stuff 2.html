@@ -34,7 +34,7 @@
 	            auto: true,
 	            resumePause: 3000,
 	            preloadAjax: true,
-	            ajaxLoadFunction: function (t) {
+                ajaxLoad: function (t) {
 	                var $img = $(this).children();
 	                var url = $img.attr('src');
 	                var width = ($img.width() / $img.height()) * 37;
@@ -46,12 +46,12 @@
                         .append('<div class="caption" >' + imagesText[t - 1] + '</div>');
 
 	            },
-	            beforeAniFunc: function (t) {
+	            beforeAnimation: function (t) {
 	                var numberOfSlides = sudoSlider.getValue("totalSlides");
 	                // Only hiding the slides that are currently not vissible. 
 	                sudoSlider.children().children().not(sudoSlider.getSlide(currentSlide)).not(sudoSlider.getSlide(currentSlide + 1)).find(".caption").hide();
 	            },
-	            afterAniFunc: function (t) {
+	            afterAnimation: function (t) {
 	                currentSlide = t;
 	                sudoSlider.getSlide(t).add(sudoSlider.getSlide(t + 1)).children('.caption').slideDown(400);
 	            }

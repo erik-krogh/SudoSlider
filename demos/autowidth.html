@@ -10,7 +10,7 @@
 		$(document).ready(function(){	
 			var oldt = 0;
 			var sudoSlider = $("#slider").sudoSlider({
-				beforeAniFunc: function(t){
+				beforeAnimation: function(t){
 					var width = $(this).width();
 					
 					var diff = Math.sqrt(Math.abs(oldt-t));
@@ -59,7 +59,7 @@
     $(document).ready(function(){	
         var oldt = 0;
         var sudoSlider = $("#slider").sudoSlider({
-            beforeAniFunc: function(t){
+            beforeAnimation: function(t){
                 var width = $(this).width();
                 var diff = Math.sqrt(Math.abs(oldt-t));
                 var speed = parseInt(diff*800);

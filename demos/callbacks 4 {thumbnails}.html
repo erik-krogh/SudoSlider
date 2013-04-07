@@ -13,7 +13,7 @@
 		        ajax: ['../images/01.jpg', '../images/02.jpg', '../images/03.jpg', '../images/04.jpg', '../images/05.jpg'],
 		        numeric:true,
 		        preloadAjax:true,
-		        ajaxLoadFunction: function(t){
+                ajaxLoad: function(t){
 		            var $img = $(this).children();
 		            var url = $img.attr('src');
 		            var width = ($img.width() / $img.height()) * 28;
@@ -26,7 +26,7 @@
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Callbacks 4 (thumbnails) demo</h1> 
-	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
+	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAnimation">afterAnimation & beforeAnimation in docs</a>
 	<div style="position:relative;">
 		<div id="slider"></div>
 	</div>
@@ -43,7 +43,7 @@ $(document).ready(function(){
         ajax: ['../images/01.jpg', '../images/02.jpg', '../images/03.jpg', '../images/04.jpg', '../images/05.jpg'],
         numeric:true,
         preloadAjax:true,
-        ajaxLoadFunction: function(t){
+        ajaxLoad: function(t){
             var $img = $(this).children();
             var url = $img.attr('src');
             var width = ($img.width() / $img.height()) * 28;

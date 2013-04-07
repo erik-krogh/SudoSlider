@@ -10,10 +10,10 @@
 		$(document).ready(function(){	
 			var sudoSlider = $("#slider").sudoSlider({ 
 				numeric: true,
-				beforeAniFunc: function(slide){
+				beforeAnimation: function(slide){
 					$('div.descrip-text #anistate').text('Animating to slide ' + slide).show(600);
 				},
-				afterAniFunc: function(slide){
+				afterAnimation: function(slide){
 					$('div.descrip-text #anistate').hide(400);
 					$('div.descrip-text #slidenumber').text(slide);
 					var text = $(this).children().attr('src');
@@ -37,7 +37,7 @@
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Callbacks 1 demo</h1> 
-	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAniFunc">afterAniFunc & beforeAniFunc in docs</a>
+	<a href="http://webbies.dk/SudoSlider/help/#Settings-afterAnimation">afterAnimation & beforeAnimation in docs</a>
 	<div style="position:relative;">
 			<div id="slider" class="slider" style="position: relative; height: 248px; overflow-x: hidden; overflow-y: hidden; ">
 				<ul style="width: 3480px; margin-left: 0px; ">				
@@ -61,10 +61,10 @@
    $(document).ready(function(){
       var sudoSlider = $("#slider").sudoSlider({
          numeric: true,
-         beforeAniFunc: function(slide){
+         beforeAnimation: function(slide){
             $('div.descrip-text #anistate').text('Animating to slide ' + slide).show(600);
          },
-         afterAniFunc: function(slide){
+         afterAnimation: function(slide){
             $('div.descrip-text #anistate').hide(400);
             $('div.descrip-text #slidenumber').text(slide);
             var text = $(this).children().attr('src');

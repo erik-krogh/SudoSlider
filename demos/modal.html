@@ -12,7 +12,7 @@
 			$("#slider").sudoSlider({ 
 				ajax: ['../images/06.jpg', '../images/07.jpg', '../images/08.jpg'],
 				continuous: true,
-				ajaxLoadFunction: function(t){
+                ajaxLoad: function(t){
 					var target = $(this).children();
 					target.css('cursor' , 'pointer').click(function() {
 					var maxheight = $(window).height() - 80;
@@ -72,7 +72,7 @@ $(document).ready(function(){
    $("#slider").sudoSlider({ 
       ajax: ['../images/06.jpg', '../images/07.jpg', '../images/08.jpg'],
       continuous: true,
-      ajaxLoadFunction: function(t){
+      ajaxLoad: function(t){
          var target = $(this).children();
          target.css('cursor' , 'pointer').click(function() {
          var maxheight = $(window).height() - 80;

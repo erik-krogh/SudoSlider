@@ -11,7 +11,7 @@
 			var sudoSlider = $("#slider").sudoSlider({ 
 				auto:true,
 				prevNext:false,
-				afterAniFunc: function (t) {
+				afterAnimation: function (t) {
 					if (t == sudoSlider.getValue("totalSlides")) {
 						sudoSlider.stopAuto();
 					}
@@ -51,7 +51,7 @@
       var sudoSlider = $("#slider").sudoSlider({ 
          auto:true,
          prevNext:false,
-         afterAniFunc: function (t) {
+         afterAnimation: function (t) {
             if (t == sudoSlider.getValue("totalSlides")) {
                sudoSlider.stopAuto();
             }
