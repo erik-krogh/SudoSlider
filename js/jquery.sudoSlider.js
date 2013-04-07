@@ -133,8 +133,6 @@
 			destroyed,
 			destroyT,
 			controls,
-			firstbutton,
-			lastbutton,
 			nextbutton,
 			prevbutton,
 			autoTimeout,
@@ -372,8 +370,7 @@
             function getEffectMethod(inputEffect) {
                 var sudoSliderEffects = $.fn.sudoSlider.effects;
                 if ($.isArray(inputEffect)) {
-                    var array = inputEffect;
-                    return arrayToRandomEffect(array);
+                    return arrayToRandomEffect(inputEffect);
                 } else if (isFunc(inputEffect)) {
                     return inputEffect
                 } else {
@@ -480,14 +477,10 @@
 			function fadeControl (fadeOpacity,fadetime,nextcontrol) {
 				if (nextcontrol) {
 					var eA = nextbutton,
-					eB = lastbutton,
-					directionA = NEXT_STRING,
-					directionB = LAST_STRING;
+					directionA = NEXT_STRING;
 				} else {
 					var eA = prevbutton,
-					eB = firstbutton,
-					directionA = PREV_STRING,
-					directionB = FIRST_STRING;
+					directionA = PREV_STRING;
 				}
 
 				if (option[3]/*controlsShow*/) {
@@ -502,7 +495,7 @@
 				}
 				if(option[2]/*customlink*/) {
 				    var filterFunction = function () {
-				        return (getRelAttribute(this) == directionA || getRelAttribute(this) == directionB);
+				        return (getRelAttribute(this) == directionA);
 				    };
 				    if (fadeOpacity) {
 				        $(option[2]/*customlink*/).filter(filterFunction).filter(HIDDEN_SELECTOR_STRING).fadeIn(fadetime);
@@ -684,7 +677,7 @@
 			}
 
 			function getSlidePosition(slide, vertical) {
-			    var slide = liConti.eq(slide + (continuousClones ? option[8]/*slidecount*/ : 0));
+			    slide = liConti.eq(slide + (continuousClones ? option[8]/*slidecount*/ : 0));
 			    return slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
 			}
 
@@ -932,17 +925,17 @@
                         // Finding a "shortcut", used for calculating the offsets.
                         var diff = -(t-dir);
                         if (option[16]/*continuous*/) {
-                            var diffAbs = MathAbs(diff);
+                            var diffAbs = mathAbs(diff);
                             i = dir;
                             // Finding the shortest path from where we are to where we are going.
                             var newDiff = -(t - dir - s) /* t - (realTarget + s) */;
-                            if (dir < option[8]/*slidecount*/-numberOfVisibleSlides+1 && MathAbs(newDiff) < diffAbs) {
+                            if (dir < option[8]/*slidecount*/-numberOfVisibleSlides+1 && mathAbs(newDiff) < diffAbs) {
                                 i = dir + s;
                                 diff = newDiff;
-                                diffAbs = MathAbs(diff);
+                                diffAbs = mathAbs(diff);
                             }
                             newDiff = -(t - dir + s)/* t - (realTarget - s) */;
-                            if (dir > ts - option[8]/*slidecount*/ && MathAbs(newDiff)  < diffAbs) {
+                            if (dir > ts - option[8]/*slidecount*/ && mathAbs(newDiff)  < diffAbs) {
                                 i = dir - s;
                                 diff = newDiff;
                             }
@@ -969,9 +962,6 @@
                                 currentlyAnimating = FALSE;
                                 clickable = TRUE;
                                 goToSlide(dir,clicked);
-                                if(option[27]/*history*/ && clicked) {
-                                    window.location.hash = option[19]/*numerictext*/[t];
-                                }
                                 fixClearType(toSlides);
 
                                 // afteranimation
@@ -1098,7 +1088,7 @@
 				// pos = 0 means before everything else.
 				// pos = 1 means after the first slide.
 				if (pos > s) pos = s;
-				var html = '<li>' + html + '</li>';
+				html = '<li>' + html + '</li>';
 				if (!pos || pos == 0) ul.prepend(html);
 				else li.eq(pos -1).after(html);
 				// Finally, we make it work again.
@@ -1274,7 +1264,7 @@
         var timeBuff = 0;
         var i = 0;
         var v = 0;
-        if (reverse) reverseArray(slices)
+        if (reverse) reverseArray(slices);
         if (randomize) slices = shuffle(slices);
         var count = 0;
         slices.each(function () {
@@ -1657,7 +1647,7 @@
         var ul = obj.slider.children("ul");
         var ease = obj.options.ease;
         var speed = obj.options.speed;
-        speed *= Math.sqrt(MathAbs(obj.diff));
+        speed *= Math.sqrt(mathAbs(obj.diff));
         var left = parseInt10(ul.css("marginLeft")) - obj.offset.left;
         var top = parseInt10(ul.css("marginTop")) - obj.offset.top;
 
@@ -1826,7 +1816,7 @@
         return new Date() - 0;
     }
 
-    function MathAbs(number) {
+    function mathAbs(number) {
         return number < 0 ? - number : number;
     }
 
