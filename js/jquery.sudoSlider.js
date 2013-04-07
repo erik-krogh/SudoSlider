@@ -950,7 +950,6 @@
                             i = filterDir(i);
                         }
 
-
                         var leftOffset = parseInt10(ul.css("marginLeft")) - getSlidePosition(i, FALSE);
                         var topOffset = parseInt10(ul.css("marginTop")) - getSlidePosition(i, TRUE);
 
@@ -1186,7 +1185,8 @@
 	 */
 
     // Start by defining everything, the implementations is below.
-	var allEffects = {
+	var nonReversibleEffects = {
+        push: push,
 	    pushUp : pushUp,
         pushRight : pushRight,
         pushDown : pushDown,
@@ -1195,19 +1195,10 @@
         fadeInOut : fadeInOut,
         crossFade : crossFade,
         show : show,
+        pushIn: pushIn,
         pushInUp : pushInUp,
         pushInRight : pushInRight,
-	    fold : fold,
-        foldReverse : foldReverse,
         foldRandom : foldRandom,
-        boxes : boxes,
-        boxesGrow : boxesGrow,
-        boxesReverse : boxesReverse,
-        boxesGrowReverse : boxesGrowReverse,
-        boxRain : boxRain,
-        boxRainGrow : boxRainGrow,
-        boxRainReverse: boxRainReverse,
-        boxRainGrowReverse : boxRainGrowReverse,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
         sliceUp : sliceUp,
@@ -1221,10 +1212,34 @@
         boxesDown : boxesDown,
         boxesDownGrow : boxesDownGrow,
         boxesUp : boxesUp,
-        boxesUpGrow : boxesUpGrow,
-        slicesFade: slicesFade,
-        slicesFadeReverse: slicesFadeReverse
+        boxesUpGrow : boxesUpGrow
 	};
+
+    var reversibleEffects = {
+        fold : fold,
+        curtain1: curtain1,
+        curtain2: curtain2,
+        curtain3: curtain3,
+        boxes : boxes,
+        boxesGrow : boxesGrow,
+        boxRain : boxRain,
+        boxRainGrow : boxRainGrow,
+        slicesFade: slicesFade
+    }
+
+    function makeReversedEffects(reversibleEffects) {
+        var result = {};
+        $.each(reversibleEffects, function (name, effectFunction) {
+            result[name + "Reverse"] = function (obj) {
+                effectFunction(obj, TRUE);
+            }
+        });
+        return result;
+    }
+
+    var reversedEffects = makeReversedEffects(reversibleEffects);
+
+    var allEffects = mergeObjects(nonReversibleEffects, reversibleEffects, reversedEffects);
 
 	var randomEffects = {
 	    random: function (obj) {
@@ -1270,7 +1285,7 @@
         var timeBuff = 0;
         var i = 0;
         var v = 0;
-        if (reverse) slices = slices._reverse();
+        if (reverse) reverseArray(slices)
         if (randomize) slices = shuffle(slices);
         var count = 0;
         slices.each(function () {
@@ -1307,28 +1322,22 @@
             v++;
         });
     }
-    function boxes(obj) {
-        boxTemplate(obj, FALSE, FALSE);
+    function boxes(obj, reverse) {
+        boxTemplate(obj, reverse, FALSE, FALSE);
     }
-    function boxesGrow(obj) {
-        boxTemplate(obj, FALSE, TRUE);
-    }
-    function boxesReverse(obj) {
-        boxTemplate(obj, FALSE, FALSE, TRUE);
-    }
-    function boxesGrowReverse(obj) {
-        boxTemplate(obj, FALSE, TRUE, TRUE);
+    function boxesGrow(obj, reverse) {
+        boxTemplate(obj, reverse, FALSE, TRUE);
     }
 
     function boxRandom(obj) {
-        boxTemplate(obj, TRUE, FALSE);
+        boxTemplate(obj, FALSE, TRUE, FALSE);
     }
 
     function boxRandomGrow(obj) {
-        boxTemplate(obj, TRUE, TRUE);
+        boxTemplate(obj, FALSE, TRUE, TRUE);
     }
 
-    function boxTemplate(obj, random, grow, reverse) {
+    function boxTemplate(obj, reverse, random, grow) {
         var speed = obj.options.speed;
         var boxRows = obj.options.boxrows;
         var boxCols = obj.options.boxcols;
@@ -1339,7 +1348,7 @@
             boxes = shuffle(boxes);
         }
         if (reverse) {
-            boxes = boxes._reverse();
+            reverseArray(boxes);
         }
         var i = 0;
         var timeBuff = 0;
@@ -1374,29 +1383,23 @@
         boxRainTemplate(obj, FALSE, FALSE, TRUE);
     }
     function boxesDownGrow(obj) {
-        boxRainTemplate(obj, TRUE, FALSE, TRUE);
+        boxRainTemplate(obj, FALSE, TRUE, TRUE);
     }
     function boxesUp(obj) {
-        boxRainTemplate(obj, FALSE, TRUE, TRUE);
+        boxRainTemplate(obj, TRUE, FALSE, TRUE);
     }
     function boxesUpGrow(obj) {
         boxRainTemplate(obj, TRUE, TRUE, TRUE);
     }
 
-    function boxRain(obj) {
-        boxRainTemplate(obj, FALSE, FALSE);
+    function boxRain(obj, reverse) {
+        boxRainTemplate(obj, reverse, FALSE, FALSE);
     }
-    function boxRainGrow(obj) {
-        boxRainTemplate(obj, TRUE, FALSE);
-    }
-    function boxRainReverse(obj) {
-        boxRainTemplate(obj, FALSE, TRUE);
-    }
-    function boxRainGrowReverse(obj) {
-        boxRainTemplate(obj, TRUE, TRUE);
+    function boxRainGrow(obj, reverse) {
+        boxRainTemplate(obj, reverse, TRUE, FALSE);
     }
 
-    function boxRainTemplate(obj, grow, reverse, randomizeRows) {
+    function boxRainTemplate(obj, reverse, grow, randomizeRows) {
         var speed = obj.options.speed;
         var boxRows = obj.options.boxrows;
         var boxCols = obj.options.boxcols;
@@ -1409,7 +1412,7 @@
         var box2Darr = [];
         box2Darr[rowIndex] = [];
         if (reverse) {
-            boxes = boxes._reverse();
+            reverseArray(boxes);
         }
         boxes.each(function () {
             box2Darr[rowIndex][colIndex] = this;
@@ -1462,48 +1465,69 @@
         }
     }
 
-    function slicesFade(obj) {
-        foldTemplate(obj, FALSE, FALSE, TRUE);
+    function slicesFade(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, TRUE);
     }
 
-    function slicesFadeReverse(obj) {
-        foldTemplate(obj, TRUE, FALSE, TRUE);
-    }
-
-    function fold(obj) {
-        foldTemplate(obj, FALSE);
-    }
-
-    function foldReverse(obj) {
-        foldTemplate(obj, TRUE);
+    function fold(obj, reverse) {
+        foldTemplate(obj, reverse);
     }
 
     function foldRandom(obj) {
         foldTemplate(obj, FALSE, TRUE);
     }
 
-    function foldTemplate(obj, reverse, randomize, onlyFade) {
+    function curtain1(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, FALSE, 1);
+    }
+
+    function curtain2(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, FALSE, 2);
+    }
+
+    function curtain3(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, FALSE, 3);
+    }
+
+    function foldTemplate(obj, reverse, randomize, onlyFade, curtainEffect) {
         var slides = obj.options.slices;
         var speed = obj.options.speed;
         var target = $(obj.toSlides.get(0));
-        var slicesElement = createSlices(target, obj.slider, slides);
+        var objSlider = obj.slider;
+        var slicesElement = createSlices(target, objSlider, slides);
+        if (!reverse) {
+            $(reverseArray(slicesElement.get())).appendTo(objSlider);
+        }
+        var width = target.width();
         var count = 0;
-        if (reverse) slicesElement = slicesElement._reverse();
+        if (reverse) reverseArray(slicesElement);
         if (randomize) slicesElement = shuffle(slicesElement);
         slicesElement.each(function (i) {
-            var timeBuff = 100 + ((speed / slides) * i);
+            var timeBuff = ((speed / slides) * i);
             var slice = $(this);
             var origWidth = slice.width();
+            var orgLeft = slice.css("left");
+            var left = orgLeft;
+            if (curtainEffect == 1) {
+                left = 0
+            } else if (curtainEffect == 2) {
+                left = width / 2;
+            } else if (curtainEffect == 3) {
+                left = width / 3;
+            }
+            if (reverse) {
+                left = width - left;
+            }
             slice.css({
-                top: '0px',
-                height: '100%',
-                width: (onlyFade ? origWidth : 0) + 'px'
+                width: (onlyFade ? origWidth : 0) + 'px',
+                left: left
             });
             count++;
             setTimeout(function () {
                 slice.animate({
                     width: origWidth,
-                    opacity: 1
+                    opacity: 1,
+                    left: orgLeft
                 }, speed, '', function () {
                     count--;
                     if (count == 0) {
@@ -1538,21 +1562,41 @@
         return clones.get(0);
     }
 
+    function push(obj) {
+        var vertical = obj.options.vertical;
+        var diff = obj.diff;
+        var dir;
+        if (vertical) {
+            if (diff < 0) {
+                dir = 1;
+            } else {
+                dir = 3;
+            }
+        } else {
+            if (diff < 0) {
+                dir = 2;
+            } else {
+                dir = 4;
+            }
+        }
+        pushTemplate(obj, dir);
+    }
+
     function pushUp(obj) {
-        push(obj, 1);
+        pushTemplate(obj, 1);
     }
     function pushRight(obj) {
-        push(obj, 2);
+        pushTemplate(obj, 2);
     }
     function pushDown(obj) {
-        push(obj, 3);
+        pushTemplate(obj, 3);
     }
     function pushLeft(obj) {
-        push(obj, 4);
+        pushTemplate(obj, 4);
     }
 
     // 1: up, 2: right, 3: down, 4, left:
-    function push(obj, direction) {
+    function pushTemplate(obj, direction) {
         var vertical = direction == 2 || direction == 4;
         var negative = (direction == 2 || direction == 3) ? -1 : 1;
         var ease = obj.options.ease;
@@ -1577,12 +1621,22 @@
         return clones.get(0);
     }
 
+    function pushIn(obj) {
+        var vertical = obj.options.vertical;
+        var diff = obj.diff;
+        if (diff > 0) {
+            // TODO: PushInCoverTemplate
+            return push(obj);
+        }
+        pushInTemplate(obj, vertical);
+    }
+
     function pushInUp(obj) {
-        pushInTemplate(obj, FALSE);
+        pushInTemplate(obj, TRUE);
     }
 
     function pushInRight(obj) {
-        pushInTemplate(obj, TRUE);
+        pushInTemplate(obj, FALSE);
     }
 
     function pushInTemplate(obj, vertical) {
@@ -1597,9 +1651,9 @@
             var orgHeight = that.height();
             that.css({zIndex: Z_INDEX_VALUE, position: ABSOLUTE_STRING, listStyle: 'none'});
             if (vertical) {
-                that.css({width: 0, top: 0});
-            } else {
                 that.css({height: 0, left: 0});
+            } else {
+                that.css({width: 0, top: 0});
             }
             that.animate({width: orgWidth, height: orgHeight}, speed, ease, function () {
                 if (index == 0) {
@@ -1764,11 +1818,13 @@
     /*
      * Util scripts.
      */
-    $.fn._reverse = [].reverse;
+    function reverseArray(arr) {
+        return [].reverse.call(arr);
+    }
 
-    function shuffle(arr) {
-        for (var j, x, i = arr.length; i; j = parseInt(Math.random() * i), x = arr[--i], arr[i] = arr[j], arr[j] = x){}
-        return arr;
+    function shuffle(array) {
+        for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x){}
+        return array;
     }
 
     function isFunc(func) {
@@ -1790,7 +1846,7 @@
     function mergeObjects(){
         var result = {};
         var args = arguments;
-        for (a in args) {
+        for (var a in args) {
             var obj = args[a];
             for (var attrname in obj) {
                 result[attrname] = obj[attrname];
