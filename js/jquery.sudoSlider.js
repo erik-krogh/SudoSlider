@@ -1186,14 +1186,14 @@
 
     // Start by defining everything, the implementations is below.
 	var nonReversibleEffects = {
+        slide : slide,
+        fadeInOut : fadeInOut,
+        crossFade : crossFade,
         push: push, // generic
 	    pushUp : pushUp,
         pushRight : pushRight,
         pushDown : pushDown,
         pushLeft : pushLeft,
-        slide : slide,
-        fadeInOut : fadeInOut,
-        crossFade : crossFade,
         show : show,
         pushIn: pushIn, // generic
         pushInDown : pushInDown,
@@ -1201,8 +1201,8 @@
         foldRandom : foldRandom,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
-        slicesRandomUp : slicesRandomUp,
         slicesRandomDown : slicesRandomDown,
+        slicesRandomUp : slicesRandomUp,
         boxesDown : boxesDown,
         boxesDownGrow : boxesDownGrow,
         boxesUp : boxesUp,
@@ -1259,10 +1259,10 @@
         sliceUpDownTemplate(obj, 3, reverse);
     }
 
-    function slicesRandomUp(obj) {
+    function slicesRandomDown(obj) {
         sliceUpDownTemplate(obj, 2, FALSE, TRUE);
     }
-    function slicesRandomDown(obj) {
+    function slicesRandomUp(obj) {
         sliceUpDownTemplate(obj, 1, FALSE, TRUE);
     }
 
