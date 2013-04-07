@@ -879,11 +879,11 @@
 			}
 
 			function customAni(i, clicked, ajaxcallback) {
-                if (filterDir(i) != t && !destroyed && clickable) {
+                var dir = filterDir(i);
+
+                if (dir != t) {
                     // Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
                     ajaxloading = FALSE;
-
-                    var dir = filterDir(i);
 
                     if (option[30]/*updateBefore*/) setCurrent(dir);
 
@@ -921,7 +921,6 @@
                         }
 
 
-
                         // Finding a "shortcut", used for calculating the offsets.
                         var diff = -(t-dir);
                         if (option[16]/*continuous*/) {
@@ -943,20 +942,20 @@
                             i = filterDir(i);
                         }
 
-                        var leftOffset = parseInt10(ul.css("marginLeft")) - getSlidePosition(i, FALSE);
-                        var topOffset = parseInt10(ul.css("marginTop")) - getSlidePosition(i, TRUE);
+                        var leftTarget = getSlidePosition(i, FALSE);
+                        var topTarget = getSlidePosition(i, TRUE);
 
                         var callObject = {
                             fromSlides : fromSlides,
                             toSlides : toSlides,
                             slider : obj,
                             options: $.extend(TRUE, {}, options), // Making a copy, to enforce read-only.
-                            toSlideNumber: dir + 1,
-                            fromSlideNumber: t + 1,
+                            to: dir + 1,
+                            from: t + 1,
                             diff: diff,
-                            offset: {
-                                left: leftOffset,
-                                top: topOffset
+                            target: {
+                                left: leftTarget,
+                                top: topTarget
                             },
                             callback: function () {
                                 currentlyAnimating = FALSE;
@@ -998,7 +997,7 @@
             }
 
 			function goToSlide(slide, clicked) {
-				if ((clickable && !destroyed && (slide != t || init))) {
+				if ((clickable && !destroyed)) {
 					clickable = !clicked && !option[13]/*auto*/;
 					ot = t;
 					t = slide;
@@ -1648,8 +1647,8 @@
         var ease = obj.options.ease;
         var speed = obj.options.speed;
         speed *= Math.sqrt(mathAbs(obj.diff));
-        var left = parseInt10(ul.css("marginLeft")) - obj.offset.left;
-        var top = parseInt10(ul.css("marginTop")) - obj.offset.top;
+        var left = obj.target.left;
+        var top = obj.target.top;
 
         ul.animate(
             { marginTop: top, marginLeft: left},
@@ -1657,9 +1656,7 @@
                 queue:FALSE,
                 duration:speed,
                 easing: ease,
-                complete: function () {
-                    obj.callback();
-                }
+                complete: obj.callback
             }
         );
     }
@@ -1823,8 +1820,8 @@
     function mergeObjects(){
         var result = {};
         var args = arguments;
-        for (var a in args) {
-            var obj = args[a];
+        for (var objName in args) {
+            var obj = args[objName];
             for (var attrname in obj) {
                 result[attrname] = obj[attrname];
             }
