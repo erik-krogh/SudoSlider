@@ -1196,7 +1196,7 @@
         crossFade : crossFade,
         show : show,
         pushIn: pushIn, // generic
-        pushInUp : pushInUp,
+        pushInDown : pushInDown,
         pushInRight : pushInRight,
         foldRandom : foldRandom,
         boxRandom : boxRandom,
@@ -1212,9 +1212,9 @@
     // The functions here must have an "reverse" argument as the second argument in the function.
     var reversibleEffects = {
         fold : fold,
-        curtain1: curtain1,
-        curtain2: curtain2,
-        curtain3: curtain3,
+        blinds1: blinds1,
+        blinds2: blinds2,
+        blinds3: blinds3,
         boxes : boxes,
         boxesGrow : boxesGrow,
         boxRain : boxRain,
@@ -1466,15 +1466,15 @@
         foldTemplate(obj, FALSE, TRUE);
     }
 
-    function curtain1(obj, reverse) {
+    function blinds1(obj, reverse) {
         foldTemplate(obj, reverse, FALSE, FALSE, 1);
     }
 
-    function curtain2(obj, reverse) {
+    function blinds2(obj, reverse) {
         foldTemplate(obj, reverse, FALSE, FALSE, 2);
     }
 
-    function curtain3(obj, reverse) {
+    function blinds3(obj, reverse) {
         foldTemplate(obj, reverse, FALSE, FALSE, 3);
     }
 
@@ -1538,8 +1538,7 @@
             var that = $(this);
             that.prependTo(obj.slider);
             var extraPush = that['outer' + (vertical ? "Height" : "Width")](TRUE);
-            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, listStyle : 'none', top : vertical ? push : 0, left : vertical ? 0 : push});
-            that.hide(0);
+            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).hide();
             that.show(speed, function () {
                 if (index == 0) {
                     obj.callback();
@@ -1598,7 +1597,7 @@
         clones.each(function (index) {
             var that = $(this);
             that.prependTo(obj.slider);
-            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, listStyle : 'none', top : vertical ? push : negative * height, left : vertical ? negative * width : push});
+            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : negative * height, left : vertical ? negative * width : push});
             that.animate(vertical ? {left: 0} : {top: 0}, speed, ease, function () {
                 if (index == 0) {
                     obj.callback();
@@ -1620,7 +1619,7 @@
         pushInTemplate(obj, vertical);
     }
 
-    function pushInUp(obj) {
+    function pushInDown(obj) {
         pushInTemplate(obj, TRUE);
     }
 
@@ -1638,7 +1637,7 @@
             that.prependTo(obj.slider);
             var orgWidth = that.width();
             var orgHeight = that.height();
-            that.css({zIndex: Z_INDEX_VALUE, position: ABSOLUTE_STRING, listStyle: 'none'});
+            that.css({zIndex: Z_INDEX_VALUE, position: ABSOLUTE_STRING});
             if (vertical) {
                 that.css({height: 0, left: 0});
             } else {
@@ -1659,9 +1658,8 @@
         var ease = obj.options.ease;
         var speed = obj.options.speed;
         speed *= Math.sqrt(MathAbs(obj.diff));
-
-        var left = parseInt(ul.css("marginLeft"), 10) - obj.offset.left;
-        var top = parseInt(ul.css("marginTop"), 10) - obj.offset.top;
+        var left = parseInt10(ul.css("marginLeft")) - obj.offset.left;
+        var top = parseInt10(ul.css("marginTop")) - obj.offset.top;
 
         ul.animate(
             { marginTop: top, marginLeft: left},
@@ -1714,7 +1712,7 @@
         clones.animate({opacity: 1}, 0).each(function (index) {
             var that = $(this);
             that.prependTo(obj.slider);
-            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, listStyle : 'none', top : vertical ? push : 0, left : vertical ? 0 : push}).
+            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).
             hide().fadeIn(speed, ease, function() {
                 that.remove();
                 if (index == 0) {
