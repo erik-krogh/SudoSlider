@@ -1290,13 +1290,13 @@
     }
 
     function sliceUpDownTemplate(obj, dir, reverse, randomize) { // Dir: 1 == down, 2 == up, 3 == up/down.
-        var numberOfSlices = obj.options.slices;
-        var speed = obj.options.speed;
-        var target = $(obj.toSlides.get(0));
+        var options = obj.options;
+        var numberOfSlices = options.slices;
+        var speed = options.speed;
+        var target = obj.toSlides.eq(0);
         var slices = createSlices(target, obj.slider, numberOfSlices);
         var timeBuff = 0;
-        var i = 0;
-        var v = 0;
+        var upDownAlternator = 0;
         if (reverse) reverseArray(slices);
         if (randomize) slices = shuffle(slices);
         var count = 0;
@@ -1304,18 +1304,20 @@
             var slice = $(this);
             var bottom = TRUE;
             if (dir == 3) {
-                if (i == 0) {
+                if (upDownAlternator == 0) {
                     bottom = FALSE;
-                    i++;
+                    upDownAlternator++;
                 } else {
-                    i = 0;
+                    upDownAlternator = 0;
                 }
             } else if (dir == 2) {
                 bottom = FALSE;
             }
-            slice.css(bottom ? 'bottom' : 'top', '0px')
-                .css(bottom ? 'top' : 'bottom', "auto")
-                .height(0);
+            slice.css({
+                bottom: bottom ? 0 : "auto",
+                top: bottom ? "auto" : 0,
+                height: 0
+            });
 
             count++;
             setTimeout(function () {
@@ -1331,7 +1333,6 @@
                 });
             }, timeBuff);
             timeBuff += (speed / numberOfSlices);
-            v++;
         });
     }
     function boxes(obj, reverse) {
@@ -1350,10 +1351,11 @@
     }
 
     function boxTemplate(obj, reverse, random, grow) {
-        var speed = obj.options.speed;
-        var boxRows = obj.options.boxrows;
-        var boxCols = obj.options.boxcols;
-        var target = $(obj.toSlides.get(0));
+        var options = obj.options;
+        var speed = options.speed;
+        var boxRows = options.boxrows;
+        var boxCols = options.boxcols;
+        var target = obj.toSlides.eq(0);
         var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
         var totalBoxes = boxes.length;
         if (random) {
@@ -1367,8 +1369,8 @@
         var count = 0;
         boxes.each(function () {
             var box = $(this);
-            var w = box.width();
-            var h = box.height();
+            var width = box.width();
+            var height = box.height();
             if (grow) {
                 box.width(0).height(0);
             }
@@ -1376,8 +1378,8 @@
             setTimeout(function () {
                 box.animate({
                     opacity: 1,
-                    width: w,
-                    height: h
+                    width: width,
+                    height: height
                 }, speed, '', function () {
                     count--;
                     if (count == 0) {
@@ -1412,30 +1414,31 @@
     }
 
     function boxRainTemplate(obj, reverse, grow, randomizeRows) {
-        var speed = obj.options.speed;
-        var boxRows = obj.options.boxrows;
-        var boxCols = obj.options.boxcols;
-        var target = $(obj.toSlides.get(0));
+        var options = obj.options;
+        var speed = options.speed;
+        var boxRows = options.boxrows;
+        var boxCols = options.boxcols;
+        var target = obj.toSlides.eq(0);
         var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
         var i = 0;
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
-        var box2Darr = [];
-        box2Darr[rowIndex] = [];
+        var box2DArr = [];
+        box2DArr[rowIndex] = [];
         if (reverse) {
             reverseArray(boxes);
         }
         boxes.each(function () {
-            box2Darr[rowIndex][colIndex] = this;
+            box2DArr[rowIndex][colIndex] = this;
             colIndex++;
             if (colIndex == boxCols) {
                 if (randomizeRows) {
-                    box2Darr[rowIndex] = shuffle(box2Darr[rowIndex]);
+                    box2DArr[rowIndex] = shuffle(box2DArr[rowIndex]);
                 }
                 rowIndex++;
                 colIndex = 0;
-                box2Darr[rowIndex] = [];
+                box2DArr[rowIndex] = [];
             }
         });
         var count = 0;
@@ -1444,7 +1447,7 @@
             for (var rows = 0; rows < boxRows; rows++) {
                 if (prevCol >= 0 && prevCol < boxCols) {
                     (function (row, col, time) {
-                        var rawBox = box2Darr[row][col];
+                        var rawBox = box2DArr[row][col];
                         if (!rawBox) {
                             return;
                         }
@@ -1460,7 +1463,7 @@
                                 opacity: 1,
                                 width: w,
                                 height: h
-                            }, speed / 1.3, function () {
+                            }, speed, function () {
                                 count--;
                                 if (count == 0) {
                                     boxes.remove();
@@ -1502,9 +1505,10 @@
     }
 
     function foldTemplate(obj, reverse, randomize, onlyFade, curtainEffect) {
-        var slides = obj.options.slices;
-        var speed = obj.options.speed;
-        var target = $(obj.toSlides.get(0));
+        var options = obj.options;
+        var slides = options.slices;
+        var speed = options.speed;
+        var target = obj.toSlides.eq(0);
         var objSlider = obj.slider;
         var slicesElement = createSlices(target, objSlider, slides);
         if (!reverse) {
@@ -1512,8 +1516,12 @@
         }
         var width = target.width();
         var count = 0;
-        if (reverse) reverseArray(slicesElement);
-        if (randomize) slicesElement = shuffle(slicesElement);
+        if (reverse) {
+            reverseArray(slicesElement);
+        }
+        if (randomize) {
+            slicesElement = shuffle(slicesElement);
+        }
         slicesElement.each(function (i) {
             var timeBuff = ((speed / slides) * i);
             var slice = $(this);
@@ -1531,7 +1539,7 @@
                 left = width - left;
             }
             slice.css({
-                width: (onlyFade ? origWidth : 0) + 'px',
+                width: (onlyFade ? origWidth : 0),
                 left: left
             });
             count++;
@@ -1552,8 +1560,9 @@
     }
 
     function show(obj) {
-        var vertical = obj.options.vertical;
-        var speed = obj.options.speed;
+        var options = obj.options;
+        var vertical = options.vertical;
+        var speed = options.speed;
 
         var push = 0;
         var clones = obj.toSlides.clone();
@@ -1570,20 +1579,23 @@
             });
             push += extraPush;
         });
-        return clones.get(0);
+        return clones.eq(0);
     }
 
     // 1: up, 2: right, 3: down, 4, left:
     function pushTemplate(obj, direction) {
         var vertical = direction == 2 || direction == 4;
         var negative = (direction == 2 || direction == 3) ? -1 : 1;
-        var ease = obj.options.ease;
-        var height = Math.max(obj.toSlides.height(), obj.fromSlides.height());
-        var width = Math.max(obj.toSlides.width(), obj.fromSlides.width());
-        var speed = obj.options.speed;
+        var options = obj.options;
+        var ease = options.ease;
+        var toSlides = obj.toSlides;
+        var fromSlides = obj.fromSlides;
+        var height = Math.max(toSlides.height(), fromSlides.height());
+        var width = Math.max(toSlides.width(), fromSlides.width());
+        var speed = options.speed;
 
         var push = 0;
-        var clones = obj.toSlides.clone();
+        var clones = toSlides.clone();
         clones.each(function (index) {
             var that = $(this);
             that.prependTo(obj.slider);
@@ -1596,18 +1608,20 @@
             });
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
         });
-        return clones.get(0);
+        return clones.eq(0);
     }
 
     function unCoverTemplate(obj, dir) {
         var vertical = dir == 1 || dir == 3;
-        var ease = obj.options.ease;
-        var speed = obj.options.speed;
-        var target = $(obj.toSlides.get(0));
+        var options = obj.options;
+        var ease = options.ease;
+        var speed = options.speed;
+        var target = obj.toSlides.eq(0);
         var width = target.width();
         var height = target.height();
-        var box = makeBox(target, 0, 0, 0, 0).css({opacity: 1});
-        obj.slider.append(box);
+        var box = makeBox(target, 0, 0, 0, 0)
+            .css({opacity: 1})
+            .appendTo(obj.slider);
         var innerBox = box.children();
         if (vertical) {
             box.css({width: width});
@@ -1633,11 +1647,12 @@
 
     function slide(obj) {
         var ul = obj.slider.children("ul");
-        var ease = obj.options.ease;
-        var speed = obj.options.speed;
-        speed *= Math.sqrt(mathAbs(obj.diff));
-        var left = obj.target.left;
-        var top = obj.target.top;
+        var options = obj.options;
+        var ease = options.ease;
+        var speed = options.speed * Math.sqrt(mathAbs(obj.diff));
+        var target = obj.target;
+        var left = target.left;
+        var top = target.top;
 
         ul.animate(
             { marginTop: top, marginLeft: left},
@@ -1651,8 +1666,9 @@
     }
 
     function fadeInOut(obj) {
-        var fadeSpeed = obj.options.speed;
-        var ease = obj.options.ease;
+        var options = obj.options;
+        var fadeSpeed = options.speed;
+        var ease = options.ease;
 
         var fadeinspeed = parseInt(fadeSpeed*(3/5), 10);
         var fadeoutspeed = fadeSpeed - fadeinspeed;
@@ -1670,7 +1686,7 @@
                 }
             }
         );
-        return clones.get(0);
+        return clones.eq(0);
     }
 
 
@@ -1678,23 +1694,25 @@
         var fadeSpeed = obj.options.speed;
         var clones = obj.toSlides.clone();
         finishFadeFx(obj, fadeSpeed, clones);
-        return clones.get(0);
+        return clones.eq(0);
     }
 
     function finishFadeFx(obj, speed, clones) {
-        var vertical = obj.options.vertical;
-        var ease = obj.options.ease;
+        var options = obj.options;
+        var vertical = options.vertical;
+        var ease = options.ease;
         var push = 0;
         clones.animate({opacity: 1}, 0).each(function (index) {
             var that = $(this);
-            that.prependTo(obj.slider);
-            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).
-            hide().fadeIn(speed, ease, function() {
-                that.remove();
-                if (index == 0) {
-                    obj.fromSlides.animate({opacity: 1}, 0);
-                    obj.callback();
-                }
+            that.prependTo(obj.slider)
+                .css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).
+                hide()
+                .fadeIn(speed, ease, function() {
+                    that.remove();
+                    if (index == 0) {
+                        obj.fromSlides.animate({opacity: 1}, 0);
+                        obj.callback();
+                    }
             });
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
         });
@@ -1757,17 +1775,17 @@
     function makeBox(target, top, left, height, width) {
         var innerBox = target.clone().css({
             position: ABSOLUTE_STRING,
-            width: target.width() + "px",
+            width: target.width(),
             height: "auto",
             display: "block",
             top: - top,
-            left: - left + "px"
+            left: - left
         });
         var box = $('<div>').css({
-             left: left + 'px',
-             top: top + 'px',
-             width: width+'px',
-             height: height+'px',
+             left: left,
+             top: top,
+             width: width,
+             height: height,
              opacity:0,
              overflow: "hidden",
              position: ABSOLUTE_STRING,

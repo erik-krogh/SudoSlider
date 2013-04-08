@@ -288,3 +288,4 @@ Change in script: Removed the speedHistory option. Since it no longer worked wit
 Change in script: Renamed a bunch of options. (ajaxloadfunction -> ajaxload, beforeanifunc -> beforeanimation, afteranifunc -> afteranimation
 Change in script: Removed the uncurrentfunc and oncurrent func. Since you can emulate them using afterAnimation and beforeAnimation)
 Change in script: If the slider gets a command to slide somewhere, while an animation is active. It will "save" the command, and do it after the ongoing animation has finished.
+Change in script: Fixed that stopAuto() didn't stop first auto animation.
