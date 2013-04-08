@@ -1722,7 +1722,7 @@
         var result = $();
         var width = target.width();
         var height = target.height();
-        var sliceWidth = Math.round(width / slices);
+        var sliceWidth = Math.ceil(width / slices);
         for (var i = 0; i < slices; i++) {
             var thisSliceWidth;
             if(i == slices -1){
@@ -1748,8 +1748,8 @@
         var result = $();
         var targetWidth = target.width();
         var targetHeight = target.height();
-        var boxWidth = Math.round(targetWidth / numberOfCols);
-        var boxHeight = Math.round(targetHeight / numberOfRows);
+        var boxWidth = Math.ceil(targetWidth / numberOfCols);
+        var boxHeight = Math.ceil(targetHeight / numberOfRows);
         for (var rows = 0; rows < numberOfRows; rows++) {
             for (var cols = 0; cols < numberOfCols; cols++) {
                 var width;
