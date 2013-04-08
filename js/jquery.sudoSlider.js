@@ -1809,8 +1809,8 @@
     function mergeObjects(){
         var result = {};
         var args = arguments;
-        for (var objName in args) {
-            var obj = args[objName];
+        for (var i = 0; i < args.length; i++) {
+            var obj = args[i];
             for (var attrname in obj) {
                 result[attrname] = obj[attrname];
             }
