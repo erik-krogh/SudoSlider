@@ -429,7 +429,9 @@
 			function startAuto(pause) {
 				autoOn = TRUE;
 				return setTimeout(function(){
-					animateToSlide(NEXT_STRING, FALSE);
+					if (autoOn) {
+                        animateToSlide(NEXT_STRING, FALSE);
+                    }
 				},pause);
 			}
 
