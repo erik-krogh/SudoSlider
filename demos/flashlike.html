@@ -8,8 +8,7 @@
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			var firstRun = true;
-			var anispeed = 800; // miliseconds. 
+			var anispeed = 800; // miliseconds.
 			var ease = 'swing';
 			$('.blackLeft, .blackRight').fadeTo(0,0.8);
 			runOnImagesLoaded($("#slider img"), true, function () {
@@ -23,22 +22,26 @@
 				autowidth:false,
 				autoheight:false,
 				clickableAni:false,
-				slideCount:2,
+				slideCount:4,
 				ease:ease,
 				speed:anispeed,
 				beforeAnimation: function(t){ 
 					var width = $(this).width();
 					var parentWidth = $("#slider").parent().width();
 					var marginleft = (parentWidth - width) / 2;
-					var anitime = firstRun ? 0 : anispeed;
-					$("#slider").stop().animate({marginLeft:marginleft},{duration:anitime,easing:ease});
-					firstRun = false;
-					$('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:anitime,easing:ease});
+					$("#slider").stop().animate({marginLeft:marginleft},{duration:anispeed,easing:ease});
+					$('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:anispeed,easing:ease});
 				},
-				afterAnimation: function(t){ 
-					
-				}
+				initcallback: adjust
 			});
+            $(window).on("resize focus", adjust);
+            function adjust() {
+                var width = sudoSlider.getSlide(sudoSlider.getValue("currentSlide")).width();
+                var parentWidth = $("#slider").parent().width();
+                var marginleft = (parentWidth - width) / 2;
+                $("#slider").stop().animate({marginLeft:marginleft},{duration:0});
+                $('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:0});
+            }
 			$('.blackRight, #slider').click(function(){
 				sudoSlider.goToSlide('next');
 			});
@@ -47,7 +50,7 @@
 			});
 
 		});
-		// This function is a direct copy of a function inside SudoSlider. 
+		// This function is a direct copy of a function inside SudoSlider.
 		function runOnImagesLoaded (target, allSlides, callback) // This function have to be rock stable, cause i use it ALL the time!
 			{
 				var elems = target.add(target.find('img')).filter('img');
@@ -122,7 +125,7 @@
 	
 </head>
 <body>
-<div style="position:relative;width:1200px;margin:0 auto;overflow:hidden;height:700px;">
+<div style="position:relative;width:100%;margin:0 auto;overflow:hidden;height:700px;">
 	<div style="width:1200px;height:700px;color:white;padding-top:300px;text-align:center;" id="loading"><span style="font-size:36px">Loading images</span></div>
     <div class="blackLeft"></div>
     <div class="blackRight"></div>
