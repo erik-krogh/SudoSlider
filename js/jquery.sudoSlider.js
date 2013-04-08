@@ -1186,9 +1186,11 @@
         pushDown : pushDown,
         pushLeft : pushLeft,
         show : show,
-        pushIn: pushIn, // generic
-        pushInDown : pushInDown,
-        pushInRight : pushInRight,
+        unCover: unCover, // generic
+        unCoverUp : unCoverUp,
+        unCoverRight : unCoverRight,
+        unCoverDown : unCoverDown,
+        unCoverLeft : unCoverLeft,
         foldRandom : foldRandom,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
@@ -1293,8 +1295,8 @@
                 }, speed, '', function () {
                     count--;
                     if (count == 0) {
-                        obj.callback();
                         slices.remove();
+                        obj.callback();
                     }
                 });
             }, timeBuff);
@@ -1349,8 +1351,8 @@
                 }, speed, '', function () {
                     count--;
                     if (count == 0) {
-                        obj.callback();
                         boxes.remove();
+                        obj.callback();
                     }
                 });
             }, timeBuff);
@@ -1531,10 +1533,10 @@
             var extraPush = that['outer' + (vertical ? "Height" : "Width")](TRUE);
             that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).hide();
             that.show(speed, function () {
+                that.remove();
                 if (index == 0) {
                     obj.callback();
                 }
-                that.remove();
             });
             push += extraPush;
         });
@@ -1590,58 +1592,82 @@
             that.prependTo(obj.slider);
             that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : negative * height, left : vertical ? negative * width : push});
             that.animate(vertical ? {left: 0} : {top: 0}, speed, ease, function () {
+                that.remove();
                 if (index == 0) {
                     obj.callback();
                 }
-                that.remove();
             });
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
         });
         return clones.get(0);
     }
 
-    function pushIn(obj) {
+    function unCover(obj) {
         var vertical = obj.options.vertical;
         var diff = obj.diff;
-        if (diff > 0) {
-            // TODO: PushInCoverTemplate
-            return push(obj);
+        var dir;
+        if (vertical) {
+            if (diff < 0) {
+                dir = 1;
+            } else {
+                dir = 3;
+            }
+        } else {
+            if (diff < 0) {
+                dir = 2;
+            } else {
+                dir = 4;
+            }
         }
-        pushInTemplate(obj, vertical);
+        unCoverTemplate(obj, dir);
     }
 
-    function pushInDown(obj) {
-        pushInTemplate(obj, TRUE);
+    function unCoverUp(obj) {
+        unCoverTemplate(obj, 1);
     }
 
-    function pushInRight(obj) {
-        pushInTemplate(obj, FALSE);
+    function unCoverRight(obj) {
+        unCoverTemplate(obj, 2);
     }
 
-    function pushInTemplate(obj, vertical) {
+    function unCoverDown(obj) {
+        unCoverTemplate(obj, 3);
+    }
+
+    function unCoverLeft(obj) {
+        unCoverTemplate(obj, 4);
+    }
+
+    function unCoverTemplate(obj, dir) {
+        var vertical = dir == 1 || dir == 3;
         var ease = obj.options.ease;
         var speed = obj.options.speed;
-
-        var clones = obj.toSlides.clone();
-        clones.each(function (index) {
-            var that = $(this);
-            that.prependTo(obj.slider);
-            var orgWidth = that.width();
-            var orgHeight = that.height();
-            that.css({zIndex: Z_INDEX_VALUE, position: ABSOLUTE_STRING});
-            if (vertical) {
-                that.css({height: 0, left: 0});
-            } else {
-                that.css({width: 0, top: 0});
+        var target = $(obj.toSlides.get(0));
+        var width = target.width();
+        var height = target.height();
+        var box = makeBox(target, 0, 0, 0, 0).css({opacity: 1});
+        obj.slider.append(box);
+        var innerBox = box.children();
+        if (vertical) {
+            box.css({width: width});
+            if (dir == 1) {
+                innerBox.css({top: - height});
+                box.css({bottom: 0, top: "auto"});
             }
-            that.animate({width: orgWidth, height: orgHeight}, speed, ease, function () {
-                if (index == 0) {
-                    obj.callback();
-                }
-                that.remove();
-            });
+        } else {
+            box.css({height: height});
+            if (dir == 4) {
+                innerBox.css({left: - width});
+                box.css({right: 0, left: "auto"});
+            }
+        }
+        innerBox.animate({left: 0, top: 0}, speed, ease);
+        box.animate({width: width, height: height}, speed, ease, function () {
+            box.remove();
+            obj.callback();
         });
-        return clones.get(0);
+
+        return box;
     }
 
     function slide(obj) {
@@ -1705,8 +1731,8 @@
             hide().fadeIn(speed, ease, function() {
                 that.remove();
                 if (index == 0) {
-                    obj.callback();
                     obj.fromSlides.animate({opacity: 1}, 0);
+                    obj.callback();
                 }
             });
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
