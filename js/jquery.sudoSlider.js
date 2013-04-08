@@ -1033,7 +1033,7 @@
 			}
 
 			function fixClearType (element) {
-                if (screen.fontSmoothingEnabled) element.style.removeAttribute("filter"); // Fix cleartype
+                if (screen.fontSmoothingEnabled && element.style) element.style.removeAttribute("filter"); // Fix cleartype
             }
 
 		    /*
@@ -1176,21 +1176,11 @@
 	 */
 
     // Start by defining everything, the implementations is below.
-	var nonReversibleEffects = {
+	var normalEffects = {
         slide : slide,
         fadeInOut : fadeInOut,
         crossFade : crossFade,
-        push: push, // generic
-	    pushUp : pushUp,
-        pushRight : pushRight,
-        pushDown : pushDown,
-        pushLeft : pushLeft,
         show : show,
-        unCover: unCover, // generic
-        unCoverUp : unCoverUp,
-        unCoverRight : unCoverRight,
-        unCoverDown : unCoverDown,
-        unCoverLeft : unCoverLeft,
         foldRandom : foldRandom,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
@@ -1218,7 +1208,44 @@
         sliceUpDown : sliceUpDown
     }
 
-    function makeReversedEffects(reversibleEffects) {
+    // Effects that can go in all directions. Must have a "direction" argument as the second argument.
+    var genericEffects = {
+        push: pushTemplate,
+        unCover: unCoverTemplate
+    }
+
+    function makeGenericEffects() {
+        var result = {};
+        $.each(genericEffects, function (name, templateFunction) {
+            result[name] = function (obj) {
+                var vertical = obj.options.vertical;
+                var diff = obj.diff;
+                var dir;
+                if (vertical) {
+                    if (diff < 0) {
+                        dir = 1;
+                    } else {
+                        dir = 3;
+                    }
+                } else {
+                    if (diff < 0) {
+                        dir = 2;
+                    } else {
+                        dir = 4;
+                    }
+                }
+                return templateFunction(obj, dir);
+            }
+            $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
+                result[name + direction] = function (obj) {
+                    return templateFunction(obj, index + 1);
+                }
+            })
+        });
+        return result;
+    }
+
+    function makeReversedEffects() {
         var result = {};
         $.each(reversibleEffects, function (name, effectFunction) {
             result[name + "Reverse"] = function (obj) {
@@ -1228,9 +1255,11 @@
         return result;
     }
 
-    var reversedEffects = makeReversedEffects(reversibleEffects);
+    var reversedEffects = makeReversedEffects();
 
-    var allEffects = mergeObjects(nonReversibleEffects, reversibleEffects, reversedEffects);
+    var makedGenericEffects = makeGenericEffects();
+
+    var allEffects = mergeObjects(normalEffects, makedGenericEffects, reversibleEffects, reversedEffects);
 
 	var randomEffects = {
 	    random: function (obj) {
@@ -1238,6 +1267,7 @@
             return effectFunction(obj);
 	    }
 	};
+
     // Saving it
 	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
@@ -1543,39 +1573,6 @@
         return clones.get(0);
     }
 
-    function push(obj) {
-        var vertical = obj.options.vertical;
-        var diff = obj.diff;
-        var dir;
-        if (vertical) {
-            if (diff < 0) {
-                dir = 1;
-            } else {
-                dir = 3;
-            }
-        } else {
-            if (diff < 0) {
-                dir = 2;
-            } else {
-                dir = 4;
-            }
-        }
-        pushTemplate(obj, dir);
-    }
-
-    function pushUp(obj) {
-        pushTemplate(obj, 1);
-    }
-    function pushRight(obj) {
-        pushTemplate(obj, 2);
-    }
-    function pushDown(obj) {
-        pushTemplate(obj, 3);
-    }
-    function pushLeft(obj) {
-        pushTemplate(obj, 4);
-    }
-
     // 1: up, 2: right, 3: down, 4, left:
     function pushTemplate(obj, direction) {
         var vertical = direction == 2 || direction == 4;
@@ -1600,42 +1597,6 @@
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
         });
         return clones.get(0);
-    }
-
-    function unCover(obj) {
-        var vertical = obj.options.vertical;
-        var diff = obj.diff;
-        var dir;
-        if (vertical) {
-            if (diff < 0) {
-                dir = 1;
-            } else {
-                dir = 3;
-            }
-        } else {
-            if (diff < 0) {
-                dir = 2;
-            } else {
-                dir = 4;
-            }
-        }
-        unCoverTemplate(obj, dir);
-    }
-
-    function unCoverUp(obj) {
-        unCoverTemplate(obj, 1);
-    }
-
-    function unCoverRight(obj) {
-        unCoverTemplate(obj, 2);
-    }
-
-    function unCoverDown(obj) {
-        unCoverTemplate(obj, 3);
-    }
-
-    function unCoverLeft(obj) {
-        unCoverTemplate(obj, 4);
     }
 
     function unCoverTemplate(obj, dir) {
