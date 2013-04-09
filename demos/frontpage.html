@@ -3,54 +3,18 @@
 <head>
 	<title>Sudo Slider | The frontpage standalone</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
-	<script type="text/javascript">
-        // 2. This code loads the IFrame Player API code asynchronously.
-        var tag = document.createElement('script');
-        tag.src = "http://www.youtube.com/player_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        // 3. This function creates an <iframe> (and YouTube player)
-        //    after the API code downloads.
-        var player = {
-            playVideo : function () {},
-            pauseVideo : function () {}
-        };
-        function onYouTubePlayerAPIReady() {
-            player = new YT.Player('dubstebVideo', {
-                height: '315',
-                width: '560',
-                videoId: 'hDlif8Km4S4'
-            });
+	<link rel="STYLESHEET" type="text/css" href="../css/style.css" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <style type="text/css">
+        body {
+            background: url('http://webbies.dk/assets/templates/SudoSlider/images/bg/bg_limited.gif') repeat-x #fff;
         }
-	    $(document).ready(function () {
-	        $(document).ready(function () {
-                var oldSlide = 0;
-	            var sudoSlider = $("#slider").sudoSlider({
-                    effect: "boxRainGrow",
-                    customlink: ".customlink",
-                    speed: 700,
-                    afteranimation: function (slide) {
-                        if (slide == 3) {
-                            player.playVideo();
-                        }
-                        oldSlide = slide;
-                    },
-                    beforeanimation: function () {
-                        if (oldSlide == 3) {
-                            player.pauseVideo();
-                        }
-                    }
-	            });
-	        });
-	    });
-    </script>
-    <style>
-        #slider ul li, #container, #slider {
-            width:960px;
+        #frontPageSlider ul, #frontPageSlider li{margin:0;padding:0;list-style:none;position:relative;display:block;}
+        #frontPageSlider, #frontPageSlider li {width:696px;overflow:hidden;}
+
+        #frontPageSlider ul li, #frontPageSlider, #container {
+            width:100%;
         }
 
         .nextBtn {
@@ -60,7 +24,7 @@
         .textSlide {
             position:relative;
             background:#ffffff;
-            min-height: 241px;
+            min-height: 300px;
         }
 
         .textSlide li {
@@ -73,7 +37,6 @@
             font-weight: lighter;
             color: #555 !important;
             width: auto !important;
-            z-index: 9 !important;
         }
 
         .customlink {
@@ -81,58 +44,200 @@
             text-decoration: underline;
         }
 
+        .slideContainer {
+            width: 960px;
+            margin: 0 auto;
+            position:relative;
+        }
+
+            /*Demo slider*/
+        #demoslider ul, #demoslider li{position:relative;margin:0;padding:0;list-style:none !important;display:block;}
+        #demoslider li {margin: 0 !important;}
+        #demoslider li , #demoslider img{width:570px;overflow:hidden;}
+        #demoslider {width:570px;overflow:hidden; }
+        #demoslider img {border:none;}
+
+
+        #slidercontainer {margin:0 auto;width:570px;position:relative;}
+        .prevBtn, .nextBtn{margin:0;padding:0;display:block;overflow:hidden;text-indent:-8000px;display:block;width:30px;height:77px;position:absolute;left:-30px;top:121px;z-index:1000;background:url(http://webbies.dk/assets/files/SudoSlider/package/images/btn_prev.gif) no-repeat 0 0;cursor:pointer;}
+        .nextBtn{ background:url(http://webbies.dk/assets/files/SudoSlider/package/images/btn_next.gif) no-repeat 0 0;}
+
+        #slidercontainer .nextBtn  {left:570px; !important}
+
     </style>
+    <script>
+        $(document).ready(function(){
+            $("#demoslider").sudoSlider({
+                continuous:true,
+                ajax: [
+                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/01.jpg',
+                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/02.jpg',
+                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/03.jpg',
+                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/04.jpg',
+                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/05.jpg'
+                ],
+                effect: "random"
+            });
+            var player = loadVideo('dubstebVideo', 'hDlif8Km4S4');
+            var oldSlide = 0;
+            var sudoSlider = $("#frontPageSlider").sudoSlider({
+                effect: "boxRainGrow",
+                responsive: true,
+                numeric:true,
+                customlink: ".customlink",
+                history: true,
+                updatebefore: true,
+                numerictext: ["home", "download", "video", "donate", "demo"],
+                speed: 700,
+                prevNext: false,
+                afteranimation: function (slide) {
+                    if (slide == 3) {
+                        player.playVideo();
+                    }
+                    oldSlide = slide;
+                },
+                beforeanimation: function () {
+                    if (oldSlide == 3) {
+                        player.pauseVideo();
+                    }
+                },
+                startslide: 3
+            });
+            $(".textSlide").each(function () {
+                var that = $(this);
+                var children = that.children();
+                var wrappingElement = $("<div class='slideContainer'></div>");
+                that.append(wrappingElement);
+                wrappingElement.append(children);
+            });
+            function loadVideo(id, playerId) {
+                var tag = document.createElement('script');
+                tag.src = "http://www.youtube.com/player_api";
+                var firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+                var player = false;
+
+                window.onYouTubePlayerAPIReady = function () {
+                    player = new YT.Player(id, {
+                        height: '315',
+                        width: '560',
+                        videoId: playerId
+                    });
+                }
+                return  {
+                    playVideo : function () {
+                        if (player) player.playVideo();
+                    },
+                    pauseVideo : function () {
+                        if (player) player.pauseVideo();
+                    }
+                };
+            }
+        });
+    </script>
+
 
 </head>
 <body>
 <div id="container">
-    <!--<h1>Sudo Slider jQuery Plugin - The frontpage standalone</h1>-->
-	<div style="position:relative;">
-        <div style="position: relative;">
-            <div id="slider">
-                <ul>
-                    <li class="textSlide" style="background: #f2f2f2">
-                        <div style="z-index:1">
-                            <h1 style="font-size: 30px;">Why use SudoSlider?</h1>
-                            <ul>
-                                <li>It can be responsive</li>
-                                <li>Can contain <span style="color:darkgreen">ANY</span> HTML</li>
-                                <li>Lots of animations</li>
-                                <li>Can load AJAX content</li>
-                                <li>Supports IE6+, Chrome, Firefox etc.</li>
-                                <li>Callbacks and methods for developers</li>
-                                <li>A pack of demos to get started</li>
-                            </ul>
-                        </div>
-                        <div style="position:absolute;top:0;right:0;z-index:10;height:200px;width:500px;">
-                            <h1 style="position:absolute;top:65px;left:50px;font-size:70px;font-weight: bold;" rel="next" class="customlink">Press me</h1>
-                        </div>
-                    </li>
-                    <li class="textSlide">
-                        <a href="http://webbies.dk/SudoSlider/download.html">
-                            <img src="../images/download_box.png" alt="image description"/>
-                            <div style="position:absolute;left:256px;top:115px;">
-                                <h1 style="font-size: 40px;text-decoration: underline;">Download</h1>
-                            </div>
+    <!-- START MEDIUM SECTION -->
+    <div style="position: relative;">
+        <div id="frontPageSlider">
+            <ul>
+                <li class="textSlide" style="background: #f2f2f2">
+                    <div style="z-index:1;margin-top:7px;margin-left:10px;width:500px;">
+                        <h1 style="font-size: 30px;">Why use SudoSlider?</h1>
+                        <ul>
+                            <li>It can be responsive</li>
+                            <li>Can contain <span style="color:darkgreen">ANY</span> HTML</li>
+                            <li>Lots of animations</li>
+                            <li>Can load AJAX content</li>
+                            <li>Supports IE6+, Chrome, Firefox etc.</li>
+                            <li>Callbacks and methods for developers</li>
+                            <li>A pack of demos to get started</li>
+                        </ul>
+                    </div>
+                    <div style="position:absolute;top:0;right:0;z-index:10;height:120px;width:500px;">
+                        <h1 style="position:absolute;top:65px;left:50px;font-size:70px;font-weight: bold;" rel="next" class="customlink">Press me</h1>
+                    </div>
+                    <div style="position:absolute;bottom:10px;right:20px;">
+                        <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip" style="float:left;">
+                            <img src="http://webbies.dk/assets/templates/SudoSlider/images/download_box.png" alt="image description" width="64" height="64"/>
                         </a>
-                        <div style="position:absolute;right:20px;top:120px;">
-                            <h1 style="font-size: 30px" rel="next" class="customlink">See a video, in the slider -></h1>
+                        <div style="float:left;">
+                            <h1 style="font-size: 40px;text-decoration: underline;position:relative;top:20px;">
+                                <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip">
+                                    Download
+                                </a>
+                            </h1>
                         </div>
-                    </li>
-                    <li data-transition="slide" style="height:315px;background: #f2f2f2">
-                        <div style="position:absolute;top:120px;left:0;">
-                            <h1 style="font-size: 30px" rel="prev" class="customlink"><- Back to download</h1>
-                        </div>
-                        <div style="position:absolute;top:0;right:0;">
-                            <div id="dubstebVideo"></div>
-                        </div>
-                    </li>
-                    <li class="textSlide"><img src="../images/04.jpg" alt="image description"/></li>
-                    <li class="textSlide" style="background: #f2f2f2"><img src="../images/05.jpg" alt="image description"/></li>
-                </ul>
-            </div>
-        </div>
+                    </div>
+                </li>
 
+
+                <li class="textSlide">
+                    <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip">
+                        <img src="http://webbies.dk/assets/templates/SudoSlider/images/download_box.png" alt="image description"/>
+                    </a>
+                    <div style="position:absolute;left:256px;top:115px;">
+                        <h1 style="font-size: 40px;text-decoration: underline;">
+                            <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip">
+                                Download
+                            </a>
+                        </h1>
+                    </div>
+
+                    <div style="position:absolute;right:20px;top:120px;">
+                        <h1 style="font-size: 30px" rel="next" class="customlink">See a video, in the slider -></h1>
+                    </div>
+                </li>
+
+
+                <li class="textSlide" data-transition="slide" style="height:315px;background: #f2f2f2">
+                    <div style="position:absolute;top:40px;left:10px;">
+                        <h1 style="font-size: 30px" rel="prev" class="customlink">&lt;- Back to download</h1>
+                        <h2>See other examples of <br />what's possible in <a href="http://webbies.dk/SudoSlider/demos.html">the demos</a></h2>
+                    </div>
+                    <div style="position:absolute;top:0;right:0;">
+                        <div id="dubstebVideo"></div>
+                    </div>
+                </li>
+
+
+                <li class="textSlide donate">
+                    <div style="margin-top:20px;margin-left:40px;">
+                        <h2 style="font-size:300%;">Help me, <span class="orange">donate!</span></h2>
+                        <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+                            <label>$</label><input type="text" name="amount" class="amount" value="5">
+                            <input type="submit" name="submit" value="Donate Now" class="submit">
+                            <script language="JavaScript" type="text/JavaScript">			<!--
+                            if (document.images) {
+                                preload_billede = new Image();
+                                preload_billede.src  = "http://webbies.dk/assets/templates/SudoSlider/images/donate_hover.png";
+                            }
+                            //-->
+                            </script>
+                            <input type="hidden" name="cmd" value="_donations">
+                            <input type="hidden" name="item_name" value="Webbies">
+                            <input type="hidden" name="item_number" value="Donate to the Sudo Slider project">
+                            <input type="hidden" name="business" value="erik1002@gmail.com">
+                            <input type="hidden" name="return" value="http://webbies.dk/SudoSlider/index.php?id=54">
+                        </form>
+                    </div>
+                </li>
+
+
+                <li class="textSlide" style="background: #f2f2f2">
+                    <div id="slidercontainer" style="margin-top:10px;">
+                        <div class="center"><h2>Simple demo</h2></div>
+                        <div id="demoslider"></div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="clear"></div>
+        <!-- End featured -->
     </div>
 </div>
 
@@ -163,5 +268,15 @@
   })();
 
 </script>
+
+<style>
+
+        /* Donate */
+    .donate label {color: #666;font: normal normal bold 43px/normal 'helvetica neue', Helvetica, Calibri, 'Bitstream Vera', arial, sans-serif;line-height: 1;margin: 0px;padding: 0px;vertical-align: bottom;}
+    .donate input.amount {color: #222;font: normal normal bold 28px/normal 'helvetica neue', Helvetica, Calibri, 'Bitstream Vera', arial, sans-serif;height: 37px;margin-left: 10px;padding: 3px 5px 0px 0px;text-align: right;width: 258px;border-color: #DDD;borde-radius:4px;background: #FAFAFA;border: 1px solid #999;}
+    .donate input.submit {background: transparent url(http://webbies.dk/assets/templates/SudoSlider/images/donate.png) no-repeat;border: 0px;color: #333;display: block;font-size: 0px;height: 80px;line-height: 0;margin-top: 10px;text-indent: -9999px;width: 300px;border-color: #DDD;border-radius:4px;cursor:pointer;}
+    .donate input.submit:hover {background: transparent url(http://webbies.dk/assets/templates/SudoSlider/images/donate_hover.png);}
+
+</style>
 </body>
 </html>

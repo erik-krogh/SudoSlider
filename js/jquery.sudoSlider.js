@@ -268,6 +268,7 @@
 
 				if (option[11]/*responsive*/) {
 					$(window).on("resize focus", adjustResponsiveLayout).resize();
+                    setTimeout(adjustResponsiveLayout);
 				}
 
 				controls = FALSE;
@@ -343,6 +344,8 @@
 						URLChange();
 					}
 					else goToSlide(option[10]/*startslide*/ - 1,FALSE);
+
+                    setCurrent(t);
 				});
 
                 if (option[31]/*ajax*/[0]) {
@@ -544,13 +547,13 @@
 					}
 			}
 
-			function filterUrlHash(a) {
+			function filterUrlHash(hashString) {
 				for (i in option[19]/*numerictext*/) {
-				    if (option[19]/*numerictext*/[i] == a) {
+				    if (option[19]/*numerictext*/[i] == hashString) {
 				        return i;
 				    }
 				}
-				return a ? t : 0;
+				return hashString ? t : 0;
 			}
 
 			function runOnImagesLoaded (target, allSlides, callback) {
@@ -1302,6 +1305,7 @@
         var count = 0;
         slices.each(function () {
             var slice = $(this);
+            var width = slice.width();
             var bottom = TRUE;
             if (dir == 3) {
                 if (upDownAlternator == 0) {
@@ -1316,14 +1320,16 @@
             slice.css({
                 bottom: bottom ? 0 : "auto",
                 top: bottom ? "auto" : 0,
-                height: 0
+                height: 0,
+                width:0
             });
 
             count++;
             setTimeout(function () {
                 slice.animate({
                     height: '100%',
-                    opacity: 1
+                    opacity: 1,
+                    width: width
                 }, speed, '', function () {
                     count--;
                     if (count == 0) {
@@ -1776,7 +1782,7 @@
         var innerBox = target.clone().css({
             position: ABSOLUTE_STRING,
             width: target.width(),
-            height: "auto",
+            height: target.height(),
             display: "block",
             top: - top,
             left: - left
