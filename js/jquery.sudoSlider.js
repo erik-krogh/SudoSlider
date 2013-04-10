@@ -1297,7 +1297,7 @@
         var numberOfSlices = options.slices;
         var speed = options.speed;
         var target = obj.toSlides.eq(0);
-        var slices = createSlices(target, obj.slider, numberOfSlices);
+        var slices = createBoxes(target, obj.slider, numberOfSlices, 1);
         var timeBuff = 0;
         var upDownAlternator = 0;
         if (reverse) reverseArray(slices);
@@ -1516,7 +1516,7 @@
         var speed = options.speed;
         var target = obj.toSlides.eq(0);
         var objSlider = obj.slider;
-        var slicesElement = createSlices(target, objSlider, slides);
+        var slicesElement = createBoxes(target, objSlider, slides, 1);
         if (!reverse) {
             $(reverseArray(slicesElement.get())).appendTo(objSlider);
         }
@@ -1722,32 +1722,6 @@
             });
             push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
         });
-    }
-
-    function createSlices(target, obj, slices) {
-        var result = $();
-        var width = target.width();
-        var height = target.height();
-        var sliceWidth = Math.ceil(width / slices);
-        for (var i = 0; i < slices; i++) {
-            var thisSliceWidth;
-            if(i == slices -1){
-                thisSliceWidth = width-(sliceWidth*i);
-            } else {
-                thisSliceWidth = sliceWidth;
-            }
-            var slice = makeBox(
-                target, // target
-                0, // top
-                i * sliceWidth, // left
-                height, // height
-                thisSliceWidth // width
-            );
-
-            obj.append(slice);
-            result = result.add(slice);
-        }
-        return result;
     }
 
     function createBoxes(target, obj, numberOfCols, numberOfRows) {
