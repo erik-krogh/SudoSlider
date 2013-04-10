@@ -2,8 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>Sudo Slider | Basic usage</title>
-	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
-	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
@@ -11,7 +10,7 @@
 			var sudoSlider = $("#slider").sudoSlider();
 		});	
 	</script>
-	
+
 
 
 	
@@ -20,47 +19,30 @@
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Back to basics demo</h1> 
 	<h2>The most basic slider you can create with this plugin.</h2>
+    <h2>As you may have noticed, this page contains no styling or CSS.</h2>
 	<a href="http://webbies.dk/SudoSlider/help/#Howto">How to make a slider</a>
-	<div style="position:relative;">
-		<div id="slider">
-			<ul>				
-				<li><img src="../images/01.jpg" alt="image description"/></li>
-				<li><img src="../images/02.jpg" alt="image description"/></li>
-				<li><img src="../images/03.jpg" alt="image description"/></li>
-				<li><img src="../images/04.jpg" alt="image description"/></li>
-				<li><img src="../images/05.jpg" alt="image description"/></li>			
-			</ul>
-		</div>
-	</div>
+    <div id="slider">
+        <ul>
+            <li><img src="../images/01.jpg" alt="image description"/></li>
+            <li><img src="../images/02.jpg" alt="image description"/></li>
+            <li><img src="../images/03.jpg" alt="image description"/></li>
+            <li><img src="../images/04.jpg" alt="image description"/></li>
+            <li><img src="../images/05.jpg" alt="image description"/></li>
+        </ul>
+    </div>
 	<h3>Usage</h3>
 	<h4>This is everything you need.</h4>
 	<h4>Include the javascripts</h4>
 	<pre>
 &lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-	<h4>The Javascript to start it. (This script has to be below your CSS)</h4>
+	<h4>The Javascript to start it. (This script has to be below the CSS on your site)</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
     $(document).ready(function(){
         var sudoSlider = $("#slider").sudoSlider();
     });
 &lt;/script&gt;</pre>
-	<h4>The CSS</h4>
-	<pre>
-#slider, #slider li {
-    width:696px;
-    overflow:hidden; 
-}
-#slider img{
-    border:none;
-}
-#slider ul, #slider li{
-    position:relative;
-    margin:0;
-    padding:0;
-    list-style:none;
-    display:block;
-}</pre>
 	<h4>The HTML</h4>
 	<pre>
 &lt;div id="slider" &gt;

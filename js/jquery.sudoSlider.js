@@ -21,8 +21,6 @@
     var PREV_STRING = "prev";
     var LAST_STRING = "last";
     var FIRST_STRING = "first";
-    var HIDDEN_SELECTOR_STRING = ":hidden";
-    var SELECTED_SELECTOR_STRING = ":visible";
     var ABSOLUTE_STRING = "absolute";
     var Z_INDEX_VALUE = 10000;
     var EMPTY_FUNCTION = function () { };
@@ -200,12 +198,14 @@
 				numericControls = [];
 				destroyed = FALSE;
 
-				// <strike>Set obj overflow to hidden</strike> (and position to relative <strike>, if fade is enabled. </strike>)
-				// obj.css("overflow","hidden");
-				if (obj.css("position") == "static") obj.css("position","relative"); // Fixed a lot of IE6 + IE7 bugs.
+				// Set obj overflow to hidden (and position to relative <strike>, if fade is enabled. </strike>)
+				obj.css({overflow: "hidden"});
+				if (obj.css("position") == "static") obj.css({position: "relative"}); // Fixed a lot of IE6 + IE7 bugs.
 
 				// Float items to the left, and make sure that all elements are shown.
-				li.css({'float': "left", 'display': 'block'});
+                li.css({"float": "left", listStyle: "none"});
+                // The last CSS to make it work.
+                ul.add(li).css({display: "block", position: "relative"});
 
 				option[8]/*slidecount*/ = parseInt10(option[8]/*slidecount*/);
 
@@ -491,10 +491,10 @@
 				if (option[3]/*controlsShow*/) {
                     if (option[17]/*prevnext*/) {
                         if (fadeOpacity) {
-                            eA.filter(HIDDEN_SELECTOR_STRING).fadeIn(fadetime);
+                            eA.stop().fadeTo(fadetime, 1);
                         }
                         else {
-                            eA.filter(SELECTED_SELECTOR_STRING).fadeOut(fadetime);
+                            eA.stop().fadeTo(fadetime, 0);
                         }
                     }
 				}
@@ -503,10 +503,10 @@
 				        return (getRelAttribute(this) == directionA);
 				    };
 				    if (fadeOpacity) {
-				        $(option[2]/*customlink*/).filter(filterFunction).filter(HIDDEN_SELECTOR_STRING).fadeIn(fadetime);
+				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeTo(fadetime, 1);
 				    }
 				    else {
-				        $(option[2]/*customlink*/).filter(filterFunction).filter(SELECTED_SELECTOR_STRING).fadeOut(fadetime);
+				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeTo(fadetime, 0);
 				    }
 				}
 			}

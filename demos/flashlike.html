@@ -51,73 +51,72 @@
 
 		});
 		// This function is a direct copy of a function inside SudoSlider.
-		function runOnImagesLoaded (target, allSlides, callback) // This function have to be rock stable, cause i use it ALL the time!
-			{
-				var elems = target.add(target.find('img')).filter('img');
-				var len = elems.length;
-				if (!len)
-				{
-					callback();
-					// No need to do anything else. 
-					return this;
-				}
-				function loadFunction(that)
-				{
-					$(that).unbind('load').unbind('error');
-					// Webkit/Chrome (not sure) fix. 
-					if (that.naturalHeight && !that.clientHeight)
-					{
-						$(that).height(that.naturalHeight).width(that.naturalWidth);
-					}
-					if (allSlides)
-					{
-						len--;
-						if (len == 0)
-						{
-							callback();
-						}
-					}
-					else
-					{
-						callback();
-					}
-				}
-				elems.each(function(){
-					var that = this;
-					$(that).load(function () {
-						loadFunction(that);
-					}).error(function () {
-						loadFunction(that);
-					});
-					/*
-					 * Start ugly working IE fix. 
-					 */
-					if (that.readyState == "complete") 
-					{
-						$(that).trigger("load");	
-					}
-					else if (that.readyState)
-					{
-						// Sometimes IE doesn't fire the readystatechange, even though the readystate has been changed to complete. AARRGHH!! I HATE IE, I HATE IT, I HATE IE!
-						that.src = that.src; // Do not ask me why this works, ask the IE team!
-					}
-					/*
-					 * End ugly working IE fix. 
-					 */
-					else if (that.complete)
-					{
-						$(that).trigger("load");
-					}
-					else if (that.complete === undefined)
-					{
-						var src = that.src;
-						// webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
-						// data uri bypasses webkit log warning (thx doug jones)
-						that.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="; // This is about the smallest image you can make. 
-						that.src = src;
-					}
-				}); 
-			}	
+		function runOnImagesLoaded (target, allSlides, callback) {
+            var elems = target.add(target.find('img')).filter('img');
+            var len = elems.length;
+            if (!len)
+            {
+                callback();
+                // No need to do anything else.
+                return this;
+            }
+            function loadFunction(that)
+            {
+                $(that).unbind('load').unbind('error');
+                // Webkit/Chrome (not sure) fix.
+                if (that.naturalHeight && !that.clientHeight)
+                {
+                    $(that).height(that.naturalHeight).width(that.naturalWidth);
+                }
+                if (allSlides)
+                {
+                    len--;
+                    if (len == 0)
+                    {
+                        callback();
+                    }
+                }
+                else
+                {
+                    callback();
+                }
+            }
+            elems.each(function(){
+                var that = this;
+                $(that).load(function () {
+                    loadFunction(that);
+                }).error(function () {
+                    loadFunction(that);
+                });
+                /*
+                 * Start ugly working IE fix.
+                 */
+                if (that.readyState == "complete")
+                {
+                    $(that).trigger("load");
+                }
+                else if (that.readyState)
+                {
+                    // Sometimes IE doesn't fire the readystatechange, even though the readystate has been changed to complete. AARRGHH!! I HATE IE, I HATE IT, I HATE IE!
+                    that.src = that.src; // Do not ask me why this works, ask the IE team!
+                }
+                /*
+                 * End ugly working IE fix.
+                 */
+                else if (that.complete)
+                {
+                    $(that).trigger("load");
+                }
+                else if (that.complete === undefined)
+                {
+                    var src = that.src;
+                    // webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
+                    // data uri bypasses webkit log warning (thx doug jones)
+                    that.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="; // This is about the smallest image you can make.
+                    that.src = src;
+                }
+            });
+        }
 	</script>
 	
 
@@ -129,7 +128,7 @@
 	<div style="width:1200px;height:700px;color:white;padding-top:300px;text-align:center;" id="loading"><span style="font-size:36px">Loading images</span></div>
     <div class="blackLeft"></div>
     <div class="blackRight"></div>
-    <div id="slider" class="slider">
+    <div id="slider">
         <ul>				
             <li><img src="../images/06.jpg" height="241" alt="image description"/></li>
             <li><img src="../images/07.jpg" height="241" alt="image description"/></li>

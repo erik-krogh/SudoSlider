@@ -9,7 +9,7 @@ body {background:black;}
 #slider li:first-child {display:block;}
 */
 
-#slider {width:696px;overflow:visible;position:relative;}
+#slider {width:696px;overflow:visible !important;position:relative;}
 /* // Sudo Slider */	
 /* Numeric Navigation */
 ol {margin:1em 0;padding:0;height:28px;	}
