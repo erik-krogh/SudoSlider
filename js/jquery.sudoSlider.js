@@ -1183,16 +1183,11 @@
         slide : slide,
         fadeInOut : fadeInOut,
         crossFade : crossFade,
-        show : show,
         foldRandom : foldRandom,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
         slicesRandomDown : slicesRandomDown,
-        slicesRandomUp : slicesRandomUp,
-        boxesDown : boxesDown,
-        boxesDownGrow : boxesDownGrow,
-        boxesUp : boxesUp,
-        boxesUpGrow : boxesUpGrow
+        slicesRandomUp : slicesRandomUp
 	};
 
     // The functions here must have an "reverse" argument as the second argument in the function.
@@ -1275,158 +1270,35 @@
 	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    function sliceUp(obj, reverse) {
-        sliceUpDownTemplate(obj, 1, reverse);
-    }
-    function sliceDown(obj, reverse) {
-        sliceUpDownTemplate(obj, 2, reverse);
-    }
-    function sliceUpDown(obj, reverse) {
-        sliceUpDownTemplate(obj, 3, reverse);
-    }
-
-    function slicesRandomDown(obj) {
-        sliceUpDownTemplate(obj, 2, FALSE, TRUE);
-    }
-    function slicesRandomUp(obj) {
-        sliceUpDownTemplate(obj, 1, FALSE, TRUE);
-    }
-
-    function sliceUpDownTemplate(obj, dir, reverse, randomize) { // Dir: 1 == down, 2 == up, 3 == up/down.
-        var options = obj.options;
-        var numberOfSlices = options.slices;
-        var speed = options.speed;
-        var target = obj.toSlides.eq(0);
-        var slices = createBoxes(target, obj.slider, numberOfSlices, 1);
-        var timeBuff = 0;
-        var upDownAlternator = 0;
-        if (reverse) reverseArray(slices);
-        if (randomize) slices = shuffle(slices);
-        var count = 0;
-        slices.each(function () {
-            var slice = $(this);
-            var width = slice.width();
-            var bottom = TRUE;
-            if (dir == 3) {
-                if (upDownAlternator == 0) {
-                    bottom = FALSE;
-                    upDownAlternator++;
-                } else {
-                    upDownAlternator = 0;
-                }
-            } else if (dir == 2) {
-                bottom = FALSE;
-            }
-            slice.css({
-                bottom: bottom ? 0 : "auto",
-                top: bottom ? "auto" : 0,
-                height: 0,
-                width:0
-            });
-
-            count++;
-            setTimeout(function () {
-                slice.animate({
-                    height: '100%',
-                    opacity: 1,
-                    width: width
-                }, speed, '', function () {
-                    count--;
-                    if (count == 0) {
-                        slices.remove();
-                        obj.callback();
-                    }
-                });
-            }, timeBuff);
-            timeBuff += (speed / numberOfSlices);
-        });
-    }
     function boxes(obj, reverse) {
         boxTemplate(obj, reverse, FALSE, FALSE);
     }
     function boxesGrow(obj, reverse) {
-        boxTemplate(obj, reverse, FALSE, TRUE);
+        boxTemplate(obj, reverse, TRUE, FALSE);
+    }
+
+    function boxRain(obj, reverse) {
+        boxTemplate(obj, reverse, FALSE, FALSE, TRUE);
+    }
+    function boxRainGrow(obj, reverse) {
+        boxTemplate(obj, reverse, TRUE, FALSE, TRUE);
     }
 
     function boxRandom(obj) {
-        boxTemplate(obj, FALSE, TRUE, FALSE);
+        boxTemplate(obj, FALSE, FALSE, TRUE);
     }
 
     function boxRandomGrow(obj) {
         boxTemplate(obj, FALSE, TRUE, TRUE);
     }
 
-    function boxTemplate(obj, reverse, random, grow) {
+    function boxTemplate(obj, reverse, grow, randomize, rain) {
         var options = obj.options;
         var speed = options.speed;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
         var target = obj.toSlides.eq(0);
         var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
-        var totalBoxes = boxes.length;
-        if (random) {
-            boxes = shuffle(boxes);
-        }
-        if (reverse) {
-            reverseArray(boxes);
-        }
-        var i = 0;
-        var timeBuff = 0;
-        var count = 0;
-        boxes.each(function () {
-            var box = $(this);
-            var width = box.width();
-            var height = box.height();
-            if (grow) {
-                box.width(0).height(0);
-            }
-            count++;
-            setTimeout(function () {
-                box.animate({
-                    opacity: 1,
-                    width: width,
-                    height: height
-                }, speed, '', function () {
-                    count--;
-                    if (count == 0) {
-                        boxes.remove();
-                        obj.callback();
-                    }
-                });
-            }, timeBuff);
-            timeBuff += (speed / totalBoxes);
-            i++;
-        });
-    }
-
-    function boxesDown(obj) {
-        boxRainTemplate(obj, FALSE, FALSE, TRUE);
-    }
-    function boxesDownGrow(obj) {
-        boxRainTemplate(obj, FALSE, TRUE, TRUE);
-    }
-    function boxesUp(obj) {
-        boxRainTemplate(obj, TRUE, FALSE, TRUE);
-    }
-    function boxesUpGrow(obj) {
-        boxRainTemplate(obj, TRUE, TRUE, TRUE);
-    }
-
-    function boxRain(obj, reverse) {
-        boxRainTemplate(obj, reverse, FALSE, FALSE);
-    }
-    function boxRainGrow(obj, reverse) {
-        boxRainTemplate(obj, reverse, TRUE, FALSE);
-    }
-
-    function boxRainTemplate(obj, reverse, grow, randomizeRows) {
-        var options = obj.options;
-        var speed = options.speed;
-        var boxRows = options.boxrows;
-        var boxCols = options.boxcols;
-        var target = obj.toSlides.eq(0);
-        var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
-        var i = 0;
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
@@ -1435,54 +1307,76 @@
         if (reverse) {
             reverseArray(boxes);
         }
+        if (randomize) {
+            boxes = shuffle(boxes);
+        }
+
+
         boxes.each(function () {
             box2DArr[rowIndex][colIndex] = this;
             colIndex++;
             if (colIndex == boxCols) {
-                if (randomizeRows) {
-                    box2DArr[rowIndex] = shuffle(box2DArr[rowIndex]);
-                }
                 rowIndex++;
                 colIndex = 0;
                 box2DArr[rowIndex] = [];
             }
         });
-        var count = 0;
-        for (var cols = 0; cols < (boxCols * 2) + 1; cols++) {
-            var prevCol = cols;
-            for (var rows = 0; rows < boxRows; rows++) {
-                if (prevCol >= 0 && prevCol < boxCols) {
-                    (function (row, col, time) {
-                        var rawBox = box2DArr[row][col];
+
+        var boxesResult = [];
+        if (rain) {
+            for (var cols = 0; cols < (boxCols * 2) + 1; cols++) {
+                var prevCol = cols;
+                var boxesResultLine = [];
+                for (var rows = 0; rows < boxRows; rows++) {
+                    if (prevCol >= 0 && prevCol < boxCols) {
+                        var rawBox = box2DArr[rows][prevCol];
                         if (!rawBox) {
                             return;
                         }
-                        var box = $(rawBox);
-                        var w = box.width();
-                        var h = box.height();
-                        if (grow) {
-                            box.width(0).height(0);
-                        }
-                        count++;
-                        setTimeout(function () {
-                            box.animate({
-                                opacity: 1,
-                                width: w,
-                                height: h
-                            }, speed, function () {
-                                count--;
-                                if (count == 0) {
-                                    boxes.remove();
-                                    obj.callback();
-                                }
-                            });
-                        }, time);
-                    })(rows, prevCol, timeBuff);
-                    i++;
+                        boxesResultLine.push(rawBox);
+                    }
+                    prevCol--;
                 }
-                prevCol--;
+                if (boxesResultLine.length != 0) {
+                    boxesResult.push(boxesResultLine);
+                }
             }
-            timeBuff += (speed / boxCols);
+        } else {
+            for (var row = 0; row < boxRows; row++) {
+                for (var col = 0; col < boxCols; col++) {
+                    boxesResult.push([box2DArr[row][col]]);
+                }
+            }
+        }
+
+        var count = 0;
+        for (var i = 0; i < boxesResult.length; i++) {
+            var boxLine = boxesResult[i];
+            for (var j = 0; j < boxLine.length; j++) {
+                var box = $(boxLine[j]);
+                (function (box, timeBuff) {
+                    var width = box.width();
+                    var height = box.height();
+                    if (grow) {
+                        box.width(0).height(0);
+                    }
+                    count++;
+                    setTimeout(function () {
+                        box.animate({
+                            opacity: 1,
+                            width: width,
+                            height: height
+                        }, speed, function () {
+                            count--;
+                            if (count == 0) {
+                                boxes.remove();
+                                obj.callback();
+                            }
+                        });
+                    }, timeBuff);
+                })(box, timeBuff);
+            }
+            timeBuff += (speed / boxesResult.length) * 2;
         }
     }
 
@@ -1510,20 +1404,38 @@
         foldTemplate(obj, reverse, FALSE, FALSE, 3);
     }
 
-    function foldTemplate(obj, reverse, randomize, onlyFade, curtainEffect) {
+    function sliceUp(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, FALSE, 0, 1);
+    }
+    function sliceDown(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, FALSE, 0, 2);
+    }
+    function sliceUpDown(obj, reverse) {
+        foldTemplate(obj, reverse, FALSE, FALSE, 0, 3);
+    }
+
+    function slicesRandomDown(obj) {
+        foldTemplate(obj, FALSE, TRUE, FALSE, 0, 2);
+    }
+    function slicesRandomUp(obj) {
+        foldTemplate(obj, FALSE, TRUE, FALSE, 0, 1);
+    }
+
+    function foldTemplate(obj, reverse, randomize, onlyFade, curtainEffect, upDownEffect) {
         var options = obj.options;
         var slides = options.slices;
         var speed = options.speed;
+        var ease = options.ease;
         var target = obj.toSlides.eq(0);
         var objSlider = obj.slider;
         var slicesElement = createBoxes(target, objSlider, slides, 1);
-        if (!reverse) {
-            $(reverseArray(slicesElement.get())).appendTo(objSlider);
-        }
         var width = target.width();
         var count = 0;
+        var upDownAlternator = 0;
         if (reverse) {
             reverseArray(slicesElement);
+        } else {
+            $(reverseArray(slicesElement.get())).appendTo(objSlider);
         }
         if (randomize) {
             slicesElement = shuffle(slicesElement);
@@ -1534,6 +1446,8 @@
             var origWidth = slice.width();
             var orgLeft = slice.css("left");
             var left = orgLeft;
+
+
             if (curtainEffect == 1) {
                 left = 0
             } else if (curtainEffect == 2) {
@@ -1544,17 +1458,39 @@
             if (reverse) {
                 left = width - left;
             }
+
             slice.css({
-                width: (onlyFade ? origWidth : 0),
+                width: (onlyFade || upDownEffect ? origWidth : 0),
                 left: left
             });
+
+            if (upDownEffect) {
+                var bottom = TRUE;
+                if (upDownEffect == 3) {
+                    if (upDownAlternator == 0) {
+                        bottom = FALSE;
+                        upDownAlternator++;
+                    } else {
+                        upDownAlternator = 0;
+                    }
+                } else if (upDownEffect == 2) {
+                    bottom = FALSE;
+                }
+                slice.css({
+                    bottom: bottom ? 0 : "auto",
+                    top: bottom ? "auto" : 0,
+                    height: 0
+                });
+            }
+
             count++;
             setTimeout(function () {
                 slice.animate({
                     width: origWidth,
                     opacity: 1,
-                    left: orgLeft
-                }, speed, '', function () {
+                    left: orgLeft,
+                    height: '100%'
+                }, speed, ease, function () {
                     count--;
                     if (count == 0) {
                         slicesElement.remove();
@@ -1563,29 +1499,6 @@
                 });
             }, timeBuff);
         });
-    }
-
-    function show(obj) {
-        var options = obj.options;
-        var vertical = options.vertical;
-        var speed = options.speed;
-
-        var push = 0;
-        var clones = obj.toSlides.clone();
-        clones.each(function (index) {
-            var that = $(this);
-            that.prependTo(obj.slider);
-            var extraPush = that['outer' + (vertical ? "Height" : "Width")](TRUE);
-            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).hide();
-            that.show(speed, function () {
-                that.remove();
-                if (index == 0) {
-                    obj.callback();
-                }
-            });
-            push += extraPush;
-        });
-        return clones.eq(0);
     }
 
     // 1: up, 2: right, 3: down, 4, left:
