@@ -67,6 +67,50 @@
     </style>
     <script>
         $(document).ready(function(){
+            // The main slider
+            (function () {
+                // The video on slide 3.
+                var player = loadVideo('dubstebVideo', 'hDlif8Km4S4');
+
+                var oldSlide = 0;
+                var sudoSlider = $("#frontPageSlider").sudoSlider({
+                    effect: frontPageSliderEffect,
+                    responsive: true,
+                    numeric:true,
+                    customlink: ".customlink",
+                    history: true,
+                    updatebefore: true,
+                    numerictext: ["home", "download", "video", "donate", "demo"],
+                    speed: 700,
+                    prevNext: false,
+                    afteranimation: function (slide) {
+                        if (slide == 3) {
+                            player.playVideo();
+                        }
+                        oldSlide = slide;
+                    },
+                    beforeanimation: function () {
+                        if (oldSlide == 3) {
+                            player.pauseVideo();
+                        }
+                    },
+                    startslide: 3
+                });
+
+                // This effect is basically the boxRainGrow effect, but with a dynamic number of cols.
+                function frontPageSliderEffect(obj) {
+                    var width = $(window).width();
+                    var height = obj.toSlides.height();
+                    var rows = 4;
+                    var cols = Math.ceil((width / height) * rows);
+                    cols = Math.min(10, cols);
+                    obj.options.boxcols = cols;
+                    obj.options.boxrows = rows;
+                    return $.fn.sudoSlider.effects.boxRainGrow(obj);
+                }
+            })();
+
+            // The demo slider, thats inside the main slider. (Could just as well be initialized before the main slider).
             $("#demoslider").sudoSlider({
                 continuous:true,
                 ajax: [
@@ -78,31 +122,8 @@
                 ],
                 effect: "random"
             });
-            var player = loadVideo('dubstebVideo', 'hDlif8Km4S4');
-            var oldSlide = 0;
-            var sudoSlider = $("#frontPageSlider").sudoSlider({
-                effect: "boxRainGrow",
-                responsive: true,
-                numeric:true,
-                customlink: ".customlink",
-                history: true,
-                updatebefore: true,
-                numerictext: ["home", "download", "video", "donate", "demo"],
-                speed: 700,
-                prevNext: false,
-                afteranimation: function (slide) {
-                    if (slide == 3) {
-                        player.playVideo();
-                    }
-                    oldSlide = slide;
-                },
-                beforeanimation: function () {
-                    if (oldSlide == 3) {
-                        player.pauseVideo();
-                    }
-                },
-                startslide: 3
-            });
+
+            // Wrap the content of the slides inside a container, to limit the width.
             $(".textSlide").each(function () {
                 var that = $(this);
                 var children = that.children();
@@ -110,20 +131,34 @@
                 that.append(wrappingElement);
                 wrappingElement.append(children);
             });
-            function loadVideo(id, playerId) {
-                var tag = document.createElement('script');
-                tag.src = "http://www.youtube.com/player_api";
-                var firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+            // Load the video with the given videoId into the container with the given id.
+            function loadVideo(id, videoId) {
+                if (!window.onYouTubePlayerAPIReady) {
+                    var tag = document.createElement('script');
+                    tag.src = "http://www.youtube.com/player_api";
+                    var firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                    window.youtubePlayerReady = false;
+                }
 
                 var player = false;
-
-                window.onYouTubePlayerAPIReady = function () {
+                function loadPlayer () {
                     player = new YT.Player(id, {
                         height: '315',
                         width: '560',
-                        videoId: playerId
+                        videoId: videoId
                     });
+                }
+                if (!window.youtubePlayerReady) {
+                    var oldFunction = window.onYouTubePlayerAPIReady;
+                    window.onYouTubePlayerAPIReady = function () {
+                        window.youtubePlayerReady = true;
+                        loadPlayer();
+                        if (oldFunction) {
+                            oldFunction();
+                        }
+                    }
                 }
                 return  {
                     playVideo : function () {
@@ -146,7 +181,7 @@
         <div id="frontPageSlider">
             <ul>
                 <li class="textSlide" style="background: #f2f2f2">
-                    <div style="z-index:1;margin-top:7px;margin-left:10px;width:500px;">
+                    <div style="margin-top:7px;margin-left:10px;width:500px;">
                         <h1 style="font-size: 30px;">Why use SudoSlider?</h1>
                         <ul>
                             <li>It can be responsive</li>
@@ -158,9 +193,7 @@
                             <li>A pack of demos to get started</li>
                         </ul>
                     </div>
-                    <div style="position:absolute;top:0;right:0;z-index:10;height:120px;width:500px;">
-                        <h1 style="position:absolute;top:65px;left:50px;font-size:70px;font-weight: bold;" rel="next" class="customlink">Press me</h1>
-                    </div>
+                    <h1 style="position:absolute;top:65px;right:50px;font-size:70px;font-weight: bold;" rel="next" class="customlink">Press me</h1>
                     <div style="position:absolute;bottom:10px;right:20px;">
                         <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip" style="float:left;">
                             <img src="http://webbies.dk/assets/templates/SudoSlider/images/download_box.png" alt="image description" width="64" height="64"/>
@@ -240,6 +273,22 @@
         <!-- End featured -->
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div style="width:728px;height:90px;margin:0 auto;">
 	<script type="text/javascript">
