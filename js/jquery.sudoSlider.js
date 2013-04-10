@@ -69,42 +69,6 @@
 		};
 		// Defining the base element.
 		var baseSlider = this;
-		// This object holds all the callback functions, each field in the object is an array of functions.
-		var publicMethods = {};
-		// Adds a public method to the base element, to allow methods calls to be made on the returned object.
-		function addMethod(name, func) {
-			if (publicMethods[name]) {
-				publicMethods[name].push(func);
-			} else {
-				// No function, lets first make an array in the publicMethods object.
-				publicMethods[name] = [func];
-				// Defining the method that is actually called. Its only responsibility is to call the specified methods and make sure to return something meaningful.
-				baseSlider[name] = function () {
-					var functions = publicMethods[name];
-					var returnvar;
-					var numberofreturns = 0;
-					for (var i = 0; i < functions.length; i++)
-					{
-						// Arguments is already defined, they are the arguments this method was called with.
-						var tmpReturn = functions[i].apply(baseSlider, arguments);
-						if (tmpReturn != undefined) {
-							numberofreturns++;
-							if (numberofreturns == 1) {
-								returnvar = tmpReturn;
-							} else if (numberofreturns == 2) {
-								returnvar = [returnvar, tmpReturn];
-							} else {
-								returnvar.push(tmpReturn);
-							}
-						}
-					}
-					if (numberofreturns == 0) {
-						return baseSlider;
-					}
-					return returnvar;
-				};
-			}
-		}
 
 		function objectToLowercase (obj) {
 			var ret = {};
@@ -371,7 +335,6 @@
             }
 
             function getEffectMethod(inputEffect) {
-                var sudoSliderEffects = $.fn.sudoSlider.effects;
                 if ($.isArray(inputEffect)) {
                     return arrayToRandomEffect(inputEffect);
                 } else if (isFunc(inputEffect)) {
@@ -381,7 +344,7 @@
                         var array = inputEffect.split(",");
                         return arrayToRandomEffect(array);
                     } else {
-                        return sudoSliderEffects[inputEffect];
+                        return $.fn.sudoSlider.effects[inputEffect];
                     }
                 }
             }
@@ -1067,7 +1030,7 @@
 				adjustPosition();
 			}
 
-			addMethod("destroy", publicDestroy);
+            baseSlider.destroy = publicDestroy;
 
 			function publicInit(){
 				if (destroyed) {
@@ -1075,19 +1038,19 @@
 				}
 			}
 
-			addMethod("init", publicInit);
+            baseSlider.init = publicInit;
 
-			addMethod("getOption", function(a){
+            baseSlider.getOption = function(a){
 				return options[a.toLowerCase()];
-			});
+			}
 
-			addMethod("setOption", function(a, val){
+            baseSlider.setOption = function(a, val){
 				publicDestroy();
 				options[a.toLowerCase()] = val;
 				publicInit();
-			});
+			}
 
-			addMethod("insertSlide", function (html, pos, numtext, goToSlide) {
+            baseSlider.insertSlide = function (html, pos, numtext, goToSlide) {
 				publicDestroy();
 				// pos = 0 means before everything else.
 				// pos = 1 means after the first slide.
@@ -1108,9 +1071,9 @@
 
 				option[19]/*numerictext*/.splice(pos,0,numtext || parseInt10(pos)+1);
 				publicInit();
-			});
+			}
 
-			addMethod("removeSlide", function(pos){
+            baseSlider.removeSlide = function(pos){
 				pos--; // 1 == the first.
 				publicDestroy();
 
@@ -1121,36 +1084,36 @@
 				}
 
 				publicInit();
-			});
+			}
 
-			addMethod("goToSlide", function(a){
+            baseSlider.goToSlide = function(a){
 				animateToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE);
-			});
+			}
 
-			addMethod("block", function(){
+            baseSlider.block = function(){
 				clickable = FALSE;
-			});
+			}
 
-			addMethod("unblock", function(){
+            baseSlider.unblock = function(){
 				clickable = TRUE;
-			});
+			}
 
-			addMethod("startAuto", function(){
+            baseSlider.startAuto = function(){
 				option[13]/*auto*/ = TRUE;
 				autoTimeout = startAuto(option[14]/*pause*/);
-			});
+			}
 
-			addMethod("stopAuto", function(){
+            baseSlider.stopAuto = function(){
 				option[13]/*auto*/ = FALSE;
 				stopAuto();
-			});
+			}
 
-			addMethod("adjust", function(){
+            baseSlider.adjust = function(){
 				autoadjust(t, 0);
 				adjustPosition();
-			});
+			}
 
-			addMethod("getValue", function(a){
+            baseSlider.getValue = function(a){
 				return a == 'currentSlide' ?
 						t + 1 :
 					a == 'totalSlides' ?
@@ -1162,12 +1125,12 @@
 					a == 'autoAnimation' ?
 						autoOn :
 					undefined;
-			});
+			}
 
-			addMethod("getSlide", function (number) {
-			    number = getRealPos(parseInt10(number) - 1);
-			    return getSlideElements(number);
-			});
+            baseSlider.getSlide = function (number) {
+                number = getRealPos(parseInt10(number) - 1);
+                return getSlideElements(number);
+            }
 
 
             // Done, now initialize.
