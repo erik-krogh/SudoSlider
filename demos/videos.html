@@ -1,89 +1,137 @@
 ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Sudo Slider | Videos in slider</title>
+    <title>Sudo Slider | Videos in the slider</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-    <link rel="STYLESHEET" type="text/css" href="../css/style.css">
+    <link rel="STYLESHEET" type="text/css" href="../css/style.css" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/lib/jQuery.tubeplayer.min.js"></script>
-    <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            // Initialize the videos. 
-            jQuery("#video1").tubeplayer({
-                width: 696, // the width of the player
-                height: 400, // the height of the player
-                allowFullScreen: "true", // true by default, allow user to go full screen
-                initialVideo: "Oiuzt2E4NYc", // the video that is loaded into the player
-                preferredQuality: "large",// preferred quality: default, small, medium, large, hd720
-            });
-            jQuery("#video2").tubeplayer({
-                width: 696, // the width of the player
-                height: 400, // the height of the player
-                allowFullScreen: "true", // true by default, allow user to go full screen
-                initialVideo: "gsyMiTx_CF8", // the video that is loaded into the player
-                preferredQuality: "large",// preferred quality: default, small, medium, large, hd720
-            });
+    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <script>
+        $(document).ready(function(){
+            // The video on slide 3.
+            var videos = [];
+            videos[1] = loadVideo('video1', 'Oiuzt2E4NYc');
+            videos[2] = loadVideo('video2', 'gsyMiTx_CF8');
+            videos[3] = loadVideo('video3', 'hDlif8Km4S4');
 
-            var sudoSlider = $("#slider").sudoSlider({
-                beforeAnimation: function () {
-                    $("#slider ul li").children().each(function () {
-                        $(this).tubeplayer("pause");
-                    });
+            var oldSlide = 0;
+            var sudoSlider = $("#frontPageSlider").sudoSlider({
+                effect: "slide",
+                numeric:true,
+                prevNext: false,
+                beforeanimation: function (slide) {
+                    var video = videos[oldSlide];
+                    if (video) {
+                        video.pauseVideo();
+                    }
+                    oldSlide = slide;
                 }
             });
+
+            // Load the video with the given videoId into the container with the given id.
+            function loadVideo(id, videoId, mute) {
+                // First time setup, lazy load the YouTube API.
+                if (!window.onYouTubePlayerAPIReady) {
+                    var tag = document.createElement('script');
+                    tag.src = "http://www.youtube.com/player_api";
+                    var firstScriptTag = document.getElementsByTagName('script')[0];
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                    window.youtubePlayerReady = false;
+                }
+
+                var player = false;
+                function loadPlayer () {
+                    player = new YT.Player(id, {
+                        height: 480,
+                        width: 853,
+                        videoId: videoId
+                    });
+                    if (mute) {
+                        player.mute();
+                    }
+                    // This is needed to adjust the height of the slider. Since the slider can't tell that flash-content has been loaded.
+                    sudoSlider.adjust();
+                }
+                if (!window.youtubePlayerReady) {
+                    var oldFunction = window.onYouTubePlayerAPIReady;
+                    window.onYouTubePlayerAPIReady = function () {
+                        window.youtubePlayerReady = true;
+                        loadPlayer();
+                        if (oldFunction) {
+                            oldFunction();
+                        }
+                    }
+                }
+                return  {
+                    playVideo : function () {
+                        if (player) player.playVideo();
+                    },
+                    pauseVideo : function () {
+                        if (player) player.pauseVideo();
+                    }
+                };
+            }
         });
     </script>
 
 
-
-
 </head>
 <body>
-    <div id="container">
-        <h1>Sudo Slider jQuery Plugin - Videos in slider</h1>
-        <div style="position: relative;">
-            <div id="slider">
-                <ul>
-                    <li style="height:400px;">
-                        <div id="video1"></div>
-                    </li>
-                    <li style="height:400px;">
-                        <div id="video2"></div>
-                    </li>
-                </ul>
-            </div>
+<div id="container">
+    <!-- START MEDIUM SECTION -->
+    <h2>See the source code for how to do this. </h2>
+    <h2>Remember that only the default slide animation works with flash content. </h2>
+    <div style="position: relative;">
+        <div id="frontPageSlider">
+            <ul>
+                <li>
+                    <div id="video1"></div>
+                </li>
+
+
+                <li>
+                    <div id="video2"></div>
+                </li>
+
+
+                <li>
+                    <div id="video3"></div>
+                </li>
+            </ul>
         </div>
-        <h3>Usage</h3>
-        <h4>See the source code, remember to include tubeplayer.</h4>
+        <h2>You can always just insert a flash video into a slide <br/>
+            You only need to do these sorts of tricks if you want to pause the video when its not visible</h2>
     </div>
+</div>
 
-    <div style="width: 728px; height: 90px; margin: 0 auto;">
-        <script type="text/javascript">
-		<!--
-    google_ad_client = "pub-8170632875475442";
-    /* Sudo Slider, lang horisontal */
-    google_ad_slot = "0149025622";
-    google_ad_width = 728;
-    google_ad_height = 90;
-    //-->
-        </script>
-        <script type="text/javascript"
-            src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-        </script>
-    </div>
+
+<div style="width:728px;height:90px;margin:0 auto;">
     <script type="text/javascript">
-
-        var _gaq = _gaq || [];
-        _gaq.push(['_setAccount', 'UA-20484420-1']);
-        _gaq.push(['_trackPageview']);
-
-        (function () {
-            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-        })();
-
+        <!--
+        google_ad_client = "pub-8170632875475442";
+        /* Sudo Slider, lang horisontal */
+        google_ad_slot = "0149025622";
+        google_ad_width = 728;
+        google_ad_height = 90;
+        //-->
     </script>
+    <script type="text/javascript"
+            src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-20484420-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+</script>
+
 </body>
 </html>
