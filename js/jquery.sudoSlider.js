@@ -442,7 +442,7 @@
 			}
 
             // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
-			function fadeControl (fadeOpacity,fadetime,nextcontrol) {
+			function fadeControl (fadeOpacity, fadetime ,nextcontrol) {
 				if (nextcontrol) {
 					var eA = nextbutton,
 					directionA = NEXT_STRING;
@@ -451,25 +451,23 @@
 					directionA = PREV_STRING;
 				}
 
-				if (option[3]/*controlsShow*/) {
-                    if (option[17]/*prevnext*/) {
-                        if (fadeOpacity) {
-                            eA.stop().fadeTo(fadetime, 1);
-                        }
-                        else {
-                            eA.stop().fadeTo(fadetime, 0);
-                        }
+				if (option[3]/*controlsShow*/ && option[17]/*prevnext*/) {
+                    if (fadeOpacity) {
+                        eA.stop().fadeIn(fadetime);
+                    }
+                    else {
+                        eA.stop().fadeOut(fadetime);
                     }
 				}
 				if(option[2]/*customlink*/) {
-				    var filterFunction = function () {
+				    function filterFunction () {
 				        return (getRelAttribute(this) == directionA);
-				    };
+				    }
 				    if (fadeOpacity) {
-				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeTo(fadetime, 1);
+				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeIn(fadetime);
 				    }
 				    else {
-				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeTo(fadetime, 0);
+				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeOut(fadetime);
 				    }
 				}
 			}
