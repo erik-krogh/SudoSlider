@@ -70,7 +70,7 @@
             // The main slider
             (function () {
                 // The video on slide 3.
-                var player = loadVideo('dubstebVideo', 'hDlif8Km4S4');
+                var dubstebVideoPlayer = loadVideo('dubstebVideo', 'hDlif8Km4S4', true);
 
                 var oldSlide = 0;
                 var sudoSlider = $("#frontPageSlider").sudoSlider({
@@ -85,13 +85,13 @@
                     prevNext: false,
                     afteranimation: function (slide) {
                         if (slide == 3) {
-                            player.playVideo();
+                            dubstebVideoPlayer.playVideo();
                         }
                         oldSlide = slide;
                     },
                     beforeanimation: function () {
                         if (oldSlide == 3) {
-                            player.pauseVideo();
+                            dubstebVideoPlayer.pauseVideo();
                         }
                     },
                     startslide: 3
@@ -133,7 +133,7 @@
             });
 
             // Load the video with the given videoId into the container with the given id.
-            function loadVideo(id, videoId) {
+            function loadVideo(id, videoId, mute) {
                 if (!window.onYouTubePlayerAPIReady) {
                     var tag = document.createElement('script');
                     tag.src = "http://www.youtube.com/player_api";
@@ -149,6 +149,9 @@
                         width: '560',
                         videoId: videoId
                     });
+                    if (mute) {
+                        player.mute();
+                    }
                 }
                 if (!window.youtubePlayerReady) {
                     var oldFunction = window.onYouTubePlayerAPIReady;
