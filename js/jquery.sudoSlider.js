@@ -9,7 +9,7 @@
  *	 http://jquery.com
  *
  */
-(function($) {
+(function($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
     var FALSE = false;
@@ -231,7 +231,7 @@
 				option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
 
 				if (option[11]/*responsive*/) {
-					$(window).on("resize focus", adjustResponsiveLayout).resize();
+					$(win).on("resize focus", adjustResponsiveLayout).resize();
                     setTimeout(adjustResponsiveLayout);
 				}
 
@@ -295,7 +295,7 @@
 					    goToSlide(destroyT,FALSE);
 					} else if (option[27]/*history*/) {
 						// I support the jquery.address plugin, Ben Alman's hashchange plugin and Ben Alman's jQuery.BBQ.
-						var window = $(window); // BYTES!
+						var window = $(win); // BYTES!
 						var hashPlugin;
 						if (hashPlugin = window.hashchange) {
 							hashPlugin(URLChange);
@@ -368,9 +368,9 @@
 
 			// Triggered when the URL changes.
 			function URLChange() {
-				var target = filterUrlHash(location.hash.substr(1));
+				var target = getUrlHashTarget();
 				if (init) goToSlide(target,FALSE);
-				else if (target != t) animateToSlide(target, FALSE);
+				else animateToSlide(target, FALSE);
 			}
 
 			function startAsyncDelayedLoad () {
@@ -425,7 +425,7 @@
 				});
 			}
 
-			// <strike>Simple function</strike><b>A litle complecated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
+			// <strike>Simple function</strike><b>A litle complicated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
 			function animateToSlide(i, clicked) {
 			    if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
@@ -460,14 +460,12 @@
                     }
 				}
 				if(option[2]/*customlink*/) {
-				    function filterFunction () {
-				        return (getRelAttribute(this) == directionA);
-				    }
+                    var filterString = "[rel='" + directionA + "']";
 				    if (fadeOpacity) {
-				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeIn(fadetime);
+                        $(option[2]/*customlink*/).filter(filterString).stop().fadeIn(fadetime);
 				    }
 				    else {
-				        $(option[2]/*customlink*/).filter(filterFunction).stop().fadeOut(fadetime);
+				        $(option[2]/*customlink*/).filter(filterString).stop().fadeOut(fadetime);
 				    }
 				}
 			}
@@ -508,7 +506,8 @@
 					}
 			}
 
-			function filterUrlHash(hashString) {
+			function getUrlHashTarget() {
+                var hashString = location.hash.substr(1)
 				for (i in option[19]/*numerictext*/) {
 				    if (option[19]/*numerictext*/[i] == hashString) {
 				        return i;
@@ -653,7 +652,7 @@
 				if(!option[30]/*updateBefore*/) setCurrent(t);
 				adjustPosition();
 				clickable = TRUE;
-				if(option[27]/*history*/ && clicked) window.location.hash = option[19]/*numerictext*/[t];
+				if(option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[t];
 
 				if (option[13]/*auto*/) {
 				    // Stopping auto if clicked. And also continuing after X seconds of inactivity.
@@ -669,7 +668,7 @@
 				    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
 				}
 
-                if (animateToAfterCompletion != FALSE) {
+                if (animateToAfterCompletion !== FALSE) {
                     var animateTo = animateToAfterCompletion;
                     animateToAfterCompletion = FALSE;
                     animateToSlide(animateTo, animateToAfterCompletionClicked);
@@ -925,7 +924,6 @@
                             },
                             callback: function () {
                                 currentlyAnimating = FALSE;
-                                clickable = TRUE;
                                 goToSlide(dir,clicked);
                                 fixClearType(toSlides);
 
@@ -963,7 +961,7 @@
             }
 
 			function goToSlide(slide, clicked) {
-				if ((clickable && !destroyed)) {
+				if ((!destroyed)) {
 					clickable = !clicked && !option[13]/*auto*/;
 					ot = t;
 					t = slide;
@@ -1010,7 +1008,7 @@
 				destroyT = t;
 
 				if (option[11]/*responsive*/) {
-					$(window).off("resize focus", adjustResponsiveLayout);
+					$(win).off("resize focus", adjustResponsiveLayout);
 				}
 
 				if (controls) {
@@ -1142,8 +1140,8 @@
     // Start by defining everything, the implementations is below.
 	var normalEffects = {
         slide : slide,
+        fade : fade,
         fadeInOut : fadeInOut,
-        crossFade : crossFade,
         foldRandom : foldRandom,
         boxRandom : boxRandom,
         boxRandomGrow : boxRandomGrow,
@@ -1570,7 +1568,7 @@
     }
 
 
-    function crossFade(obj) {
+    function fade(obj) {
         var fadeSpeed = obj.options.speed;
         var clones = obj.toSlides.clone();
         finishFadeFx(obj, fadeSpeed, clones);
@@ -1579,23 +1577,15 @@
 
     function finishFadeFx(obj, speed, clones) {
         var options = obj.options;
-        var vertical = options.vertical;
-        var ease = options.ease;
-        var push = 0;
-        clones.animate({opacity: 1}, 0).each(function (index) {
-            var that = $(this);
-            that.prependTo(obj.slider)
-                .css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : 0, left : vertical ? 0 : push}).
-                hide()
-                .fadeIn(speed, ease, function() {
-                    that.remove();
-                    if (index == 0) {
-                        obj.fromSlides.animate({opacity: 1}, 0);
-                        obj.callback();
-                    }
-            });
-            push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
-        });
+        options.boxcols = 1;
+        options.boxrows = 1;
+        options.speed = speed;
+        var originalCallback = obj.callback;
+        obj.callback = function () {
+            obj.fromSlides.animate({opacity: 1}, 0);
+            originalCallback();
+        };
+        return boxTemplate(obj);
     }
 
     function createBoxes(target, obj, numberOfCols, numberOfRows) {
@@ -1699,6 +1689,6 @@
         return obj[result];
     }
 
-})(jQuery);
+})(jQuery, window);
 // If you did just read the entire code, congrats.
 // Did you find a bug? I didn't, so plz tell me if you did. (https://github.com/webbiesdk/SudoSlider/issues)
