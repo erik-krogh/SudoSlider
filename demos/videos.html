@@ -30,7 +30,6 @@
 
             // Load the video with the given videoId into the container with the given id.
             function loadVideo(id, videoId, mute) {
-                // First time setup, lazy load the YouTube API.
                 if (!window.onYouTubePlayerAPIReady) {
                     var tag = document.createElement('script');
                     tag.src = "http://www.youtube.com/player_api";
@@ -42,15 +41,18 @@
                 var player = false;
                 function loadPlayer () {
                     player = new YT.Player(id, {
-                        height: 480,
-                        width: 853,
-                        videoId: videoId
+                        height: '315',
+                        width: '560',
+                        videoId: videoId,
+                        events: {
+                            'onReady': function () {
+                                if (mute) {
+                                    player.mute();
+                                }
+                            }
+                            // 'onStateChange': onPlayerStateChange
+                        }
                     });
-                    if (mute) {
-                        player.mute();
-                    }
-                    // This is needed to adjust the height of the slider. Since the slider can't tell that flash-content has been loaded.
-                    sudoSlider.adjust();
                 }
                 if (!window.youtubePlayerReady) {
                     var oldFunction = window.onYouTubePlayerAPIReady;
@@ -61,6 +63,8 @@
                             oldFunction();
                         }
                     }
+                } else {
+                    loadPlayer();
                 }
                 return  {
                     playVideo : function () {

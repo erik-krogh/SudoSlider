@@ -73,10 +73,10 @@
                 var dubstebVideoPlayer = loadVideo('dubstebVideo', 'hDlif8Km4S4', true);
 
                 var oldSlide = 0;
-                var sudoSlider = $("#frontPageSlider").sudoSlider({
+                var frontPageSlider = $("#frontPageSlider").sudoSlider({
                     effect: frontPageSliderEffect,
                     responsive: true,
-                    numeric:true,
+                    speed: 2000,
                     customlink: ".customlink",
                     history: true,
                     updatebefore: true,
@@ -96,6 +96,12 @@
                     }
                 });
 
+                // Stealing the donate links.
+                $(".donateLink").click(function () {
+                    frontPageSlider.goToSlide(4);
+                    return false;
+                })
+
                 // This effect is basically the boxRainGrow effect, but with a dynamic number of cols.
                 function frontPageSliderEffect(obj) {
                     var width = $(window).width();
@@ -109,18 +115,33 @@
                 }
             })();
 
-            // The demo slider, thats inside the main slider. (Could just as well be initialized before the main slider).
-            $("#demoslider").sudoSlider({
-                continuous:true,
-                ajax: [
-                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/01.jpg',
-                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/02.jpg',
-                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/03.jpg',
-                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/04.jpg',
-                    'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/05.jpg'
-                ],
-                effect: "random"
-            });
+            // The demo slider
+            (function () {
+                // The demo slider, thats inside the main slider. (Could just as well be initialized before the main slider).
+                $("#demoslider").sudoSlider({
+                    continuous:true,
+                    ajax: [
+                        'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/01.jpg',
+                        'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/02.jpg',
+                        'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/03.jpg',
+                        'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/04.jpg',
+                        'http://webbies.dk/assets/templates/SudoSlider/images/demoimages/05.jpg'
+                    ],
+                    effect: demoSliderEffect
+                });
+
+                var sliderEffects = $.fn.sudoSlider.effects;
+                var effectsDropDown = $("#demoSliderEffects");
+                $.each(sliderEffects, function (name, effect){
+                    effectsDropDown.append("<option value=\"" + name + "\">" + name + "</option>")
+                });
+
+                function demoSliderEffect(obj) {
+                    return sliderEffects[effectsDropDown.val()](obj);;
+                }
+            })();
+
+
 
             // Wrap the content of the slides inside a container, to limit the width.
             $(".textSlide").each(function () {
@@ -146,11 +167,16 @@
                     player = new YT.Player(id, {
                         height: '315',
                         width: '560',
-                        videoId: videoId
+                        videoId: videoId,
+                        events: {
+                            'onReady': function () {
+                                if (mute) {
+                                    player.mute();
+                                }
+                            }
+                            // 'onStateChange': onPlayerStateChange
+                        }
                     });
-                    if (mute) {
-                        player.mute();
-                    }
                 }
                 if (!window.youtubePlayerReady) {
                     var oldFunction = window.onYouTubePlayerAPIReady;
@@ -161,6 +187,8 @@
                             oldFunction();
                         }
                     }
+                } else {
+                    loadPlayer();
                 }
                 return  {
                     playVideo : function () {
@@ -178,7 +206,6 @@
 </head>
 <body>
 <div id="container">
-    <!-- START MEDIUM SECTION -->
     <div style="position: relative;">
         <div id="frontPageSlider">
             <ul>
@@ -186,22 +213,22 @@
                     <div style="margin-top:7px;margin-left:10px;width:500px;">
                         <h1 style="font-size: 30px;">Why use SudoSlider?</h1>
                         <ul>
-                            <li>It can be responsive</li>
+                            <li>It can be <a href="http://webbies.dk/assets/files/SudoSlider/package/demos/responsive.html">responsive</a></li>
                             <li>Can contain <span style="color:darkgreen">ANY</span> HTML</li>
-                            <li>Lots of animations</li>
-                            <li>Can load AJAX content</li>
+                            <li><a href="javascript:void(0);" class="customlink" rel="5">Lots of animations</a></li>
+                            <li>Can <a href="http://webbies.dk/assets/files/SudoSlider/package/demos/ajax.html">load AJAX content</a></li>
                             <li>Supports IE6+, Chrome, Firefox etc.</li>
                             <li>Callbacks and methods for developers</li>
-                            <li>A pack of demos to get started</li>
+                            <li><a href="http://webbies.dk/SudoSlider/demos.html">A pack of demos to get started</a></li>
                         </ul>
                     </div>
-                    <h1 style="position:absolute;top:65px;right:50px;font-size:70px;font-weight: bold;" rel="next" class="customlink">Press me</h1>
+                    <h1 style="position:absolute;top:65px;right:50px;font-size:70px;font-weight: bold;" rel="2" class="customlink"><a href="javascript:void(0)">Press me</a></h1>
                     <div style="position:absolute;bottom:10px;right:20px;">
                         <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip" style="float:left;">
                             <img src="http://webbies.dk/assets/templates/SudoSlider/images/download_box.png" alt="image description" width="64" height="64"/>
                         </a>
                         <div style="float:left;">
-                            <h1 style="font-size: 40px;text-decoration: underline;position:relative;top:20px;">
+                            <h1 style="font-size: 40px;position:relative;top:20px;">
                                 <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip">
                                     Download
                                 </a>
@@ -216,22 +243,22 @@
                         <img src="http://webbies.dk/assets/templates/SudoSlider/images/download_box.png" alt="image description"/>
                     </a>
                     <div style="position:absolute;left:256px;top:115px;">
-                        <h1 style="font-size: 40px;text-decoration: underline;">
+                        <h1 style="font-size: 40px;">
                             <a href="http://webbies.dk/assets/files/SudoSlider/SudoSlider.zip">
                                 Download
                             </a>
                         </h1>
                     </div>
 
-                    <div style="position:absolute;right:20px;top:120px;">
-                        <h1 style="font-size: 30px" rel="next" class="customlink">See a video, in the slider -></h1>
-                    </div>
+                    <h1 style="position:absolute;top:120px;right:50px;font-size:30px;font-weight: bold;" rel="3" class="customlink"><a href="javascript:void(0);">See a video in the slider -&gt;</a></h1>
+
+                    <h2 style="position:absolute;left:310px;top:200px;">Press the back button in the browser to go back</h2>
                 </li>
 
 
                 <li class="textSlide" data-transition="slide" style="height:315px;background: #f2f2f2">
                     <div style="position:absolute;top:40px;left:10px;">
-                        <h1 style="font-size: 30px" rel="prev" class="customlink">&lt;- Back to download</h1>
+                        <h1 style="font-size: 30px" rel="2" class="customlink"><a href="javascript:void(0)">&lt;- Back to download</a></h1>
                         <h2>See other examples of <br />what's possible in <a href="http://webbies.dk/SudoSlider/demos.html">the demos</a></h2>
                     </div>
                     <div style="position:absolute;top:0;right:0;">
@@ -260,12 +287,16 @@
                             <input type="hidden" name="return" value="http://webbies.dk/SudoSlider/index.php?id=54">
                         </form>
                     </div>
+                    <div style="position:absolute;top:0px;left:340px;">
+                        <img src="http://webbies.dk/assets/templates/SudoSlider/images/coffee.png" />
+                    </div>
                 </li>
 
 
-                <li class="textSlide" style="background: #f2f2f2">
+                <li class="textSlide" data-transition="unCoverUp" style="background: #f2f2f2">
                     <div id="slidercontainer" style="margin-top:10px;">
-                        <div class="center"><h2>Simple demo</h2></div>
+                        <div class="center"><h2>Effects explorer</h2></div>
+                        <div class="center"><h3 style="display:inline;">Select effect </h3> <select id="demoSliderEffects"></select></div>
                         <div id="demoslider"></div>
                     </div>
                 </li>
