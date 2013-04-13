@@ -1135,39 +1135,42 @@
         slide : slide,
         fade : fade,
         fadeInOut : fadeInOut,
-        foldRandom : foldRandom,
+        foldRandomVertical : foldRandomVertical,
+        foldRandomHorizontal: foldRandomHorizontal,
         boxRandom : boxRandom,
-        boxRandomGrow : boxRandomGrow,
-        slicesRandomDown : slicesRandomDown,
-        slicesRandomUp : slicesRandomUp
+        boxRandomGrow : boxRandomGrow
 	};
 
     // The functions here must have an "reverse" argument as the second argument in the function.
     var reversibleEffects = {
-        fold : fold,
-        blinds1: blinds1,
-        blinds2: blinds2,
-        blinds3: blinds3,
         boxes : boxes,
         boxesGrow : boxesGrow,
         boxRain : boxRain,
         boxRainGrow : boxRainGrow,
-        slicesFade: slicesFade,
-        sliceUp : sliceUp,
-        sliceDown : sliceDown,
         sliceUpDown : sliceUpDown
     }
 
     // Effects that can go in all directions. Must have a "direction" argument as the second argument.
     var genericEffects = {
         push: pushTemplate,
-        unCover: unCoverTemplate
+        unCover: unCoverTemplate,
+        slicesRandom: slicesRandom,
+        fold : fold,
+        blinds1: blinds1,
+        blinds2: blinds2,
+        blinds3: blinds3,
+        slicesFade: slicesFade
     }
 
-    function makeGenericEffects() {
+    // function : (obj, dir, reverse)
+    var genericReversibleEffects = {
+        slice: slice
+    }
+
+    function makeGenericEffects(genericEffects) {
         var result = {};
         $.each(genericEffects, function (name, templateFunction) {
-            result[name] = function (obj) {
+            result[name] = function (obj, reverse) {
                 var vertical = obj.options.vertical;
                 var diff = obj.diff;
                 var dir;
@@ -1184,20 +1187,23 @@
                         dir = 4;
                     }
                 }
-                return templateFunction(obj, dir);
+                return templateFunction(obj, dir, reverse);
             }
             $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
-                result[name + direction] = function (obj) {
-                    templateFunction(obj, index + 1);
+                result[name + direction] = function (obj, reverse) {
+                    templateFunction(obj, index + 1, reverse);
                 }
             })
         });
         return result;
     }
 
-    function makeReversedEffects() {
+    function makeReversedEffects(reversibleEffects) {
         var result = {};
         $.each(reversibleEffects, function (name, effectFunction) {
+            result[name] = function (obj) {
+                effectFunction(obj, FALSE);
+            }
             result[name + "Reverse"] = function (obj) {
                 effectFunction(obj, TRUE);
             }
@@ -1205,11 +1211,14 @@
         return result;
     }
 
-    var reversedEffects = makeReversedEffects();
+    var reversedEffects = makeReversedEffects(reversibleEffects);
 
-    var makedGenericEffects = makeGenericEffects();
+    var makedGenericEffects = makeGenericEffects(genericEffects);
 
-    var allEffects = mergeObjects(normalEffects, makedGenericEffects, reversibleEffects, reversedEffects);
+    var makedGenericReversedEffects = makeReversedEffects(makeGenericEffects(genericReversibleEffects));
+
+
+    var allEffects = mergeObjects(normalEffects, makedGenericEffects, reversedEffects, makedGenericReversedEffects);
 
 	var randomEffects = {
 	    random: function (obj) {
@@ -1331,54 +1340,67 @@
         }
     }
 
-    function slicesFade(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, TRUE);
+    function slicesFade(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative, FALSE, TRUE);
     }
 
-    function fold(obj, reverse) {
-        foldTemplate(obj, reverse);
+    function fold(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative);
     }
 
-    function foldRandom(obj) {
-        foldTemplate(obj, FALSE, TRUE);
+    function foldRandomVertical(obj) {
+        foldTemplate(obj, TRUE, FALSE, TRUE);
     }
 
-    function blinds1(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, FALSE, 1);
+    function foldRandomHorizontal(obj) {
+        foldTemplate(obj, FALSE, FALSE, TRUE);
     }
 
-    function blinds2(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, FALSE, 2);
+    function blinds1(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative, FALSE, FALSE, 1);
     }
 
-    function blinds3(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, FALSE, 3);
+    function blinds2(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative, FALSE, FALSE, 2);
     }
 
-    function sliceUp(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, FALSE, 0, 1);
+    function blinds3(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative, FALSE, FALSE, 3);
     }
-    function sliceDown(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, FALSE, 0, 2);
+
+    function slice(obj, dir, reverse) {
+        var vertical = dir == 1 || dir == 3;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2);
     }
+
     function sliceUpDown(obj, reverse) {
-        foldTemplate(obj, reverse, FALSE, FALSE, 0, 3);
+        foldTemplate(obj, TRUE, reverse, FALSE, FALSE, 0, 3);
     }
 
-    function slicesRandomDown(obj) {
-        foldTemplate(obj, FALSE, TRUE, FALSE, 0, 2);
-    }
-    function slicesRandomUp(obj) {
-        foldTemplate(obj, FALSE, TRUE, FALSE, 0, 1);
+    function slicesRandom(obj, dir) {
+        var vertical = dir == 1 || dir == 3;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2);
     }
 
-    function foldTemplate(obj, reverse, randomize, onlyFade, curtainEffect, upDownEffect) {
+    function foldTemplate(obj, vertical, reverse, randomize, onlyFade, curtainEffect, upDownEffect) {
         var options = obj.options;
         var slides = options.slices;
         var speed = options.speed;
         var ease = options.ease;
         var objSlider = obj.slider;
-        var slicesElement = createBoxes(obj, slides, 1);
+        var slicesElement = createBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides);
         var count = 0;
         var upDownAlternator = 0;
         if (reverse) {
@@ -1392,26 +1414,35 @@
         slicesElement.each(function (i) {
             var timeBuff = ((speed / slides) * i);
             var slice = $(this);
-            var origWidth = slice.width();
+            var orgWidth = slice.width();
+            var orgHeight = slice.height();
             var orgLeft = slice.css("left");
-            var left = orgLeft;
+            var orgTop = slice.css("top");
+            var startPosition = vertical ? orgLeft : orgTop;
 
-            var width = slice.children().width();
+            var innerBox = slice.children();
+            var startAdjustment = innerBox[vertical ? "width" : "height"]();
             if (curtainEffect == 1) {
-                left = 0
+                startPosition = 0
             } else if (curtainEffect == 2) {
-                left = width / 2;
+                startPosition = startAdjustment / 2;
             } else if (curtainEffect == 3) {
-                left = width / 3;
+                startPosition = startAdjustment / 3;
             }
             if (reverse) {
-                left = width - left;
+                startPosition = startAdjustment - startPosition;
             }
-
-            slice.css({
-                width: (onlyFade || upDownEffect ? origWidth : 0),
-                left: left
-            });
+            if (vertical) {
+                slice.css({
+                    width: (onlyFade || upDownEffect ? orgWidth : 0),
+                    left: startPosition
+                });
+            } else {
+                slice.css({
+                    height: (onlyFade || upDownEffect ? orgHeight : 0),
+                    top: startPosition
+                });
+            }
 
             if (upDownEffect) {
                 var bottom = TRUE;
@@ -1425,20 +1456,29 @@
                 } else if (upDownEffect == 2) {
                     bottom = FALSE;
                 }
-                slice.css({
-                    bottom: bottom ? 0 : "auto",
-                    top: bottom ? "auto" : 0,
-                    height: 0
-                });
+                if (vertical) {
+                    slice.css({
+                        bottom: bottom ? 0 : orgHeight,
+                        top: bottom ? orgHeight : 0,
+                        height: 0
+                    });
+                } else {
+                    slice.css({
+                        right: bottom ? 0 : orgWidth,
+                        left: bottom ? orgWidth : 0,
+                        width: 0
+                    });
+                }
             }
 
             count++;
             setTimeout(function () {
                 slice.animate({
-                    width: origWidth,
+                    width: orgWidth,
+                    height: orgHeight,
                     opacity: 1,
                     left: orgLeft,
-                    height: '100%'
+                    top: orgTop
                 }, speed, ease, function () {
                     count--;
                     if (count == 0) {

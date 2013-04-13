@@ -22,12 +22,15 @@
                 controlsFade: false
             });
             var container = $("#effectLinksHolder");
+            var count = 0;
             $.each(effects, function (effectName, effect) {
+                count++;
                 container.append($("<a> " + effectName + " </a> <span>|</span> ").click(function () {
                     useEffect = effect;
                     sudoSlider.goToSlide("next");
                 }))
             });
+            $("#effectCounter").text(count);
         });
     </script>
 
@@ -37,7 +40,7 @@
 </head>
 <body>
 <div id="container">
-    <h1>Sudo Slider jQuery Plugin - Explorer the effects</h1>
+    <h1>Sudo Slider jQuery Plugin - Explorer the <span id="effectCounter"></span> effects</h1>
     <div style="position:relative;">
         <div id="slider">
             <ul>
