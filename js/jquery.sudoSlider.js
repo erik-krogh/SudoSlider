@@ -608,12 +608,12 @@
                     if (axis == option[7]/*vertical*/) {
                         pixels += targetPixels;
                     } else {
-                        pixels = Math.max(targetPixels, pixels);
+                        pixels = mathMax(targetPixels, pixels);
                     }
                 }
 
 				var speed = adjustTargetTime - getTimeInMillis();
-				speed = Math.max(speed, 0);
+				speed = mathMax(speed, 0);
 				// First i run it. In case there are no images to be loaded.
 				obj.animate(
 					axis ? {height : pixels} : {width : pixels},
@@ -942,20 +942,13 @@
                         if (slideSpecificEffect) {
                             effect = getEffectMethod(slideSpecificEffect);
                         }
-                        var extraClone = effect.call(baseSlider, callObject);
-
-                        if (extraClone) {
-                            callBackList[dir].push(extraClone);
-                        }
 
                         // beforeanimation
                         aniCall(dir, FALSE);
 
-                        autoadjust(dir, option[1]/*speed*/);
+                        effect.call(baseSlider, callObject);
 
-                        if (extraClone) {
-                            callBackList[dir].pop();
-                        }
+                        autoadjust(dir, option[1]/*speed*/);
                     }
                 }
             }
@@ -1195,7 +1188,7 @@
             }
             $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
                 result[name + direction] = function (obj) {
-                    return templateFunction(obj, index + 1);
+                    templateFunction(obj, index + 1);
                 }
             })
         });
@@ -1256,8 +1249,7 @@
         var speed = options.speed;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
-        var target = obj.toSlides.eq(0);
-        var boxes = createBoxes(target, obj.slider, boxCols, boxRows);
+        var boxes = createBoxes(obj, boxCols, boxRows);
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
@@ -1385,10 +1377,8 @@
         var slides = options.slices;
         var speed = options.speed;
         var ease = options.ease;
-        var target = obj.toSlides.eq(0);
         var objSlider = obj.slider;
-        var slicesElement = createBoxes(target, objSlider, slides, 1);
-        var width = target.width();
+        var slicesElement = createBoxes(obj, slides, 1);
         var count = 0;
         var upDownAlternator = 0;
         if (reverse) {
@@ -1406,7 +1396,7 @@
             var orgLeft = slice.css("left");
             var left = orgLeft;
 
-
+            var width = slice.children().width();
             if (curtainEffect == 1) {
                 left = 0
             } else if (curtainEffect == 2) {
@@ -1466,27 +1456,20 @@
         var negative = (direction == 2 || direction == 3) ? -1 : 1;
         var options = obj.options;
         var ease = options.ease;
-        var toSlides = obj.toSlides;
         var fromSlides = obj.fromSlides;
-        var height = Math.max(toSlides.height(), fromSlides.height());
-        var width = Math.max(toSlides.width(), fromSlides.width());
+        var clone = makeClone(obj);
+        clone.prependTo(obj.slider);
+        var height = mathMax(clone.height(), fromSlides.height());
+        var width = mathMax(clone.width(), fromSlides.width());
         var speed = options.speed;
-
-        var push = 0;
-        var clones = toSlides.clone();
-        clones.each(function (index) {
-            var that = $(this);
-            that.prependTo(obj.slider);
-            that.css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : vertical ? push : negative * height, left : vertical ? negative * width : push});
-            that.animate(vertical ? {left: 0} : {top: 0}, speed, ease, function () {
-                that.remove();
-                if (index == 0) {
-                    obj.callback();
-                }
-            });
-            push += that['outer' + (vertical ? "Height" : "Width")](TRUE);
-        });
-        return clones.eq(0);
+        clone.css(
+            vertical ? {left: negative * width} : {top: negative * height}
+        ).animate(
+            {left: 0, top: 0}, speed, ease, function () {
+                clone.remove();
+                obj.callback();
+            }
+        );
     }
 
     function unCoverTemplate(obj, dir) {
@@ -1494,13 +1477,12 @@
         var options = obj.options;
         var ease = options.ease;
         var speed = options.speed;
-        var target = obj.toSlides.eq(0);
-        var width = target.width();
-        var height = target.height();
-        var box = makeBox(target, 0, 0, 0, 0)
+        var innerBox = makeClone(obj);
+        var width = innerBox.width();
+        var height = innerBox.height();
+        var box = makeBox(innerBox, 0, 0, 0, 0)
             .css({opacity: 1})
             .appendTo(obj.slider);
-        var innerBox = box.children();
         if (vertical) {
             box.css({width: width});
             if (dir == 1) {
@@ -1519,8 +1501,6 @@
             box.remove();
             obj.callback();
         });
-
-        return box;
     }
 
     function slide(obj) {
@@ -1551,7 +1531,11 @@
         var fadeinspeed = parseInt(fadeSpeed*(3/5), 10);
         var fadeoutspeed = fadeSpeed - fadeinspeed;
 
-        var clones = obj.toSlides.clone();
+        var orgCallback = obj.callback;
+        obj.callback = function () {
+            obj.fromSlides.animate({opacity: 1}, 0);
+            orgCallback();
+        };
 
         obj.fromSlides.animate(
             { opacity: 0.0001 },
@@ -1560,67 +1544,66 @@
                 duration:fadeoutspeed,
                 easing:ease,
                 complete:function () {
-                    finishFadeFx(obj, fadeSpeed, clones);
+                    fadeTemplate(obj, fadeSpeed);
                 }
             }
         );
-        return clones.eq(0);
     }
 
 
     function fade(obj) {
-        var fadeSpeed = obj.options.speed;
-        var clones = obj.toSlides.clone();
-        finishFadeFx(obj, fadeSpeed, clones);
-        return clones.eq(0);
+        fadeTemplate(obj, obj.options.speed);
     }
 
-    function finishFadeFx(obj, speed, clones) {
+    function fadeTemplate(obj, speed) {
         var options = obj.options;
         options.boxcols = 1;
         options.boxrows = 1;
         options.speed = speed;
-        var originalCallback = obj.callback;
-        obj.callback = function () {
-            obj.fromSlides.animate({opacity: 1}, 0);
-            originalCallback();
-        };
-        return boxTemplate(obj);
+        boxTemplate(obj);
     }
 
-    function createBoxes(target, obj, numberOfCols, numberOfRows) {
+    function createBoxes(obj, numberOfCols, numberOfRows) {
+        var slider = obj.slider;
         var result = $();
-        var targetWidth = target.width();
-        var targetHeight = target.height();
-        var boxWidth = Math.ceil(targetWidth / numberOfCols);
-        var boxHeight = Math.ceil(targetHeight / numberOfRows);
+        var boxWidth, boxHeight, adjustedBoxWidth, adjustBoxHeight;
+        var first = TRUE;
         for (var rows = 0; rows < numberOfRows; rows++) {
             for (var cols = 0; cols < numberOfCols; cols++) {
-                var width;
+                var innerBox = makeClone(obj);
+
+                if (first) {
+                    first = FALSE;
+                    boxWidth = innerBox.width() / numberOfCols;
+                    boxHeight = innerBox.height() / numberOfRows;
+                    adjustedBoxWidth = Math.ceil(boxWidth);
+                    adjustBoxHeight = Math.ceil(boxHeight);
+                }
+
+                var boxWidthToUse;
                 if (cols == numberOfCols - 1) {
-                    width = (obj.width() - (boxWidth * cols));
+                    boxWidthToUse = (slider.width() - (boxWidth * cols));
                 } else {
-                    width = boxWidth;
+                    boxWidthToUse = adjustedBoxWidth;
                 }
                 var box = makeBox(
-                    target, // target
+                    innerBox, // innerBox
                     boxHeight * rows, // top
                     boxWidth * cols, // left
-                    boxHeight, // height
-                    width // width
+                    adjustBoxHeight, // height
+                    boxWidthToUse // width
                 );
-                obj.append(box);
+                slider.append(box);
                 result = result.add(box);
             }
         }
         return result;
     }
 
-    function makeBox(target, top, left, height, width) {
-        var innerBox = target.clone().css({
-            position: ABSOLUTE_STRING,
-            width: target.width(),
-            height: target.height(),
+    function makeBox(innerBox, top, left, height, width) {
+        innerBox.css({
+            width: innerBox.width(),
+            height: innerBox.height(),
             display: "block",
             top: - top,
             left: - left
@@ -1639,12 +1622,38 @@
         return box;
     }
 
+    // Makes a single box that contains clones of the toSlides. Positioned correctly relative to each other. And the returned box has the correct height and width.
+    function makeClone(obj) {
+        var toSlides = obj.toSlides;
+        var firstSlidePosition = toSlides.eq(0).position();
+        var orgLeft = firstSlidePosition.left;
+        var orgTop = firstSlidePosition.top;
+        var height = 0;
+        var width = 0;
+        var result = $("<div>").css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : 0, left : 0});
+        toSlides.each(function () {
+            var that = $(this);
+            var cloneWidth = that.outerWidth(true);
+            var cloneHeight = that.outerHeight(true);
+            var clone = that.clone();
+            var position = that.position();
+            var left = position.left - orgLeft;
+            var top = position.top - orgTop;
+            clone.css({position : ABSOLUTE_STRING, left: left, top: top, opacity: 1});
+            height = mathMax(height, top + cloneHeight);
+            width = mathMax(width, left + cloneWidth);
+            result.append(clone);
+        });
+        result.width(width).height(height);
+        return result;
+    }
+
 
     /*
      * Util scripts.
      */
-    function reverseArray(arr) {
-        return [].reverse.call(arr);
+    function reverseArray(array) {
+        return [].reverse.call(array);
     }
 
     function shuffle(array) {
@@ -1666,6 +1675,10 @@
 
     function mathAbs(number) {
         return number < 0 ? - number : number;
+    }
+
+    function mathMax(a, b) {
+        return a > b ? a : b;
     }
 
     function mergeObjects(){

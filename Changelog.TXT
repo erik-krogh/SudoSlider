@@ -282,7 +282,7 @@ Change in script: beforeAniFunc and afterAniFunc no longer runs on initializatio
 Change in script: If you set the attribute "data-transition" on a slides <li>, it will now force that animation to run when animating to that slide.
 Change in script: Changed the default loadingText to an empty string.
 Change in script: Removed the build in "first" and "last" buttons. You can still make equivalent buttons using customLink
-Change in script: Removed all options related to fade. You can make equivalent sliders using effect
+Change in script: Removed all options related to fade. You can still use the "fade" or "fadeInOut" animations.
 Change in script: Lowered the default wait between slide loads to 100ms. (Only relevant when using Ajax)
 Change in script: Removed the speedHistory option. Since it no longer worked with the new effects functionality.
 Change in script: Renamed a bunch of options. (ajaxloadfunction -> ajaxload, beforeanifunc -> beforeanimation, afteranifunc -> afteranimation
