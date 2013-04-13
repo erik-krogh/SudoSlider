@@ -41,7 +41,6 @@
 
         .customlink {
             cursor: pointer;
-            text-decoration: underline;
         }
 
         .slideContainer {
@@ -53,7 +52,7 @@
             /*Demo slider*/
         #demoslider ul, #demoslider li{position:relative;margin:0;padding:0;list-style:none !important;display:block;}
         #demoslider li {margin: 0 !important;}
-        #demoslider li , #demoslider img{width:570px;overflow:hidden;}
+        #demoslider li , #demoslider img{width:570px;overflow:hidden;height:197px;}
         #demoslider {width:570px;overflow:hidden; }
         #demoslider img {border:none;}
 
@@ -76,7 +75,6 @@
                 var frontPageSlider = $("#frontPageSlider").sudoSlider({
                     effect: frontPageSliderEffect,
                     responsive: true,
-                    speed: 2000,
                     customlink: ".customlink",
                     history: true,
                     updatebefore: true,
@@ -137,7 +135,7 @@
                 });
 
                 function demoSliderEffect(obj) {
-                    return sliderEffects[effectsDropDown.val()](obj);;
+                    return sliderEffects[effectsDropDown.val()](obj);
                 }
             })();
 
@@ -202,14 +200,13 @@
         });
     </script>
 
-
 </head>
 <body>
 <div id="container">
     <div style="position: relative;">
         <div id="frontPageSlider">
             <ul>
-                <li class="textSlide" style="background: #f2f2f2">
+                <li class="textSlide" style="background: #f2f2f2" data-transition="blinds1Right">
                     <div style="margin-top:7px;margin-left:10px;width:500px;">
                         <h1 style="font-size: 30px;">Why use SudoSlider?</h1>
                         <ul>
@@ -250,15 +247,18 @@
                         </h1>
                     </div>
 
-                    <h1 style="position:absolute;top:120px;right:50px;font-size:30px;font-weight: bold;" rel="3" class="customlink"><a href="javascript:void(0);">See a video in the slider -&gt;</a></h1>
+                    <h1 style="position:absolute;top:120px;right:50px;font-size:27px;font-weight: bold;" rel="3" class="customlink"><a href="javascript:void(0);">See a video in the slider &rarr;</a></h1>
 
                     <h2 style="position:absolute;left:310px;top:200px;">Press the back button in the browser to go back</h2>
                 </li>
 
 
-                <li class="textSlide" data-transition="slide" style="height:315px;background: #f2f2f2">
+                <li class="textSlide" data-transition="slide" style="height:315px;background: #f0f0f0">
                     <div style="position:absolute;top:40px;left:10px;">
-                        <h1 style="font-size: 30px" rel="2" class="customlink"><a href="javascript:void(0)">&lt;- Back to download</a></h1>
+                        <h1 style="font-size: 30px">
+                            <a href="javascript:void(0)" rel="2" class="customlink">&larr; Back to download</a><br/>
+                            <span style="font-size: 15px;">(Or press the back button in the browser)</span>
+                        </h1>
                         <h2>See other examples of <br />what's possible in <a href="http://webbies.dk/SudoSlider/demos.html">the demos</a></h2>
                     </div>
                     <div style="position:absolute;top:0;right:0;">
@@ -267,7 +267,7 @@
                 </li>
 
 
-                <li class="textSlide donate">
+                <li class="textSlide donate" data-transition="blinds1Down" data-speed="400">
                     <div style="margin-top:20px;margin-left:40px;">
                         <h2 style="font-size:300%;">Help me, <span class="orange">donate!</span></h2>
                         <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -293,7 +293,7 @@
                 </li>
 
 
-                <li class="textSlide" data-transition="unCoverUp" style="background: #f2f2f2">
+                <li class="textSlide" data-transition="blinds1Up" data-speed="400">
                     <div id="slidercontainer" style="margin-top:10px;">
                         <div class="center"><h2>Effects explorer</h2></div>
                         <div class="center"><h3 style="display:inline;">Select effect </h3> <select id="demoSliderEffects"></select></div>
@@ -306,21 +306,6 @@
         <!-- End featured -->
     </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <div style="width:728px;height:90px;margin:0 auto;">
