@@ -910,11 +910,18 @@
                         var leftTarget = getSlidePosition(i, FALSE);
                         var topTarget = getSlidePosition(i, TRUE);
 
+                        var targetLi = li.eq(dir);
+                        var callOptions = $.extend(TRUE, {}, options); // Making a copy, to enforce read-only.
+                        var attributeSpeed = targetLi.attr("data-speed");
+                        if (attributeSpeed != undefined) {
+                            callOptions.speed = attributeSpeed;
+                        }
+
                         var callObject = {
                             fromSlides : fromSlides,
                             toSlides : toSlides,
                             slider : obj,
-                            options: $.extend(TRUE, {}, options), // Making a copy, to enforce read-only.
+                            options: callOptions,
                             to: dir + 1,
                             from: t + 1,
                             diff: diff,
@@ -938,7 +945,7 @@
                         currentlyAnimating = TRUE;
 
                         var effect = option[0]/*effect*/;
-                        var slideSpecificEffect = li.eq(dir).attr("data-transition");
+                        var slideSpecificEffect = targetLi.attr("data-transition");
                         if (slideSpecificEffect) {
                             effect = getEffectMethod(slideSpecificEffect);
                         }
@@ -1134,7 +1141,7 @@
 	var normalEffects = {
         slide : slide,
         fade : fade,
-        fadeInOut : fadeInOut,
+        fadeOutIn : fadeOutIn,
         foldRandomVertical : foldRandomVertical,
         foldRandomHorizontal: foldRandomHorizontal,
         boxRandom : boxRandom,
@@ -1563,7 +1570,7 @@
         );
     }
 
-    function fadeInOut(obj) {
+    function fadeOutIn(obj) {
         var options = obj.options;
         var fadeSpeed = options.speed;
         var ease = options.ease;

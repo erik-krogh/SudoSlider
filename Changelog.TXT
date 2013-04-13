@@ -280,9 +280,10 @@ Change in script: Added the effect option. Read about it in the docs.
 Change in script: Added lots of effects that can be used with effect, also added an "explorer effects" demo to showcase them.
 Change in script: beforeAniFunc and afterAniFunc no longer runs on initialization. Instead there's an initCallback, that runs when the slider is ready and the shown slide is loaded.
 Change in script: If you set the attribute "data-transition" on a slides <li>, it will now force that animation to run when animating to that slide.
+Change in script: If you set the attribute "data-speed", it will override the default speed setting on the animation to that slide.
 Change in script: Changed the default loadingText to an empty string.
 Change in script: Removed the build in "first" and "last" buttons. You can still make equivalent buttons using customLink
-Change in script: Removed all options related to fade. You can still use the "fade" or "fadeInOut" animations.
+Change in script: Removed all options related to fade. You can still use the "fade" or "fadeOutIn" animations.
 Change in script: Lowered the default wait between slide loads to 100ms. (Only relevant when using Ajax)
 Change in script: Removed the speedHistory option. Since it no longer worked with the new effects functionality.
 Change in script: Renamed a bunch of options. (ajaxloadfunction -> ajaxload, beforeanifunc -> beforeanimation, afteranifunc -> afteranimation
