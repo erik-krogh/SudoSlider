@@ -344,7 +344,7 @@
                         var array = inputEffect.split(",");
                         return arrayToRandomEffect(array);
                     } else {
-                        return $.fn.sudoSlider.effects[inputEffect];
+                        return objectToLowercase($.fn.sudoSlider.effects)[inputEffect.toLowerCase()];
                     }
                 }
             }
@@ -945,7 +945,7 @@
                         currentlyAnimating = TRUE;
 
                         var effect = option[0]/*effect*/;
-                        var slideSpecificEffect = targetLi.attr("data-transition");
+                        var slideSpecificEffect = targetLi.attr("data-effect");
                         if (slideSpecificEffect) {
                             effect = getEffectMethod(slideSpecificEffect);
                         }
