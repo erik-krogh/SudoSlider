@@ -8,9 +8,8 @@
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			
-			var oldt = 0;
-		    var sudoSlider = $("#slider").sudoSlider({ 
+		    var sudoSlider = $("#slider").sudoSlider({
+                effect: "unCover",
 				customLink: '.custom',
 				prevNext:false,
 				beforeAnimation: function(t){ 
@@ -19,8 +18,7 @@
 					if (scroll < -2) scroll = -2;
 					var scroll = scroll * $('.custom').eq(0).outerWidth(true);
 					
-					var diff = Math.sqrt(Math.abs(oldt-t));
-					var speed = parseInt(diff*800);
+					var speed = 800;
 					
 					$('.customBox').animate(
 						{ marginLeft: scroll },
@@ -29,7 +27,6 @@
 							duration:speed
 						}
 					);
-					oldt = t;
 				}
 		   });
 		});
@@ -53,7 +50,7 @@
 				<li><img src="../images/05.jpg" alt="image description"/></li>			
 			</ul>
 		</div>
-		<div style="background:none;width:210px;height:40px;position:absolute;top:150px;left:100px;overflow:hidden;">
+		<div style="background:none;width:210px;height:40px;position:absolute;top:150px;left:100px;overflow:hidden;z-index:10001">
 			<div class="customBox" style="width:350px;height:40px;background:lightgrey;">
 				<div class="custom" rel="1" style="height:30px;width:60px;margin:2px;float:left;background:grey;padding:3px;" >
 					<img src="../images/thumbs/01.jpg" height="30px;" width="60"/>
@@ -73,78 +70,7 @@
 			</div>
 		</div>
 	</div>
-	<h3>Usage</h3>
-	<h4>Include the javascripts</h4>
-	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-	<h4>The Javascript to start it.</h4>
-	<pre>
-&lt;script type="text/javascript" &gt;
-$(document).ready(function(){   
-   var oldt = 0;
-    var sudoSlider = $("#slider").sudoSlider({ 
-      customLink: '.custom',
-      prevNext:false,
-      beforeAnimation: function(t){ 
-         var scroll = -t+2;
-         if (scroll == 1) scroll = 0;
-         if (scroll < -2) scroll = -2;
-         var scroll = scroll * $('.custom').eq(0).outerWidth(true);
-         
-         var diff = Math.sqrt(Math.abs(oldt-t));
-         var speed = parseInt(diff*800);
-         
-         $('.customBox').animate(
-            { marginLeft: scroll },
-            {
-               queue:false,
-               duration:speed
-            }
-         );
-         oldt = t;
-      }
-   });
-});
-&lt;/script&gt;</pre>
-	<h4>The HTML</h4>
-	<pre>
-&lt;div style="position:relative;"&gt;
- &lt;div id="slider"&gt;
-  &lt;ul&gt;    
-   &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
-   &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
-   &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-   &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
-   &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;   
-  &lt;/ul&gt;
- &lt;/div&gt;
- &lt;div style="width:210px;height:40px;position:absolute;top:150px;left:100px;overflow:hidden;"&gt;
-  &lt;div class="customBox" style="width:350px;height:40px;background:lightgrey;"&gt;
-   &lt;div class="custom" rel="1" 
-   style="height:30px;width:60px;margin:2px;float:left;background:grey;padding:3px;" &gt;
-    &lt;img src="../images/thumbs/01.jpg" height="30px;" width="60"/&gt;
-   &lt;/div&gt;
-   &lt;div class="custom" rel="2"  
-   style="height:30px;width:60px;margin:2px;float:left;background:grey;padding:3px;" &gt;
-    &lt;img src="../images/thumbs/02.jpg" height="30px;" width="60"/&gt;
-   &lt;/div&gt;
-   &lt;div class="custom" rel="3"  
-   style="height:30px;width:60px;margin:2px;float:left;background:grey;padding:3px;" &gt;
-    &lt;img src="../images/thumbs/03.jpg" height="30px;" width="60"/&gt;
-   &lt;/div&gt;
-   &lt;div class="custom" rel="4"  
-   style="height:30px;width:60px;margin:2px;float:left;background:grey;padding:3px;" &gt;
-    &lt;img src="../images/thumbs/04.jpg" height="30px;" width="60"/&gt;
-   &lt;/div&gt;
-   &lt;div class="custom" rel="5"  
-   style="height:30px;width:60px;margin:2px;float:left;background:grey;padding:3px;" &gt;
-    &lt;img src="../images/thumbs/05.jpg" height="30px;" width="60"/&gt;
-   &lt;/div&gt;
-  &lt;/div&gt;
- &lt;/div&gt;
-&lt;/div&gt; </pre>
-</div>
+	<h3>Usage: See the source code. Remember the "z-index:10001". </h3>
 
 <div style="width:728px;height:90px;margin:0 auto;">
 	<script type="text/javascript">

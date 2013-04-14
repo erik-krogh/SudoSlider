@@ -276,7 +276,7 @@ Change in docs: Upgraded to jQuery 1.9.1
 Change in script: Using outerHeight and outerWidth to calculate where slides should be positioned. Thereby supporting slides with margins and paddings.
 
 3.0.0
-Change in script: Added the effect option. Read about it in the docs.
+Change in script: Added the effect option. Read about it in the docs. To control it there also is the "slices", "boxcols" and "boxrows" options.
 Change in script: Added lots of effects that can be used with effect, also added an "explorer effects" demo to showcase them.
 Change in script: beforeAniFunc and afterAniFunc no longer runs on initialization. Instead there's an initCallback, that runs when the slider is ready and the shown slide is loaded.
 Change in script: If you set the attribute "data-effect" on a slides <li>, it will now force that animation to run when animating to that slide.

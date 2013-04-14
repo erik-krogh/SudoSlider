@@ -9,7 +9,7 @@
 	<script type="text/javascript">
 		$(document).ready(function(){	
 			// Init
-			$('.upBtn').stop().fadeOut(00);
+			$('.upBtn').stop().fadeOut(0);
 			
 			var nestedSliderSettings = {
 				prevNext: false,
@@ -31,7 +31,14 @@
 					for (var i=0;i<nestedSlider.length;i++) {
                         nestedSlider[i].goToSlide(a);
                     }
-                    var sliderT = nestedSlider[0].getValue("currentSlide");
+                    var sliderT;
+                    if (a == "next") {
+                        sliderT = nestedSlider[0].getValue("currentSlide") + 1;
+                    } else if (a == "prev") {
+                        sliderT = nestedSlider[0].getValue("currentSlide") - 1;
+                    } else {
+                        sliderT = a;
+                    }
 					if (sliderT == 3) $('.downBtn').fadeOut(800);
 					else $('.downBtn').stop().fadeIn(800);
 					
@@ -122,87 +129,7 @@
 			</ul>
 		</div>
 	</div>
-	<h3>Usage</h3>
-	<h4>This is everything you need.</h4>
-	<h4>Include the javascripts</h4>
-	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-	<h4>The Javascript to start it. (This script has to be below your CSS)</h4>
-	<pre>
-&lt;script type="text/javascript" &gt;
-   $(document).ready(function(){   
-      // Init
-      $('.upBtn').stop().fadeOut(00);
-      var sliderT = 0;
-      
-      var nestedSliderSettings = {
-         prevNext: false,
-         vertical:true,
-         beforeAnimation: function(t){ 
-            sliderT = t;
-         }
-      };
-      
-      // Launching the nested sliders first, so the main slider doens't read an incorrect height. 
-      var nestedSlider = new Array();
-      nestedSlider[0] = $("#nested1").sudoSlider(nestedSliderSettings);
-      nestedSlider[1] = $("#nested2").sudoSlider(nestedSliderSettings);
-      nestedSlider[2] = $("#nested3").sudoSlider(nestedSliderSettings);
-      
-      var sudoSlider = $("#mainSlider").sudoSlider({
-      });
-      
-      $(document).on('click', 'a.custom', function() {
-         var a = $(this).attr('rel');
-         if (a) {
-            for (var i=0;i<nestedSlider.length;i++) {
-               nestedSlider[i].goToSlide(a);
-            }
-            var sliderT = nestedSlider[0].getValue("currentSlide");
-            if (sliderT == 3) $('.downBtn').fadeOut(800);
-            else $('.downBtn').stop().fadeIn(800);
-
-            if (sliderT == 1) $('.upBtn').stop().fadeOut(800);
-            else $('.upBtn').stop().fadeIn(800);
-         }
-         return false;
-      });
-   });	
-&lt;/script&gt;</pre>
-	<h4>The HTML</h4>
-	<pre>
-&lt;div class="slider" id="mainSlider"&gt;
-   &lt;ul&gt;
-      &lt;li&gt;
-         &lt;div class="slider" id="nested1"&gt;
-            &lt;ul&gt;            
-               &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
-               &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-               &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
-            &lt;/ul&gt;
-         &lt;/div&gt;
-      &lt;/li&gt;
-      &lt;li&gt;
-         &lt;div class="slider" id="nested2"&gt;
-            &lt;ul&gt;            
-               &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-               &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
-               &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;         
-            &lt;/ul&gt;
-         &lt;/div&gt;
-      &lt;/li&gt;
-      &lt;li&gt;
-         &lt;div class="slider" id="nested3"&gt;
-            &lt;ul&gt;            
-               &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
-               &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;         
-               &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
-            &lt;/ul&gt;
-         &lt;/div&gt;
-      &lt;/li&gt;
-   &lt;/ul&gt;
-&lt;/div&gt;</pre>
+	<h3>Usage: See the source code</h3>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">
