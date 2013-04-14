@@ -8,14 +8,14 @@
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			var oldt = 0;
+			var oldt = 1;
 			var sudoSlider = $("#slider").sudoSlider({
 				beforeAnimation: function(t){
 					var width = $(this).width();
-					
+
 					var diff = Math.sqrt(Math.abs(oldt-t));
 					var speed = parseInt(diff*800);
-					
+
 					$('.nextBtn').animate(
 						{ left: width },
 						{
