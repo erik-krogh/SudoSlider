@@ -1211,7 +1211,6 @@
         fold : fold,
         blinds1: blinds1,
         blinds2: blinds2,
-        blinds3: blinds3,
         slicesFade: slicesFade
     }
 
@@ -1443,12 +1442,6 @@
         foldTemplate(obj, vertical, negative, FALSE, FALSE, 2);
     }
 
-    function blinds3(obj, dir) {
-        var vertical = dir == 2 || dir == 4;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, negative, FALSE, FALSE, 3);
-    }
-
     function slice(obj, dir, reverse) {
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
@@ -1497,8 +1490,6 @@
                 startPosition = 0
             } else if (curtainEffect == 2) {
                 startPosition = startAdjustment / 2;
-            } else if (curtainEffect == 3) {
-                startPosition = startAdjustment / 3;
             }
             if (reverse) {
                 startPosition = startAdjustment - startPosition;
