@@ -292,6 +292,7 @@ Change in script: If the slider gets a command to slide somewhere, while an anim
 Change in script: Fixed that stopAuto() didn't stop first auto animation.
 Change in script: The script now inserts all the necessary CSS for the slider to run, no CSS needed.
 Change in script: When creating multiple sliders using the same selector, you can no longer expect methods to work.
+Change in script: Made it possible to interrupt animations. And responsive use this to cancel animations when resizing. Also added the "stopAnimation" method.
 Change in docs: Removed the modal demo, and updated the videos demo.
 Change in docs: Added a "explorer effects" demo, to showcase every single effect build into SudoSlider (58 as of now).
 Change in docs: Added a "frontpage demo", it is basically the slider on the frontpage standalone.

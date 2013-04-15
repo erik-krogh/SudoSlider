@@ -24,6 +24,7 @@
     var ABSOLUTE_STRING = "absolute";
     var Z_INDEX_VALUE = 10000;
     var EMPTY_FUNCTION = function () { };
+    var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
 
     $.fn.sudoSlider = function(optionsOrg) {
         // default configuration properties
@@ -111,6 +112,8 @@
             adjustingTo, // This one tells what slide we are adjusting to, to make sure that we do not adjust to something we shouldn't.
             adjustTargetTime = 0, // This one holds the time that the autoadjust animation should complete.
             currentlyAnimating = FALSE,
+            currentAnimation,
+            currentAnimationCallback,
             awaitingAjaxLoads = [],
             animateToAfterCompletion = FALSE,
             animateToAfterCompletionClicked,
@@ -278,7 +281,7 @@
 							}
 							else if (target == 'block') clickable = FALSE;
 							else if (target == 'unblock') clickable = TRUE;
-							else if (clickable) animateToSlide((target == parseInt10(target)) ? target - 1 : target, TRUE);
+							else animateToSlide((target == parseInt10(target)) ? target - 1 : target, TRUE);
 						}
 						return FALSE;
 					});
@@ -349,9 +352,15 @@
 
 			// Adjusts the slider when a change in layout has happened.
 			function adjustResponsiveLayout() {
-				liConti.width(getResponsiveWidth());
-				autoadjust(t, 0);
-				adjustPosition();
+                var oldWidth = liConti.width();
+                var newWidth = getResponsiveWidth();
+                liConti.width(newWidth);
+
+                if (oldWidth != newWidth) {
+                    stopAnimation();
+                    autoadjust(t, 0);
+                    adjustPosition();
+                }
 			}
 
             // Simply returns the value of the rel attribute for the given element.
@@ -931,6 +940,29 @@
                             callOptions.speed = attributeSpeed;
                         }
 
+                        var effect = option[0]/*effect*/;
+
+                        var slideSpecificEffect = targetLi.attr("data-effect");
+                        if (slideSpecificEffect) {
+                            effect = getEffectMethod(slideSpecificEffect);
+                        }
+
+                        currentlyAnimating = TRUE;
+                        currentAnimation = effect;
+
+                        currentAnimationCallback = function () {
+                            currentlyAnimating = FALSE;
+                            goToSlide(dir, clicked);
+                            fixClearType(toSlides);
+
+                            // afteranimation
+                            aniCall(dir, TRUE);
+
+                            while (awaitingAjaxLoads.length) {
+                                awaitingAjaxLoads.pop()();
+                            }
+                            callObject.callback = EMPTY_FUNCTION;
+                        };
                         var callObject = {
                             fromSlides : fromSlides,
                             toSlides : toSlides,
@@ -943,26 +975,8 @@
                                 left: leftTarget,
                                 top: topTarget
                             },
-                            callback: function () {
-                                currentlyAnimating = FALSE;
-                                goToSlide(dir,clicked);
-                                fixClearType(toSlides);
-
-                                // afteranimation
-                                aniCall(dir, TRUE);
-
-                                while (awaitingAjaxLoads.length) {
-                                    awaitingAjaxLoads.pop()();
-                                }
-                            }
+                            callback: currentAnimationCallback
                         };
-                        currentlyAnimating = TRUE;
-
-                        var effect = option[0]/*effect*/;
-                        var slideSpecificEffect = targetLi.attr("data-effect");
-                        if (slideSpecificEffect) {
-                            effect = getEffectMethod(slideSpecificEffect);
-                        }
 
                         autoadjust(dir, option[1]/*speed*/);
 
@@ -972,6 +986,16 @@
 
                             effect.call(baseSlider, callObject);
                         });
+                    }
+                }
+            }
+
+            function stopAnimation() {
+                if (currentlyAnimating) {
+                    var stopFunction = currentAnimation.stop;
+                    if (stopFunction) {
+                        stopFunction();
+                        currentAnimationCallback();
                     }
                 }
             }
@@ -1018,15 +1042,11 @@
  			 * Public methods.
 			 */
 
-			// First i just define those i use more than one (with a "public" prefix). Then i just add the others as anonymous functions.
+			// First i just define those i use more than one. Then i just add the others as anonymous functions.
 			function publicDestroy() {
+                stopAnimation();
 			    destroyed = TRUE;
 				destroyT = t;
-                if (currentlyAnimating) {
-                    awaitingAjaxLoads.push(function () {
-                        destroyT = t;
-                    });
-                }
 
 				if (option[11]/*responsive*/) {
 					$(win).off("resize focus", adjustResponsiveLayout);
@@ -1059,13 +1079,13 @@
 
             baseSlider.getOption = function(a){
 				return options[a.toLowerCase()];
-			}
+			};
 
             baseSlider.setOption = function(a, val){
 				publicDestroy();
 				options[a.toLowerCase()] = val;
 				publicInit();
-			}
+			};
 
             baseSlider.insertSlide = function (html, pos, numtext, goToSlide) {
 				publicDestroy();
@@ -1088,7 +1108,7 @@
 
 				option[19]/*numerictext*/.splice(pos,0,numtext || parseInt10(pos)+1);
 				publicInit();
-			}
+			};
 
             baseSlider.removeSlide = function(pos){
 				pos--; // 1 == the first.
@@ -1101,29 +1121,29 @@
 				}
 
 				publicInit();
-			}
+			};
 
             baseSlider.goToSlide = function(a){
 				animateToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE);
-			}
+			};
 
             baseSlider.block = function(){
 				clickable = FALSE;
-			}
+			};
 
             baseSlider.unblock = function(){
 				clickable = TRUE;
-			}
+			};
 
             baseSlider.startAuto = function(){
 				option[13]/*auto*/ = TRUE;
 				autoTimeout = startAuto(option[14]/*pause*/);
-			}
+			};
 
             baseSlider.stopAuto = function(){
 				option[13]/*auto*/ = FALSE;
 				stopAuto();
-			}
+			};
 
             baseSlider.adjust = function(){
                 var autoAdjustSpeed = adjustTargetTime - getTimeInMillis();
@@ -1131,7 +1151,7 @@
                 if (!currentlyAnimating) {
                     adjustPosition();
                 }
-			}
+			};
 
             baseSlider.getValue = function(a){
                 a = a.toLowerCase();
@@ -1146,13 +1166,14 @@
 					a == 'autoAnimation' ?
 						autoOn :
 					undefined;
-			}
+			};
 
             baseSlider.getSlide = function (number) {
                 number = getRealPos(parseInt10(number) - 1);
                 return getSlideElements(number);
-            }
+            };
 
+            baseSlider.stopAnimation = stopAnimation;
 
             // Done, now initialize.
             initSudoSlider();
@@ -1260,7 +1281,25 @@
 	};
 
     // Saving it
-	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
+	$.fn.sudoSlider.effects = makeStopable(mergeObjects(allEffects, randomEffects));
+
+    // Works for all the effects defined here.
+    function makeStopable(effects) {
+        var result = {};
+        $.each(effects, function (name, effect) {
+            result[name] = function (obj) {
+                result[name].o = obj;
+                effect(obj);
+            };
+
+            result[name].stop = function () {
+                var slider = result[name].o.slider;
+                $("." + ANIMATION_CLONE_MARKER_CLASS, slider).remove();
+                slider.children("ul").stop();
+            }
+        });
+        return result;
+    }
 
     // The implementations
     function boxes(obj, reverse) {
@@ -1637,7 +1676,7 @@
 
     function createBoxes(obj, numberOfCols, numberOfRows) {
         var slider = obj.slider;
-        var result = $();
+        var result = $("<div>").addClass(ANIMATION_CLONE_MARKER_CLASS);
         var boxWidth, boxHeight, adjustedBoxWidth, adjustBoxHeight;
         var first = TRUE;
         for (var rows = 0; rows < numberOfRows; rows++) {
@@ -1690,7 +1729,7 @@
              position: ABSOLUTE_STRING,
              zIndex: Z_INDEX_VALUE
         });
-        box.append(innerBox);
+        box.append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
         return box;
     }
 
@@ -1702,7 +1741,7 @@
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $("<div>").css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : 0, left : 0});
+        var result = $("<div>").css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : 0, left : 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
         toSlides.each(function () {
             var that = $(this);
             var cloneWidth = that.outerWidth(true);
