@@ -1211,7 +1211,7 @@
     // Effects that can go in all directions. Must have a "direction" argument as the second argument.
     var genericEffects = {
         push: pushTemplate,
-        unCover: unCoverTemplate,
+        reveal: revealTemplate,
         slicesRandom: slicesRandom,
         fold : fold,
         blinds1: blinds1,
@@ -1581,7 +1581,7 @@
         );
     }
 
-    function unCoverTemplate(obj, dir) {
+    function revealTemplate(obj, dir) {
         var vertical = dir == 1 || dir == 3;
         var options = obj.options;
         var ease = options.ease;
