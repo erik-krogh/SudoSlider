@@ -630,15 +630,20 @@
 
 				var speed = adjustTargetTime - getTimeInMillis();
 				speed = mathMax(speed, 0);
-				// First i run it. In case there are no images to be loaded.
-				obj.animate(
-					axis ? {height : pixels} : {width : pixels},
-					{
-						queue:FALSE,
-						duration:speed,
-						easing:option[12]/*ease*/
-					}
-				);
+				// Doing CSS if speed == 0, 1: its faster. 2: it fixes bugs.
+                var adjustObject = axis ? {height: pixels} : {width: pixels};
+                if (speed == 0) {
+                    obj.stop().css(adjustObject);
+                } else {
+                    obj.animate(
+                        adjustObject,
+                        {
+                            queue:FALSE,
+                            duration:speed,
+                            easing:option[12]/*ease*/
+                        }
+                    );
+                }
 			}
 
 			function adjustPosition() {
@@ -1286,16 +1291,18 @@
     function makeStopable(effects) {
         var result = {};
         $.each(effects, function (name, effect) {
-            result[name] = function (obj) {
-                result[name].o = obj;
+            var callObject;
+            var resultFunction = function (obj) {
+                callObject = obj;
                 effect(obj);
             };
 
-            result[name].stop = function () {
-                var slider = result[name].o.slider;
+            resultFunction.stop = function () {
+                var slider = callObject.slider;
                 $("." + ANIMATION_CLONE_MARKER_CLASS, slider).remove();
                 slider.children("ul").stop();
             }
+            result[name] = resultFunction;
         });
         return result;
     }
