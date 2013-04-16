@@ -956,17 +956,20 @@
                         currentAnimation = effect;
 
                         currentAnimationCallback = function () {
-                            currentlyAnimating = FALSE;
-                            goToSlide(dir, clicked);
-                            fixClearType(toSlides);
+                            // Just being sure that this thing ONLY run once.
+                            if (currentlyAnimating) {
+                                currentlyAnimating = FALSE;
+                                goToSlide(dir, clicked);
+                                fixClearType(toSlides);
 
-                            // afteranimation
-                            aniCall(dir, TRUE);
+                                // afteranimation
+                                aniCall(dir, TRUE);
 
-                            while (awaitingAjaxLoads.length) {
-                                awaitingAjaxLoads.pop()();
+                                while (awaitingAjaxLoads.length) {
+                                    awaitingAjaxLoads.pop()();
+                                }
+                                callObject.callback = EMPTY_FUNCTION;
                             }
-                            callObject.callback = EMPTY_FUNCTION;
                         };
                         var callObject = {
                             fromSlides : fromSlides,
@@ -980,7 +983,7 @@
                                 left: leftTarget,
                                 top: topTarget
                             },
-                            callback: currentAnimationCallback
+                            callback: stopAnimation
                         };
 
                         autoadjust(dir, option[1]/*speed*/);
@@ -1000,9 +1003,16 @@
                     var stopFunction = currentAnimation.stop;
                     if (stopFunction) {
                         stopFunction();
-                        currentAnimationCallback();
+                    } else {
+                        defaultStopFunction();
                     }
+                    currentAnimationCallback();
                 }
+            }
+
+            function defaultStopFunction() {
+                $("." + ANIMATION_CLONE_MARKER_CLASS, obj).remove();
+                ul.stop();
             }
 
 			function goToSlide(slide, clicked) {
@@ -1285,27 +1295,7 @@
 	};
 
     // Saving it
-	$.fn.sudoSlider.effects = makeStopable(mergeObjects(allEffects, randomEffects));
-
-    // Works for all the effects defined here.
-    function makeStopable(effects) {
-        var result = {};
-        $.each(effects, function (name, effect) {
-            var callObject;
-            var resultFunction = function (obj) {
-                callObject = obj;
-                effect(obj);
-            };
-
-            resultFunction.stop = function () {
-                var slider = callObject.slider;
-                $("." + ANIMATION_CLONE_MARKER_CLASS, slider).remove();
-                slider.children("ul").stop();
-            }
-            result[name] = resultFunction;
-        });
-        return result;
-    }
+	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
     function boxes(obj, reverse) {
@@ -1406,7 +1396,6 @@
                         }, speed, function () {
                             count--;
                             if (count == 0) {
-                                boxes.remove();
                                 obj.callback();
                             }
                         });
@@ -1551,7 +1540,6 @@
                 }, speed, ease, function () {
                     count--;
                     if (count == 0) {
-                        slicesElement.remove();
                         obj.callback();
                     }
                 });
@@ -1575,7 +1563,6 @@
             vertical ? {left: negative * width} : {top: negative * height}
         ).animate(
             {left: 0, top: 0}, speed, ease, function () {
-                clone.remove();
                 obj.callback();
             }
         );
@@ -1607,7 +1594,6 @@
         }
         innerBox.animate({left: 0, top: 0}, speed, ease);
         box.animate({width: width, height: height}, speed, ease, function () {
-            box.remove();
             obj.callback();
         });
     }
