@@ -71,13 +71,6 @@
 		// Defining the base element.
 		var baseSlider = this;
 
-		function objectToLowercase (obj) {
-			var ret = {};
-			for (var key in obj)
-				ret[key.toLowerCase()] = obj[key];
-			return ret;
-		}
-
 		optionsOrg = $.extend(defaults, objectToLowercase(optionsOrg));
 
 		return this.each(function() {
@@ -1749,6 +1742,13 @@
      */
     function reverseArray(array) {
         return [].reverse.call(array);
+    }
+
+    function objectToLowercase (obj) {
+        var ret = {};
+        for (var key in obj)
+            ret[key.toLowerCase()] = obj[key];
+        return ret;
     }
 
     function shuffle(array) {
