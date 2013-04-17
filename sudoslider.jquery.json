@@ -1,13 +1,13 @@
 {
     "name": "sudoslider",
     "title": "SudoSlider - Content slider",
-    "description": "jQuery plugin for sliding all content with lots of options.",
+    "description": "SudoSlider is a jQuery slider that supports any content, has effects you've only seen in image-sliders is responsive and much more. The script doesn't force any style on your page, and you can make your navigation buttons however you like. Just see some of the demos included in the download to get an idea of what SudoSlider can do. ",
     "keywords": [
         "slider",
         "content-slider",
 		"fade"
     ],
-    "version": "2.2.9",
+    "version": "3.0.0",
     "author": {
         "name": "Erik Krogh Kristensen",
         "url": "webbies.dk",
