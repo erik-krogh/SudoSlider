@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.0.0 - jQuery plugin
+ *  Sudo Slider verion 3.0.1 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -187,7 +187,9 @@
 				if (option[16]/*continuous*/) continuousClones = [];
 
 				for (var a = 0; a < s; a++) {
-					option[19]/*numerictext*/[a] = option[19]/*numerictext*/[a] || (a+1);
+                    if (!option[19]/*numerictext*/[a] && option[19]/*numerictext*/[a] != "") {
+                        option[19]/*numerictext*/[a] = (a+1);
+                    }
 					option[31]/*ajax*/[a] = option[31]/*ajax*/[a] || FALSE;
 				}
 
@@ -1171,7 +1173,7 @@
 						clickable :
 					a == 'destroyed' ?
 						destroyed :
-					a == 'autoAnimation' ?
+					a == 'autoanimation' ?
 						autoOn :
 					undefined;
 			};
