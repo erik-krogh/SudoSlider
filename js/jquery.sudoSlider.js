@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.0.1 - jQuery plugin
+ *  Sudo Slider verion 3.0.2 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -126,11 +126,19 @@
 				init = TRUE;
 
 				// Fix for nested list items
-				ul = obj.children("ul");
+				ul = childrenNotAnimationClones(obj);
 				// Is the ul element there?
-				if (!ul.length) obj.append(ul = $("<ul></ul>"));
+				var ulLength = ul.length;
+				var newUl = $("<div></div>");
+				if (!ulLength) {
+				    obj.append(ul = newUl);
+				} else if (ulLength > 1 || (ulLength == 1 && !ul.is("ul") && !ul.is("div"))) {
+                    newUl.append(ul);
+                    obj.append(ul = newUl);
+				}
 
-				li = ul.children("li");
+
+				li = childrenNotAnimationClones(ul);
 
 				s = li.length;
 
@@ -140,9 +148,9 @@
 					// Do we have enough list elements to fill out all the ajax documents.
 					if (option[31]/*ajax*/.length > s) {
 						for (var a = 1; a <= option[31]/*ajax*/.length - s; a++) {
-							ul.append("<li>" +  option[33]/*loadingtext*/ + "</li>");
+							ul.append("<div>" +  option[33]/*loadingtext*/ + "</div>");
 						}
-						li = ul.children("li");
+						li = childrenNotAnimationClones(ul);
 						s = li.length;
 					}
 				}
@@ -213,7 +221,7 @@
 						ul.prepend(appendClone).append(prependClone);
 					}
 					// This variable is also defined later, that's for the cases where Ajax is off, i also need to define it now, because the below code needs it.
-					liConti = ul.children("li");
+					liConti = childrenNotAnimationClones(ul);
 				}
 
 				option[5]/*controlsfade*/ = option[5]/*controlsfade*/ && !option[16]/*continuous*/;
@@ -221,7 +229,7 @@
 				// Making sure that i have enough room in the <ul> (Through testing, i found out that the max supported size (height or width) in Firefox is 17895697px, Chrome supports up to 134217726px, and i didn't find any limits in IE (6/7/8/9)).
 				ul[option[7]/*vertical*/ ? 'height' : 'width'](9000000); // That gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in Firefox on OSX.
 
-				liConti = ul.children("li");
+				liConti = childrenNotAnimationClones(ul);
 
 				// If responsive is turned on, autowidth doesn't work.
 				option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
@@ -238,7 +246,8 @@
 					$(obj)[option[6]/*insertafter*/ ? 'after' : 'before'](controls);
 
 					if(option[18]/*numeric*/) {
-						numericContainer = controls.prepend('<ol '+ option[37]/*numericattr*/ +'></ol>').children();
+						numericContainer = $('<ol '+ option[37]/*numericattr*/ +'></ol>');
+						controls.prepend(numericContainer);
 						var distanceBetweenPages = option[18]/*numeric*/ == PAGES_MARKER_STRING ? numberOfVisibleSlides : 1;
 						for(var a = 0; a < s - ((option[16]/*continuous*/ || option[18]/*numeric*/ == PAGES_MARKER_STRING) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
 							numericControls[a] = $("<li rel='" + (a+1) + "'><a href='#'><span>"+ option[19]/*numerictext*/[a] +"</span></a></li>")
@@ -430,6 +439,7 @@
 
 			// <strike>Simple function</strike><b>A litle complicated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
 			function animateToSlide(i, clicked) {
+                var interruptableAnimation = FALSE; // TODO: Remove this?
 			    if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
@@ -439,8 +449,13 @@
                         customAni(i, clicked, FALSE);
                     }
                 } else {
-                    animateToAfterCompletion = i;
-                    animateToAfterCompletionClicked = clicked;
+                    if (interruptableAnimation) {
+                        stopAnimation();
+                        animateToSlide(i, clicked);
+                    } else {
+                        animateToAfterCompletion = i;
+                        animateToAfterCompletionClicked = clicked;
+                    }
                 }
 			}
 
@@ -832,7 +847,7 @@
 					}
 
 					// The liConti gets messed up a bit in the above code, therefore i fix it.
-					liConti = ul.children("li");
+					liConti = childrenNotAnimationClones(ul);
 				}
 
 				if (adjust || finishedAdjustingTo == i) autoadjust(i, speed);
@@ -1164,18 +1179,13 @@
 			};
 
             baseSlider.getValue = function(a){
-                a = a.toLowerCase();
-				return a == 'currentslide' ?
-						t + 1 :
-					a == 'totalslides' ?
-						s :
-					a == 'clickable' ?
-						clickable :
-					a == 'destroyed' ?
-						destroyed :
-					a == 'autoanimation' ?
-						autoOn :
-					undefined;
+                return {
+                    currentslide: t + 1,
+                    totalslides : s,
+                    clickable: clickable,
+                    destroyed: destroyed,
+                    autoanimation: autoOn
+                }[a.toLowerCase()];
 			};
 
             baseSlider.getSlide = function (number) {
@@ -1594,7 +1604,7 @@
     }
 
     function slide(obj) {
-        var ul = obj.slider.children("ul");
+        var ul = obj.slider.children();
         var options = obj.options;
         var ease = options.ease;
         var speed = options.speed * Math.sqrt(mathAbs(obj.diff));
@@ -1744,6 +1754,10 @@
      */
     function reverseArray(array) {
         return [].reverse.call(array);
+    }
+
+    function childrenNotAnimationClones(obj) {
+        return obj.children(":not(." + ANIMATION_CLONE_MARKER_CLASS + ")");
     }
 
     function objectToLowercase (obj) {
