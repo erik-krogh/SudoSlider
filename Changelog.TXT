@@ -302,3 +302,6 @@ Change in docs: Added the "different effects" demo, to showcase that you can spe
 3.0.1
 Change in script: The empty string is now an acceptable numericText.
 Change in script: Fixed that "sudoSlider.getValue('autoAnimation');" always returned undefined
+
+3.0.2
+Change in script: You can use any tag as slide containers, instead of before where you needed a ul tag with child tag (the old way still works). See the basic example to see how this new behaviour works.

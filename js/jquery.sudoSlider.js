@@ -118,7 +118,7 @@
             function initSudoSlider(destroyT) {
 				// Storing the public options in an array.
 				var optionIndex = 0;
-				for (key in options) {
+				for (var key in options) {
 					option[optionIndex] = options[key];
                     optionIndex++;
 				}
@@ -132,7 +132,7 @@
 				var newUl = $("<div></div>");
 				if (!ulLength) {
 				    obj.append(ul = newUl);
-				} else if (ulLength > 1 || (ulLength == 1 && !ul.is("ul") && !ul.is("div"))) {
+				} else if (!ul.is("ul")) {
                     newUl.append(ul);
                     obj.append(ul = newUl);
 				}
