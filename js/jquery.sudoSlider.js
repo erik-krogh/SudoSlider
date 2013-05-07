@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.0.2 - jQuery plugin
+ *  Sudo Slider verion 3.0.3 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -180,8 +180,8 @@
 
 				option[8]/*slidecount*/ += option[9]/*movecount*/ - 1;
 
-				// startslide can only be a number (and not 0).
-				option[10]/*startslide*/ = parseInt10(option[10]/*startslide*/) || 1;
+				// startslide can only be a number (and not 0). Converting from 1 index to 0 index.
+				option[10]/*startslide*/ = parseInt10(option[10]/*startslide*/) - 1 || 0;
 
 
                 // Every animation is defined using effect.
@@ -312,21 +312,22 @@
 						}
 						URLChange();
 					}
-					else goToSlide(option[10]/*startslide*/ - 1,FALSE);
+					else goToSlide(option[10]/*startslide*/,FALSE);
 
                     setCurrent(t);
 				});
-
-                if (option[31]/*ajax*/[0]) {
-                    ajaxLoad(0, FALSE, 0);
+                if (option[31]/*ajax*/[option[10]/*startslide*/]) {
+                    ajaxLoad(option[10]/*startslide*/, FALSE, 0);
                 }
 				if (option[32]/*preloadajax*/ === TRUE) {
 				    for (var i = 0; i <= ts; i++) {
-				        if (option[31]/*ajax*/[i] && option[10]/*startslide*/ - 1 != i) {
+				        if (option[31]/*ajax*/[i] && option[10]/*startslide*/ != i) {
 				            ajaxLoad(i, FALSE, 0);
 				        }
 				    }
-				}
+				} else {
+                    startAsyncDelayedLoad();
+                }
 			}
 			/*
 			 * The functions do the magic.
@@ -797,8 +798,8 @@
 					url: target,
 					success: function(data, textStatus, jqXHR){
 					    var completeFunction = function () {
-                            var type = jqXHR.getResponseHeader('Content-Type').substr(0,1);
-                            if (type != "i") {
+                            var type = jqXHR.getResponseHeader('Content-Type');
+                            if (type.substr(0,1) != "i") {
                                 textloaded = TRUE;
                                 targetslide.html(data);
                                 ajaxAdjust(i, speed, ajaxCallBack, adjust, FALSE);
@@ -852,10 +853,11 @@
 
 				if (adjust || finishedAdjustingTo == i) autoadjust(i, speed);
 
-                adjustPosition();
+                // adjustPosition();
 
-				runOnImagesLoaded (target, TRUE, function(){
-					adjustPosition();
+				runOnImagesLoaded (target, TRUE, function() {
+                    if (!currentlyAnimating) adjustPosition();
+
 					// And the callback.
 					if (ajaxCallBack) ajaxCallBack();
 					startAsyncDelayedLoad();
@@ -1010,13 +1012,15 @@
 
             function stopAnimation() {
                 if (currentlyAnimating) {
+                    // Doing it in this order isn't a problem in relation to the user-callbacks, since they are run in a setTimeout(callback, 0) anyway.
+                    currentAnimationCallback();
+
                     var stopFunction = currentAnimation.stop;
                     if (stopFunction) {
                         stopFunction();
                     } else {
                         defaultStopFunction();
                     }
-                    currentAnimationCallback();
                 }
             }
 

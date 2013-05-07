@@ -305,3 +305,8 @@ Change in script: Fixed that "sudoSlider.getValue('autoAnimation');" always retu
 
 3.0.2
 Change in script: You can use any tag as slide containers, instead of before where you needed a ul tag with child tag (the old way still works). See the basic example to see how this new behaviour works.
+
+3.0.3
+Change in script: Fixed that the slide specified by "startSlide" wasn't loaded first.
+Change in script: Fixed some flickering that sometimes occurred when ajaxLoading slides ahead of the current.
+Change in script: Perhaps fixed some flickering at the end of an animation. (Waiting on feedback from Hans).
