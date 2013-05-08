@@ -739,11 +739,6 @@
                 return callBackThis;
 			}
 
-            // Puts the specified function in a setTimeout([function], 0);
-			function callAsync(func) {
-                setTimeout(func, 0);
-			}
-
 			// Convert the direction into a usefull number.
 			function filterDir(dir) {
 				if (dir == NEXT_STRING) {
@@ -797,31 +792,28 @@
 				$.ajax({
 					url: target,
 					success: function(data, textStatus, jqXHR){
-					    var completeFunction = function () {
+                        performAjaxCallback(function () {
                             var type = jqXHR.getResponseHeader('Content-Type');
                             if (type.substr(0,1) != "i") {
                                 textloaded = TRUE;
                                 targetslide.html(data);
                                 ajaxAdjust(i, speed, ajaxCallBack, adjust, FALSE);
                             }
-					    };
-					    if (currentlyAnimating) {
-					        awaitingAjaxLoads.push(completeFunction);
-					    } else {
-					        completeFunction();
-					    }
+					    });
 					},
 					complete: function(){
-						// Some browsers wont load images this way, so i treat an error as an image.
-						// There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
-						if (!textloaded) {
-							// Load the image.
-							image = new Image();
-							targetslide.html('').append(image);
-							image.src = target;
-							// Lets just make some adjustments
-							ajaxAdjust(i, speed, ajaxCallBack, adjust, TRUE);
-						}
+                        performAjaxCallback(function () {
+                            // Some browsers wont load images this way, so i treat an error as an image.
+                            // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
+                            if (!textloaded) {
+                                // Load the image.
+                                image = new Image();
+                                targetslide.html('').append(image);
+                                image.src = target;
+                                // Lets just make some adjustments
+                                ajaxAdjust(i, speed, ajaxCallBack, adjust, TRUE);
+                            }
+                        });
 					}
 				});
 				// It is loaded, we dont need to do that again.
@@ -829,6 +821,16 @@
 				// It is the only option that i need to change for good.
 				options.ajax[i] = FALSE;
 			}
+
+            // Performs the callback immediately is no animation is running.
+            // Otherwise waits for the animation to complete in a FIFO queue.
+            function performAjaxCallback(completeFunction) {
+                if (currentlyAnimating) {
+                    awaitingAjaxLoads.push(completeFunction);
+                } else {
+                    completeFunction();
+                }
+            }
 
 			function ajaxAdjust(i, speed, ajaxCallBack, adjust, img){
 			    var target = li.eq(i);
@@ -967,10 +969,12 @@
                         currentlyAnimating = TRUE;
                         currentAnimation = effect;
 
+                        var callbackHasYetToRun = TRUE;
                         currentAnimationCallback = function () {
                             // Just being sure that this thing ONLY run once.
-                            if (currentlyAnimating) {
+                            if (callbackHasYetToRun) {
                                 currentlyAnimating = FALSE;
+                                callbackHasYetToRun = FALSE;
                                 goToSlide(dir, clicked);
                                 fixClearType(toSlides);
 
@@ -978,9 +982,9 @@
                                 aniCall(dir, TRUE);
 
                                 while (awaitingAjaxLoads.length) {
-                                    awaitingAjaxLoads.pop()();
+                                    // Removing and running the first, so we maintain FIFO.
+                                    awaitingAjaxLoads.splice(0,1)[0]();
                                 }
-                                callObject.callback = EMPTY_FUNCTION;
                             }
                         };
                         var callObject = {
@@ -1756,6 +1760,11 @@
     /*
      * Util scripts.
      */
+    // Puts the specified function in a setTimeout([function], 0);
+    function callAsync(func) {
+        setTimeout(func, 0);
+    }
+
     function reverseArray(array) {
         return [].reverse.call(array);
     }

@@ -15,6 +15,8 @@
                 callObject = obj;
                 // Diff is the number of slides we are moving, negative if we are moving to the left.
                 if (obj.diff > 1) {
+                    // Make sure that everything you make in order to perform the animation is marked with the class "sudo-box".
+                    // Otherwise SudoSlider might count it as a slide.
                     obj.slider.prepend("<div class=\"sudo-box\" style=\"position:absolute;top:0;left:0;z-index:10000;opacity: 1 !important;\">THIS WILL BE REMOVED IN STOP FUNCTION!</div>");
                     obj.slider.fadeTo(2000, 0.5, function () {
                         obj.callback();

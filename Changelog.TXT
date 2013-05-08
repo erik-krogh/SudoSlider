@@ -310,3 +310,4 @@ Change in script: You can use any tag as slide containers, instead of before whe
 Change in script: Fixed that the slide specified by "startSlide" wasn't loaded first.
 Change in script: Fixed some flickering that sometimes occurred when ajaxLoading slides ahead of the current.
 Change in script: Perhaps fixed some flickering at the end of an animation. (Waiting on feedback from Hans).
+Change in script: All ajax loads are now finished at the first available time where no animation is running.
