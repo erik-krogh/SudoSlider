@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.0.3 - jQuery plugin
+ *  Sudo Slider verion 3.0.4 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -1673,7 +1673,7 @@
 
     function createBoxes(obj, numberOfCols, numberOfRows) {
         var slider = obj.slider;
-        var result = $("<div>").addClass(ANIMATION_CLONE_MARKER_CLASS);
+        var result = $();
         var boxWidth, boxHeight, adjustedBoxWidth, adjustBoxHeight;
         var first = TRUE;
         for (var rows = 0; rows < numberOfRows; rows++) {
