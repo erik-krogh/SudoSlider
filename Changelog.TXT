@@ -311,3 +311,7 @@ Change in script: Fixed that the slide specified by "startSlide" wasn't loaded f
 Change in script: Fixed some flickering that sometimes occurred when ajaxLoading slides ahead of the current.
 Change in script: Perhaps fixed some flickering at the end of an animation. (Waiting on feedback from Hans).
 Change in script: All ajax loads are now finished at the first available time when no animation is running.
+
+3.0.4
+Change in script: Fixed that the last box in a box animation didnøt fade in at all in jQuery < 1.9. In case of fade animations, the last box was the only box.
+Change in docs: Added the "fadein slider on load" demo.
