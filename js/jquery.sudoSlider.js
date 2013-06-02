@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.0.4 - jQuery plugin
+ *  Sudo Slider verion 3.0.5 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -22,7 +22,6 @@
     var LAST_STRING = "last";
     var FIRST_STRING = "first";
     var ABSOLUTE_STRING = "absolute";
-    var Z_INDEX_VALUE = 10000;
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
 
@@ -66,7 +65,8 @@
 			prevhtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
 			nexthtml:          '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
 			controlsattr:      'id="controls"', /* option[36]/*controlsattr*/
-            numericattr:       'class="controls"' /* option[37]/*numericattr*/
+            numericattr:       'class="controls"' /* option[37]/*numericattr*/,
+            animationzindex:    10000 /* option[38]/*animationZIndex*/
 		};
 		// Defining the base element.
 		var baseSlider = this;
@@ -1589,7 +1589,7 @@
         var innerBox = makeClone(obj);
         var width = innerBox.width();
         var height = innerBox.height();
-        var box = makeBox(innerBox, 0, 0, 0, 0)
+        var box = makeBox(innerBox, 0, 0, 0, 0, obj)
             .css({opacity: 1})
             .appendTo(obj.slider);
         if (vertical) {
@@ -1699,7 +1699,8 @@
                     boxHeight * rows, // top
                     boxWidth * cols, // left
                     adjustBoxHeight, // height
-                    boxWidthToUse // width
+                    boxWidthToUse, // width
+                    obj // for options.
                 );
                 slider.append(box);
                 result = result.add(box);
@@ -1708,7 +1709,7 @@
         return result;
     }
 
-    function makeBox(innerBox, top, left, height, width) {
+    function makeBox(innerBox, top, left, height, width, obj) {
         innerBox.css({
             width: innerBox.width(),
             height: innerBox.height(),
@@ -1724,7 +1725,7 @@
              opacity:0,
              overflow: "hidden",
              position: ABSOLUTE_STRING,
-             zIndex: Z_INDEX_VALUE
+             zIndex: obj.options.animationzindex
         });
         box.append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
         return box;
@@ -1738,7 +1739,7 @@
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $("<div>").css({zIndex : Z_INDEX_VALUE, position : ABSOLUTE_STRING, top : 0, left : 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
+        var result = $("<div>").css({zIndex : obj.options.animationzindex, position : ABSOLUTE_STRING, top : 0, left : 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
         toSlides.each(function () {
             var that = $(this);
             var cloneWidth = that.outerWidth(true);
