@@ -364,7 +364,7 @@
                 if (oldWidth != newWidth) {
                     stopAnimation();
                     autoadjust(t, 0);
-                    adjustPosition();
+                    adjustPositionTo(t);
                 }
 			}
 
@@ -657,12 +657,12 @@
                 }
 			}
 
-			function adjustPosition() {
+			function adjustPositionTo(slide) {
 			    setUlMargins(0,0);
 
 			    setUlMargins(
-			        getSlidePosition(t, FALSE),
-			        getSlidePosition(t, TRUE)
+			        getSlidePosition(slide, FALSE),
+			        getSlidePosition(slide, TRUE)
 			    )
 			}
 
@@ -682,7 +682,7 @@
 			    autoadjust(t, 0);
                 t = getRealPos(t); // Going to the real slide, away from the clone.
 				if(!option[30]/*updateBefore*/) setCurrent(t);
-				adjustPosition();
+				adjustPositionTo(t);
 				clickable = TRUE;
 				if(option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[t];
 
@@ -855,10 +855,10 @@
 
 				if (adjust || finishedAdjustingTo == i) autoadjust(i, speed);
 
-                // adjustPosition();
+                // adjustPositionTo();
 
 				runOnImagesLoaded (target, TRUE, function() {
-                    if (!currentlyAnimating) adjustPosition();
+                    if (!currentlyAnimating) adjustPositionTo(t);
 
 					// And the callback.
 					if (ajaxCallBack) ajaxCallBack();
@@ -999,7 +999,10 @@
                                 left: leftTarget,
                                 top: topTarget
                             },
-                            callback: stopAnimation
+                            callback: stopAnimation,
+                            goToNext: function () {
+                                adjustPositionTo(dir);
+                            }
                         };
 
                         autoadjust(dir, option[1]/*speed*/);
@@ -1097,7 +1100,7 @@
 				    }
 				}
 
-				adjustPosition();
+				adjustPositionTo(t);
 			}
 
             baseSlider.destroy = publicDestroy;
@@ -1182,7 +1185,7 @@
                 var autoAdjustSpeed = adjustTargetTime - getTimeInMillis();
 				autoadjust(t, autoAdjustSpeed);
                 if (!currentlyAnimating) {
-                    adjustPosition();
+                    adjustPositionTo(t);
                 }
 			};
 
@@ -1211,7 +1214,7 @@
 	 * End generic slider. Start animations.
 	 */
 
-    // Start by defining everything, the implementations is below.
+    // Start by defining everything, the implementations are below.
 	var normalEffects = {
         slide : slide,
         fade : fade,
@@ -1236,6 +1239,7 @@
         push: pushTemplate,
         reveal: revealTemplate,
         slicesRandom: slicesRandom,
+        slicesRandomReveal: slicesRandomReveal,
         fold : fold,
         blinds1: blinds1,
         blinds2: blinds2,
@@ -1244,7 +1248,8 @@
 
     // function : (obj, dir, reverse)
     var genericReversibleEffects = {
-        slice: slice
+        slice: slice,
+        sliceReveal: sliceReveal
     }
 
     function makeGenericEffects(genericEffects) {
@@ -1270,6 +1275,7 @@
                 return templateFunction(obj, dir, reverse);
             }
             $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
+                // Passing on the reverse argument, since the genericReversibleEffects use it.
                 result[name + direction] = function (obj, reverse) {
                     templateFunction(obj, index + 1, reverse);
                 }
@@ -1338,7 +1344,7 @@
         var speed = options.speed;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
-        var boxes = createBoxes(obj, boxCols, boxRows);
+        var boxes = createBoxes(obj, boxCols, boxRows, TRUE);
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
@@ -1457,6 +1463,12 @@
         foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2);
     }
 
+    function sliceReveal(obj, dir, reverse) {
+        var vertical = dir == 1 || dir == 3;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
+    }
+
     function sliceUpDown(obj, reverse) {
         foldTemplate(obj, TRUE, reverse, FALSE, FALSE, 0, 3);
     }
@@ -1467,13 +1479,19 @@
         foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2);
     }
 
-    function foldTemplate(obj, vertical, reverse, randomize, onlyFade, curtainEffect, upDownEffect) {
+    function slicesRandomReveal(obj, dir) {
+        var vertical = dir == 1 || dir == 3;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2, TRUE);
+    }
+
+    function foldTemplate(obj, vertical, reverse, randomize, onlyFade, curtainEffect, upDownEffect, reveal) {
         var options = obj.options;
         var slides = options.slices;
         var speed = options.speed;
         var ease = options.ease;
         var objSlider = obj.slider;
-        var slicesElement = createBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides);
+        var slicesElement = createBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
         var count = 0;
         var upDownAlternator = 0;
         if (reverse) {
@@ -1542,6 +1560,23 @@
                 }
             }
 
+            if (reveal) {
+                var negative = upDownEffect == 1 ? -1 : 1;
+                obj.goToNext();
+                slice.css({
+                    top: orgTop,
+                    left: orgLeft,
+                    width: orgWidth,
+                    height: orgHeight,
+                    opacity: 1
+                });
+                if (vertical) {
+                    orgTop = negative * orgHeight;
+                } else {
+                    orgLeft = negative * orgWidth;
+                }
+            }
+
             count++;
             setTimeout(function () {
                 slice.animate({
@@ -1567,7 +1602,7 @@
         var options = obj.options;
         var ease = options.ease;
         var fromSlides = obj.fromSlides;
-        var clone = makeClone(obj);
+        var clone = makeClone(obj, TRUE);
         clone.prependTo(obj.slider);
         var height = mathMax(clone.height(), fromSlides.height());
         var width = mathMax(clone.width(), fromSlides.width());
@@ -1586,7 +1621,7 @@
         var options = obj.options;
         var ease = options.ease;
         var speed = options.speed;
-        var innerBox = makeClone(obj);
+        var innerBox = makeClone(obj, TRUE);
         var width = innerBox.width();
         var height = innerBox.height();
         var box = makeBox(innerBox, 0, 0, 0, 0, obj)
@@ -1671,14 +1706,14 @@
         boxTemplate(obj);
     }
 
-    function createBoxes(obj, numberOfCols, numberOfRows) {
+    function createBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
         var slider = obj.slider;
         var result = $();
         var boxWidth, boxHeight, adjustedBoxWidth, adjustBoxHeight;
         var first = TRUE;
         for (var rows = 0; rows < numberOfRows; rows++) {
             for (var cols = 0; cols < numberOfCols; cols++) {
-                var innerBox = makeClone(obj);
+                var innerBox = makeClone(obj, useToSlides);
 
                 if (first) {
                     first = FALSE;
@@ -1732,8 +1767,8 @@
     }
 
     // Makes a single box that contains clones of the toSlides. Positioned correctly relative to each other. And the returned box has the correct height and width.
-    function makeClone(obj) {
-        var toSlides = obj.toSlides;
+    function makeClone(obj, useToSlides) {
+        var toSlides = useToSlides ? obj.toSlides : obj.fromSlides;
         var firstSlidePosition = toSlides.eq(0).position();
         var orgLeft = firstSlidePosition.left;
         var orgTop = firstSlidePosition.top;
