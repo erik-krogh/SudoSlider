@@ -1216,105 +1216,139 @@
 	 */
 
     // Start by defining everything, the implementations are below.
-	var normalEffects = {
-        slide : slide,
-        fade : fade,
-        fadeOutIn : fadeOutIn,
-        foldRandomVertical : foldRandomVertical,
-        foldRandomHorizontal: foldRandomHorizontal,
-        boxRandom : boxRandom,
-        boxRandomGrow : boxRandomGrow,
-        boxRainUpRight: boxRainUpRight,
-        boxRainDownRight: boxRainDownRight,
-        boxRainDownLeft: boxRainDownLeft,
-        boxRainUpLeft: boxRainUpLeft,
-        boxRainGrowUpRight: boxRainGrowUpRight,
-        boxRainGrowDownRight: boxRainGrowDownRight,
-        boxRainGrowDownLeft: boxRainGrowDownLeft,
-        boxRainGrowUpLeft: boxRainGrowUpLeft
-	};
+    var normalEffectsPrefixObject = {
+        box: {
+            Random: {
+                "": boxRandom,
+                Grow: boxRandomGrow
+            },
+            Rain: {
+                Up: {
+                    Right: boxRainUpRight,
+                    Left: boxRainUpLeft
+                },
+                Down: {
+                    Right: boxRainDownRight,
+                    Left: boxRainDownLeft
+                },
+                Grow: {
+                    Up: {
+                        Left: boxRainGrowUpLeft,
+                        Right: boxRainGrowUpRight
+                    },
+                    Down: {
+                        Left: boxRainGrowDownLeft,
+                        Right: boxRainGrowDownRight
+                    }
+                }
+            }
+        },
+        fade: {
+            "": fade,
+            OutIn: fadeOutIn
+        },
+        foldRandom: {
+            Vertical: foldRandomVertical,
+            Horizontal: foldRandomHorizontal
+        },
+        slide : slide
+    }
 
-    // Effects that can go in all directions. Must have a "direction" argument as the second argument.
-    var genericEffects = {
+    var genericEffectsPrefixObject = {
+        blinds : {
+            "1": blinds1,
+            "2": blinds2
+        },
+        fold: fold,
         push: pushTemplate,
         reveal: revealTemplate,
-        slicesRandom: slicesRandom,
-        slicesRandomReveal: slicesRandomReveal,
-        fold : fold,
-        blinds1: blinds1,
-        blinds2: blinds2,
-        slicesFade: slicesFade,
-        zip : zip,
+        slice: {
+            "": slice,
+            Reverse: sliceReverse,
+            Reveal: {
+                "": sliceReveal,
+                "Reverse": sliceRevealReverse
+            },
+            Random: {
+                "":  slicesRandom,
+                Reveal: slicesRandomReveal
+            },
+            Fade: slicesFade
+        },
+        zip: zip,
         unzip: unzip
     }
 
-    // function : (obj, dir, reverse)
-    var genericReversibleEffects = {
-        slice: slice,
-        sliceReveal: sliceReveal
+
+
+    function insertPrefixedEffects (resultObject, effectsObject, prefix, generic) {
+        if (isFunc(effectsObject)) {
+            if (generic) {
+                insertPrefixedEffects(resultObject, makeGenericEffect(effectsObject), prefix, FALSE);
+            } else {
+                resultObject[prefix] = effectsObject;
+            }
+            return;
+        }
+        $.each(effectsObject, function (name, effect) {
+            insertPrefixedEffects(resultObject, effect, prefix + name, generic);
+        });
     }
 
-    function makeGenericEffects(genericEffects) {
+    function makeGenericEffect(templateFunction) {
         var result = {};
-        $.each(genericEffects, function (name, templateFunction) {
-            result[name] = function (obj, reverse) {
-                var vertical = obj.options.vertical;
-                var diff = obj.diff;
-                var dir;
-                if (vertical) {
-                    if (diff < 0) {
-                        dir = 1;
-                    } else {
-                        dir = 3;
-                    }
+        result[""] = function (obj, reverse) {
+            var vertical = obj.options.vertical;
+            var diff = obj.diff;
+            var dir;
+            if (vertical) {
+                if (diff < 0) {
+                    dir = 1;
                 } else {
-                    if (diff < 0) {
-                        dir = 2;
-                    } else {
-                        dir = 4;
-                    }
+                    dir = 3;
                 }
-                return templateFunction(obj, dir, reverse);
+            } else {
+                if (diff < 0) {
+                    dir = 2;
+                } else {
+                    dir = 4;
+                }
             }
-            $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
-                // Passing on the reverse argument, since the genericReversibleEffects use it.
-                result[name + direction] = function (obj, reverse) {
-                    templateFunction(obj, index + 1, reverse);
-                }
-            })
-        });
+            return templateFunction(obj, dir, reverse);
+        }
+        $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
+            // Passing on the reverse argument, since the genericReversibleEffects use it.
+            result[direction] = function (obj, reverse) {
+                templateFunction(obj, index + 1, reverse);
+            }
+        })
         return result;
     }
 
-    function makeReversedEffects(reversibleEffects) {
+    function makeReversedEffects(effectFunction) {
         var result = {};
-        $.each(reversibleEffects, function (name, effectFunction) {
-            result[name] = function (obj) {
-                effectFunction(obj, FALSE);
-            }
-            result[name + "Reverse"] = function (obj) {
-                effectFunction(obj, TRUE);
-            }
-        });
+        result[""] = function (obj) {
+            effectFunction(obj, FALSE);
+        }
+        result["Reverse"] = function (obj) {
+            effectFunction(obj, TRUE);
+        }
         return result;
     }
 
-    var makedGenericEffects = makeGenericEffects(genericEffects);
+    var allEffects = {};
+    insertPrefixedEffects(allEffects, genericEffectsPrefixObject, "", TRUE);
+    insertPrefixedEffects(allEffects, normalEffectsPrefixObject, "", FALSE);
 
-    var makedGenericReversedEffects = makeReversedEffects(makeGenericEffects(genericReversibleEffects));
-
-
-    var allEffects = mergeObjects(normalEffects, makedGenericEffects, makedGenericReversedEffects);
-
-	var randomEffects = {
-	    random: function (obj) {
-	        var effectFunction = pickRandomValue(allEffects);
+    var randomEffects = {
+        random: function (obj) {
+            var effectFunction = pickRandomValue(allEffects);
             return effectFunction(obj);
-	    }
-	};
+        }
+    };
 
     // Saving it
-	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
+    $.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
     function boxRainUpRight(obj) {
@@ -1491,16 +1525,28 @@
         foldTemplate(obj, vertical, negative, FALSE, FALSE, 2);
     }
 
-    function slice(obj, dir, reverse) {
+    function slice(obj, dir) {
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2);
+        foldTemplate(obj, vertical, FALSE, FALSE, FALSE, 0, negative ? 1 : 2);
     }
 
-    function sliceReveal(obj, dir, reverse) {
+    function sliceReverse(obj, dir) {
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
+        foldTemplate(obj, vertical, TRUE, FALSE, FALSE, 0, negative ? 1 : 2);
+    }
+
+    function sliceReveal(obj, dir) {
+        var vertical = dir == 1 || dir == 3;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, FALSE, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
+    }
+
+    function sliceRevealReverse(obj, dir) {
+        var vertical = dir == 1 || dir == 3;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, TRUE, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
     }
 
     function zip(obj, dir) {
