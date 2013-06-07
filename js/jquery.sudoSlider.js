@@ -1223,15 +1223,16 @@
         foldRandomVertical : foldRandomVertical,
         foldRandomHorizontal: foldRandomHorizontal,
         boxRandom : boxRandom,
-        boxRandomGrow : boxRandomGrow
+        boxRandomGrow : boxRandomGrow,
+        boxRainUpRight: boxRainUpRight,
+        boxRainDownRight: boxRainDownRight,
+        boxRainDownLeft: boxRainDownLeft,
+        boxRainUpLeft: boxRainUpLeft,
+        boxRainGrowUpRight: boxRainGrowUpRight,
+        boxRainGrowDownRight: boxRainGrowDownRight,
+        boxRainGrowDownLeft: boxRainGrowDownLeft,
+        boxRainGrowUpLeft: boxRainGrowUpLeft
 	};
-
-    // TODO: Death to reversible effects.
-    // The functions here must have an "reverse" argument as the second argument in the function.
-    var reversibleEffects = {
-        boxRain : boxRain,
-        boxRainGrow : boxRainGrow
-    }
 
     // Effects that can go in all directions. Must have a "direction" argument as the second argument.
     var genericEffects = {
@@ -1298,14 +1299,12 @@
         return result;
     }
 
-    var reversedEffects = makeReversedEffects(reversibleEffects);
-
     var makedGenericEffects = makeGenericEffects(genericEffects);
 
     var makedGenericReversedEffects = makeReversedEffects(makeGenericEffects(genericReversibleEffects));
 
 
-    var allEffects = mergeObjects(normalEffects, makedGenericEffects, reversedEffects, makedGenericReversedEffects);
+    var allEffects = mergeObjects(normalEffects, makedGenericEffects, makedGenericReversedEffects);
 
 	var randomEffects = {
 	    random: function (obj) {
@@ -1318,23 +1317,49 @@
 	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    function boxRain(obj, reverse) {
-        boxTemplate(obj, reverse, FALSE, FALSE, TRUE);
+    function boxRainUpRight(obj) {
+        boxRainTemplate(obj, 4, FALSE);
     }
-    function boxRainGrow(obj, reverse) {
-        boxTemplate(obj, reverse, TRUE, FALSE, TRUE);
+    function boxRainDownRight(obj) {
+        boxRainTemplate(obj, 3, FALSE);
+    }
+    function boxRainDownLeft(obj) {
+        boxRainTemplate(obj, 2, FALSE);
+    }
+    function boxRainUpLeft(obj) {
+        boxRainTemplate(obj, 1, FALSE);
+    }
+
+    function boxRainGrowUpRight(obj) {
+        boxRainTemplate(obj, 4, TRUE);
+    }
+    function boxRainGrowDownRight(obj) {
+        boxRainTemplate(obj, 3, TRUE);
+    }
+    function boxRainGrowDownLeft(obj) {
+        boxRainTemplate(obj, 2, TRUE);
+    }
+    function boxRainGrowUpLeft(obj) {
+        boxRainTemplate(obj, 1, TRUE);
+    }
+
+    // dir: 1: UpRight, 2: DownRight: 3: DownLeft, 4: UpLeft
+    function boxRainTemplate(obj, dir, grow) {
+        var reverseRows = dir == 2 || dir == 4;
+        var reverse = dir == 1 || dir == 4;
+        boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE);
     }
 
     function boxRandom(obj) {
-        boxTemplate(obj, FALSE, FALSE, TRUE);
+        boxTemplate(obj, FALSE, FALSE, FALSE, TRUE);
     }
 
     function boxRandomGrow(obj) {
-        boxTemplate(obj, FALSE, TRUE, TRUE);
+        boxTemplate(obj, FALSE, FALSE, TRUE, TRUE);
     }
 
-    function boxTemplate(obj, reverse, grow, randomize, rain) {
-        var reveal = reverse; // TODO: Use this differently.
+    function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain) {
+        var reveal = FALSE; // TODO: Use this.
         var options = obj.options;
         var speed = options.speed;
         var boxRows = options.boxrows;
@@ -1357,6 +1382,9 @@
             box2DArr[rowIndex][colIndex] = this;
             colIndex++;
             if (colIndex == boxCols) {
+                if (reverseRows) {
+                    reverseArray(box2DArr[rowIndex]);
+                }
                 rowIndex++;
                 colIndex = 0;
                 box2DArr[rowIndex] = [];
