@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.0.5 - jQuery plugin
+ *  Sudo Slider verion 3.1.0 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -1212,6 +1212,7 @@
 	};
 	/*
 	 * End generic slider. Start animations.
+	 * A lot of the code here is an if-else-elseif nightmare. This is because it is smaller in JavaScript, and this thing needs to be small (when minimized).
 	 */
 
     // Start by defining everything, the implementations are below.
@@ -1225,13 +1226,11 @@
         boxRandomGrow : boxRandomGrow
 	};
 
+    // TODO: Death to reversible effects.
     // The functions here must have an "reverse" argument as the second argument in the function.
     var reversibleEffects = {
-        boxes : boxes,
-        boxesGrow : boxesGrow,
         boxRain : boxRain,
-        boxRainGrow : boxRainGrow,
-        sliceUpDown : sliceUpDown
+        boxRainGrow : boxRainGrow
     }
 
     // Effects that can go in all directions. Must have a "direction" argument as the second argument.
@@ -1243,7 +1242,9 @@
         fold : fold,
         blinds1: blinds1,
         blinds2: blinds2,
-        slicesFade: slicesFade
+        slicesFade: slicesFade,
+        zip : zip,
+        unzip: unzip
     }
 
     // function : (obj, dir, reverse)
@@ -1317,13 +1318,6 @@
 	$.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    function boxes(obj, reverse) {
-        boxTemplate(obj, reverse, FALSE, FALSE);
-    }
-    function boxesGrow(obj, reverse) {
-        boxTemplate(obj, reverse, TRUE, FALSE);
-    }
-
     function boxRain(obj, reverse) {
         boxTemplate(obj, reverse, FALSE, FALSE, TRUE);
     }
@@ -1340,11 +1334,12 @@
     }
 
     function boxTemplate(obj, reverse, grow, randomize, rain) {
+        var reveal = reverse; // TODO: Use this differently.
         var options = obj.options;
         var speed = options.speed;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
-        var boxes = createBoxes(obj, boxCols, boxRows, TRUE);
+        var boxes = createBoxes(obj, boxCols, boxRows, !reveal);
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
@@ -1395,23 +1390,34 @@
             }
         }
 
+        if (reveal) {
+            obj.goToNext();
+        }
+
         var count = 0;
         for (var i = 0; i < boxesResult.length; i++) {
             var boxLine = boxesResult[i];
             for (var j = 0; j < boxLine.length; j++) {
                 var box = $(boxLine[j]);
                 (function (box, timeBuff) {
-                    var width = box.width();
-                    var height = box.height();
+                    var goToWidth = box.width();
+                    var goToHeight = box.height();
                     if (grow) {
-                        box.width(0).height(0);
+                        if (reveal) {
+                            goToHeight = goToWidth = 0;
+                        } else {
+                            box.width(0).height(0);
+                        }
+                    }
+                    if (reveal) {
+                        box.css({opacity: 1});
                     }
                     count++;
                     setTimeout(function () {
                         box.animate({
-                            opacity: 1,
-                            width: width,
-                            height: height
+                            opacity: reveal ? 0 : 1,
+                            width: goToWidth,
+                            height: goToHeight
                         }, speed, function () {
                             count--;
                             if (count == 0) {
@@ -1469,8 +1475,16 @@
         foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
     }
 
-    function sliceUpDown(obj, reverse) {
-        foldTemplate(obj, TRUE, reverse, FALSE, FALSE, 0, 3);
+    function zip(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative, FALSE, FALSE, 0, 3);
+    }
+
+    function unzip(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = dir == 1 || dir == 4;
+        foldTemplate(obj, vertical, negative, FALSE, FALSE, 0, 3, TRUE);
     }
 
     function slicesRandom(obj, dir) {
@@ -1493,7 +1507,7 @@
         var objSlider = obj.slider;
         var slicesElement = createBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
         var count = 0;
-        var upDownAlternator = 0;
+        var upDownAlternator = FALSE;
         if (reverse) {
             reverseArray(slicesElement);
         } else {
@@ -1507,9 +1521,9 @@
             var slice = $(this);
             var orgWidth = slice.width();
             var orgHeight = slice.height();
-            var orgLeft = slice.css("left");
-            var orgTop = slice.css("top");
-            var startPosition = vertical ? orgLeft : orgTop;
+            var goToLeft = slice.css("left");
+            var goToTop = slice.css("top");
+            var startPosition = vertical ? goToLeft : goToTop;
 
             var innerBox = slice.children();
             var startAdjustment = innerBox[vertical ? "width" : "height"]();
@@ -1533,49 +1547,59 @@
                 });
             }
 
-            if (upDownEffect) {
-                var bottom = TRUE;
-                if (upDownEffect == 3) {
-                    if (upDownAlternator == 0) {
-                        bottom = FALSE;
-                        upDownAlternator++;
-                    } else {
-                        upDownAlternator = 0;
-                    }
-                } else if (upDownEffect == 2) {
-                    bottom = FALSE;
-                }
-                if (vertical) {
-                    slice.css({
-                        bottom: bottom ? 0 : orgHeight,
-                        top: bottom ? orgHeight : 0,
-                        height: 0
-                    });
-                } else {
-                    slice.css({
-                        right: bottom ? 0 : orgWidth,
-                        left: bottom ? orgWidth : 0,
-                        width: 0
-                    });
-                }
-            }
-
             if (reveal) {
                 var negative = upDownEffect == 1 ? -1 : 1;
                 obj.goToNext();
                 slice.css({
-                    top: orgTop,
-                    left: orgLeft,
+                    top: goToTop,
+                    left: goToLeft,
                     width: orgWidth,
                     height: orgHeight,
                     opacity: 1
                 });
                 if (vertical) {
-                    orgTop = negative * orgHeight;
+                    goToTop = negative * orgHeight;
                 } else {
-                    orgLeft = negative * orgWidth;
+                    goToLeft = negative * orgWidth;
                 }
             }
+
+            if (upDownEffect) {
+                var bottom = TRUE;
+                if (upDownEffect == 3) {
+                    if (upDownAlternator) {
+                        bottom = FALSE;
+                        upDownAlternator = FALSE;
+                    } else {
+                        upDownAlternator = TRUE;
+                    }
+                } else if (upDownEffect == 2) {
+                    bottom = FALSE;
+                }
+                if (vertical) {
+                    if (reveal) {
+                        goToTop = (bottom ? -1 : 1) * orgHeight;
+                    } else {
+                        slice.css({
+                            bottom: bottom ? 0 : orgHeight,
+                            top: bottom ? orgHeight : 0,
+                            height: reveal ? orgHeight : 0
+                        });
+                    }
+                } else {
+                    if (reveal) {
+                        goToLeft = (bottom ? -1 : 1) * orgWidth;
+                    } else {
+                        slice.css({
+                            right: bottom ? 0 : orgWidth,
+                            left: bottom ? orgWidth : 0,
+                            width: reveal ? orgWidth : 0
+                        });
+                    }
+                }
+            }
+
+
 
             count++;
             setTimeout(function () {
@@ -1583,8 +1607,8 @@
                     width: orgWidth,
                     height: orgHeight,
                     opacity: 1,
-                    left: orgLeft,
-                    top: orgTop
+                    left: goToLeft,
+                    top: goToTop
                 }, speed, ease, function () {
                     count--;
                     if (count == 0) {

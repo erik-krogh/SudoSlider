@@ -318,3 +318,8 @@ Change in docs: Added the "fadein slider on load" demo.
 
 3.0.5
 Change in script: Added the animationZIndex option. So you can change the z-index that the "animation" boxes have (This effects every effect except slide).
+
+3.1.0
+Change in script: Added a goToNext() method when making your own effects. By calling this the slider will instantly go to the next slide, and you can continue the effect afterwards.
+Change in script: Removed the boxes and boxesGrow effects.
+Change in script: Renamed a bunch of effects.
