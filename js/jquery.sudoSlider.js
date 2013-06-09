@@ -1,3 +1,8 @@
+// ==ClosureCompiler==
+// @output_file_name default.js
+// @compilation_level SIMPLE_OPTIMIZATIONS
+// ==/ClosureCompiler==
+
 /*
  *  Sudo Slider verion 3.1.0 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
@@ -1218,42 +1223,36 @@
     // Start by defining everything, the implementations are below.
     var normalEffectsPrefixObject = {
         box: {
-            Random: {
-                "": boxRandom,
-                Grow: boxRandomGrow
-            },
-            Rain: {
-                Up: {
-                    Right: boxRainUpRight,
-                    Left: boxRainUpLeft
-                },
-                Down: {
-                    Right: boxRainDownRight,
-                    Left: boxRainDownLeft
-                },
-                Grow: {
-                    Up: {
-                        Left: boxRainGrowUpLeft,
-                        Right: boxRainGrowUpRight
-                    },
-                    Down: {
-                        Left: boxRainGrowDownLeft,
-                        Right: boxRainGrowDownRight
-                    }
-                }
-            }
+            Random: [
+                "",
+                "Grow",
+                boxRandom
+            ],
+            Rain: [
+                "",
+                "Grow",
+                [
+                    "UpLeft",
+                    "DownLeft",
+                    "DownRight",
+                    "UpRight",
+                    boxRainTemplate
+                ]
+            ]
         },
         fade: {
             "": fade,
             OutIn: fadeOutIn
         },
-        foldRandom: {
-            Vertical: foldRandomVertical,
-            Horizontal: foldRandomHorizontal
-        },
+        foldRandom: [
+            "Horizontal",
+            "Vertical",
+            foldRandom
+        ],
         slide : slide
     }
 
+    // Generic effects needs to have a "dir" attribute as their last argument.
     var genericEffectsPrefixObject = {
         blinds : {
             "1": blinds1,
@@ -1263,16 +1262,21 @@
         push: pushTemplate,
         reveal: revealTemplate,
         slice: {
-            "": slice,
-            Reverse: sliceReverse,
-            Reveal: {
-                "": sliceReveal,
-                "Reverse": sliceRevealReverse
-            },
-            Random: {
-                "":  slicesRandom,
-                Reveal: slicesRandomReveal
-            },
+            "": [
+                "",
+                "Reverse",
+                slice
+            ],
+            Reveal: [
+                "",
+                "Reverse",
+                sliceReveal
+            ],
+            Random: [
+                "",
+                "Reveal",
+                slicesRandom
+            ],
             Fade: slicesFade
         },
         zip: zip,
@@ -1281,64 +1285,44 @@
 
 
 
-    function insertPrefixedEffects (resultObject, effectsObject, prefix, generic) {
+    function parsePrefixedEffects (resultObject, effectsObject, prefix, generic, argumentsStack) {
         if (isFunc(effectsObject)) {
             if (generic) {
-                insertPrefixedEffects(resultObject, makeGenericEffect(effectsObject), prefix, FALSE);
+                // Parsing the value 0, as a hack to make generic effects work, see the below else case.
+                parsePrefixedEffects(resultObject, ["", "Up", "Right", "Down", "Left", effectsObject], prefix, 0, argumentsStack);
             } else {
-                resultObject[prefix] = effectsObject;
-            }
-            return;
-        }
-        $.each(effectsObject, function (name, effect) {
-            insertPrefixedEffects(resultObject, effect, prefix + name, generic);
-        });
-    }
+                resultObject[prefix] = function (obj) {
+                    var argumentArray = [obj].concat(argumentsStack);
 
-    function makeGenericEffect(templateFunction) {
-        var result = {};
-        result[""] = function (obj, reverse) {
-            var vertical = obj.options.vertical;
-            var diff = obj.diff;
-            var dir;
-            if (vertical) {
-                if (diff < 0) {
-                    dir = 1;
-                } else {
-                    dir = 3;
-                }
-            } else {
-                if (diff < 0) {
-                    dir = 2;
-                } else {
-                    dir = 4;
+                    // Ugly hack, to make "generic" functions to work.
+                    var genericArgumentIndex = (argumentArray.length - 1);
+                    if (generic === 0 && argumentArray[genericArgumentIndex] == 0) {
+                        argumentArray[genericArgumentIndex] = getDirFromAnimationObject(obj);
+                    }
+
+                    effectsObject.apply(this, argumentArray);
                 }
             }
-            return templateFunction(obj, dir, reverse);
-        }
-        $.each(["Up", "Right", "Down", "Left"], function (index, direction) {
-            // Passing on the reverse argument, since the genericReversibleEffects use it.
-            result[direction] = function (obj, reverse) {
-                templateFunction(obj, index + 1, reverse);
+        } else if ($.isArray(effectsObject)) {
+            var effectIndex = effectsObject.length - 1;
+            var effect = effectsObject[effectIndex];
+            for (var i = 0; i < effectIndex; i++) {
+                var newArgumentStack = cloneArray(argumentsStack);
+                newArgumentStack.push(i);
+                var name = effectsObject[i];;
+                parsePrefixedEffects(resultObject, effect, prefix + name, generic, newArgumentStack);
             }
-        })
-        return result;
+        } else {
+            $.each(effectsObject, function (name, effect) {
+                parsePrefixedEffects(resultObject, effect, prefix + name, generic, argumentsStack);
+            });
+        }
     }
 
-    function makeReversedEffects(effectFunction) {
-        var result = {};
-        result[""] = function (obj) {
-            effectFunction(obj, FALSE);
-        }
-        result["Reverse"] = function (obj) {
-            effectFunction(obj, TRUE);
-        }
-        return result;
-    }
 
     var allEffects = {};
-    insertPrefixedEffects(allEffects, genericEffectsPrefixObject, "", TRUE);
-    insertPrefixedEffects(allEffects, normalEffectsPrefixObject, "", FALSE);
+    parsePrefixedEffects(allEffects, genericEffectsPrefixObject, "", TRUE, []);
+    parsePrefixedEffects(allEffects, normalEffectsPrefixObject, "", FALSE, []);
 
     var randomEffects = {
         random: function (obj) {
@@ -1351,45 +1335,16 @@
     $.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    function boxRainUpRight(obj) {
-        boxRainTemplate(obj, 4, FALSE);
-    }
-    function boxRainDownRight(obj) {
-        boxRainTemplate(obj, 3, FALSE);
-    }
-    function boxRainDownLeft(obj) {
-        boxRainTemplate(obj, 2, FALSE);
-    }
-    function boxRainUpLeft(obj) {
-        boxRainTemplate(obj, 1, FALSE);
-    }
-
-    function boxRainGrowUpRight(obj) {
-        boxRainTemplate(obj, 4, TRUE);
-    }
-    function boxRainGrowDownRight(obj) {
-        boxRainTemplate(obj, 3, TRUE);
-    }
-    function boxRainGrowDownLeft(obj) {
-        boxRainTemplate(obj, 2, TRUE);
-    }
-    function boxRainGrowUpLeft(obj) {
-        boxRainTemplate(obj, 1, TRUE);
-    }
-
     // dir: 1: UpRight, 2: DownRight: 3: DownLeft, 4: UpLeft
-    function boxRainTemplate(obj, dir, grow) {
+    function boxRainTemplate(obj, grow, dir) {
+        dir++;
         var reverseRows = dir == 2 || dir == 4;
         var reverse = dir == 1 || dir == 4;
         boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE);
     }
 
-    function boxRandom(obj) {
-        boxTemplate(obj, FALSE, FALSE, FALSE, TRUE);
-    }
-
-    function boxRandomGrow(obj) {
-        boxTemplate(obj, FALSE, FALSE, TRUE, TRUE);
+    function boxRandom(obj, grow) {
+        boxTemplate(obj, FALSE, FALSE, grow, TRUE);
     }
 
     function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain) {
@@ -1505,12 +1460,8 @@
         foldTemplate(obj, vertical, negative);
     }
 
-    function foldRandomVertical(obj) {
-        foldTemplate(obj, TRUE, FALSE, TRUE);
-    }
-
-    function foldRandomHorizontal(obj) {
-        foldTemplate(obj, FALSE, FALSE, TRUE);
+    function foldRandom(obj, vertical) {
+        foldTemplate(obj, vertical, FALSE, TRUE);
     }
 
     function blinds1(obj, dir) {
@@ -1531,22 +1482,10 @@
         foldTemplate(obj, vertical, FALSE, FALSE, FALSE, 0, negative ? 1 : 2);
     }
 
-    function sliceReverse(obj, dir) {
+    function sliceReveal(obj, reverse, dir) {
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, TRUE, FALSE, FALSE, 0, negative ? 1 : 2);
-    }
-
-    function sliceReveal(obj, dir) {
-        var vertical = dir == 1 || dir == 3;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, FALSE, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
-    }
-
-    function sliceRevealReverse(obj, dir) {
-        var vertical = dir == 1 || dir == 3;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, TRUE, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
+        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
     }
 
     function zip(obj, dir) {
@@ -1561,16 +1500,10 @@
         foldTemplate(obj, vertical, negative, FALSE, FALSE, 0, 3, TRUE);
     }
 
-    function slicesRandom(obj, dir) {
+    function slicesRandom(obj, reveal, dir) {
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2);
-    }
-
-    function slicesRandomReveal(obj, dir) {
-        var vertical = dir == 1 || dir == 3;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2, TRUE);
+        foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2, reveal);
     }
 
     function foldTemplate(obj, vertical, reverse, randomize, onlyFade, curtainEffect, upDownEffect, reveal) {
@@ -1694,9 +1627,9 @@
     }
 
     // 1: up, 2: right, 3: down, 4, left:
-    function pushTemplate(obj, direction) {
-        var vertical = direction == 2 || direction == 4;
-        var negative = (direction == 2 || direction == 3) ? -1 : 1;
+    function pushTemplate(obj, dir) {
+        var vertical = dir == 2 || dir == 4;
+        var negative = (dir == 2 || dir == 3) ? -1 : 1;
         var options = obj.options;
         var ease = options.ease;
         var fromSlides = obj.fromSlides;
@@ -1706,8 +1639,8 @@
         var width = mathMax(clone.width(), fromSlides.width());
         var speed = options.speed;
         clone.css(
-            vertical ? {left: negative * width} : {top: negative * height}
-        ).animate(
+                vertical ? {left: negative * width} : {top: negative * height}
+            ).animate(
             {left: 0, top: 0}, speed, ease, function () {
                 obj.callback();
             }
@@ -1785,7 +1718,7 @@
                 duration:fadeoutspeed,
                 easing:ease,
                 complete:function () {
-                    fadeTemplate(obj, fadeSpeed);
+                    finishFadeAnimation(obj, fadeSpeed);
                 }
             }
         );
@@ -1793,16 +1726,37 @@
 
 
     function fade(obj) {
-        fadeTemplate(obj, obj.options.speed);
+        finishFadeAnimation(obj, obj.options.speed);
     }
 
-    function fadeTemplate(obj, speed) {
+    function finishFadeAnimation(obj, speed) {
         var options = obj.options;
         options.boxcols = 1;
         options.boxrows = 1;
         options.speed = speed;
         boxTemplate(obj);
     }
+
+    function getDirFromAnimationObject(obj) {
+        var vertical = obj.options.vertical;
+        var diff = obj.diff;
+        var dir;
+        if (vertical) {
+            if (diff < 0) {
+                dir = 1;
+            } else {
+                dir = 3;
+            }
+        } else {
+            if (diff < 0) {
+                dir = 2;
+            } else {
+                dir = 4;
+            }
+        }
+        return dir;
+    }
+
 
     function createBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
         var slider = obj.slider;
@@ -1851,14 +1805,14 @@
             left: - left
         });
         var box = $('<div>').css({
-             left: left,
-             top: top,
-             width: width,
-             height: height,
-             opacity:0,
-             overflow: "hidden",
-             position: ABSOLUTE_STRING,
-             zIndex: obj.options.animationzindex
+            left: left,
+            top: top,
+            width: width,
+            height: height,
+            opacity:0,
+            overflow: "hidden",
+            position: ABSOLUTE_STRING,
+            zIndex: obj.options.animationzindex
         });
         box.append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
         return box;
@@ -1897,6 +1851,10 @@
     // Puts the specified function in a setTimeout([function], 0);
     function callAsync(func) {
         setTimeout(func, 0);
+    }
+
+    function cloneArray(arrayToClone) {
+        return arrayToClone.slice();
     }
 
     function reverseArray(array) {
