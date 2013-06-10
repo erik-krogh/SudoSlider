@@ -1240,6 +1240,18 @@
                     "UpRight",
                     boxRainTemplate
                 ]
+            ],
+            Spiral: [
+                "InWards",
+                "OutWards",
+                {
+                    "": boxSpiralTemplate,
+                    Grow: [
+                        "In",
+                        "Out",
+                        boxSpiralGrowTemplate
+                    ]
+                }
             ]
         },
         fade: {
@@ -1311,7 +1323,7 @@
             for (var i = 0; i < effectIndex; i++) {
                 var newArgumentStack = cloneArray(argumentsStack);
                 newArgumentStack.push(i);
-                var name = effectsObject[i];;
+                var name = effectsObject[i];
                 parsePrefixedEffects(resultObject, effect, prefix + name, generic, newArgumentStack);
             }
         } else {
@@ -1345,20 +1357,30 @@
         var grow = effect == 1 || effect == 2;
         var flyIn = effect == 3 || effect == 4;
         var reveal = effect == 4 || effect == 2;
-        boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE, flyIn, reveal);
+        boxTemplate(obj, reverse, reverseRows, grow, FALSE, 1, flyIn, reveal);
+    }
+
+    function boxSpiralTemplate(obj, direction) {
+        boxTemplate(obj, direction, FALSE, FALSE, FALSE, 2, FALSE, FALSE);
+    }
+
+    function boxSpiralGrowTemplate(obj, direction, reveal) {
+        boxTemplate(obj, direction, FALSE, TRUE, FALSE, 2, FALSE, reveal);
     }
 
     // grow: 0: no grow, 1: growIn, 2: growOut
     function boxRandomTemplate(obj, grow) {
         var reveal = grow == 2;
-        boxTemplate(obj, FALSE, FALSE, grow, TRUE, FALSE, FALSE, reveal);
+        boxTemplate(obj, FALSE, FALSE, grow, TRUE, 0, FALSE, reveal);
     }
 
-    function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain, flyIn, reveal) {
+    // SelectionAlgorithm: 0: Standard selection, 1: rain, 2: spiral
+    function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal) {
         var options = obj.options;
         var speed = options.speed;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
+        var totalBoxes = boxRows * boxCols;
         var boxes = createBoxes(obj, boxCols, boxRows, !reveal);
         var timeBuff = 0;
         var rowIndex = 0;
@@ -1387,7 +1409,7 @@
         });
 
         var boxesResult = [];
-        if (rain) {
+        if (selectionAlgorithm == 1) {
             for (var cols = 0; cols < (boxCols * 2) + 1; cols++) {
                 var prevCol = cols;
                 var boxesResultLine = [];
@@ -1403,6 +1425,28 @@
                 }
                 if (boxesResultLine.length != 0) {
                     boxesResult.push(boxesResultLine);
+                }
+            }
+        } else if (selectionAlgorithm == 2) {
+            // Algorithm borrowed from the Camera plugin by Pixedelic.com
+            var rows2 = boxRows/2, x, y, z, n= reverse ? totalBoxes : -1;
+            var negative = reverse ? -1 : 1;
+            for (z = 0; z < rows2; z++){
+                y = z;
+                for (x = z; x < boxCols - z - 1; x++) {
+                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                }
+                x = boxCols - z - 1;
+                for (y = z; y < boxRows - z - 1; y++) {
+                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                }
+                y = boxRows - z - 1;
+                for (x = boxCols - z - 1; x > z; x--) {
+                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                }
+                x = z;
+                for (y = boxRows - z - 1; y > z; y--) {
+                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
                 }
             }
         } else {
@@ -1884,6 +1928,8 @@
         return arrayToClone.slice();
     }
 
+    // This mutates the given array, so that it is reversed.
+    // It also returns it.
     function reverseArray(array) {
         return [].reverse.call(array);
     }
