@@ -225,8 +225,6 @@
                         callBackList[prependRealPos].push(prependClone);
                         ul.prepend(appendClone).append(prependClone);
                     }
-                    // This variable is also defined later, that's for the cases where Ajax is off, i also need to define it now, because the below code needs it.
-                    liConti = childrenNotAnimationClones(ul);
                 }
 
                 option[5]/*controlsfade*/ = option[5]/*controlsfade*/ && !option[16]/*continuous*/;
@@ -346,9 +344,9 @@
             }
 
             function getEffectMethod(inputEffect) {
-                if ($.isArray(inputEffect)) {
+                if (isArray(inputEffect)) {
                     return arrayToRandomEffect(inputEffect);
-                } else if (isFunc(inputEffect)) {
+                } else if (isFunction(inputEffect)) {
                     return inputEffect
                 } else {
                     if (inputEffect.indexOf(",") != -1) {
@@ -1286,7 +1284,7 @@
 
 
     function parsePrefixedEffects (resultObject, effectsObject, prefix, generic, argumentsStack) {
-        if (isFunc(effectsObject)) {
+        if (isFunction(effectsObject)) {
             if (generic) {
                 // Parsing the value 0, as a hack to make generic effects work, see the below else case.
                 parsePrefixedEffects(resultObject, ["", "Up", "Right", "Down", "Left", effectsObject], prefix, 0, argumentsStack);
@@ -1303,7 +1301,7 @@
                     effectsObject.apply(this, argumentArray);
                 }
             }
-        } else if ($.isArray(effectsObject)) {
+        } else if (isArray(effectsObject)) {
             var effectIndex = effectsObject.length - 1;
             var effect = effectsObject[effectIndex];
             for (var i = 0; i < effectIndex; i++) {
@@ -1862,7 +1860,7 @@
     }
 
     function childrenNotAnimationClones(obj) {
-        return obj.children(":not(." + ANIMATION_CLONE_MARKER_CLASS + ")");
+        return obj.children().not("."+ANIMATION_CLONE_MARKER_CLASS);
     }
 
     function objectToLowercase (obj) {
@@ -1877,8 +1875,12 @@
         return array;
     }
 
-    function isFunc(func) {
+    function isFunction(func) {
         return $.isFunction(func);
+    }
+
+    function isArray(object) {
+        return $.isArray(object);
     }
 
     function parseInt10(num) {
