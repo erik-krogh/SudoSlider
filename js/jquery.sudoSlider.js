@@ -271,7 +271,7 @@
                 // Lets make those fast/normal/fast into some numbers we can make calculations with.
                 var optionsToConvert = [4/*controlsfadespeed*/,1/*speed*/,14/*pause*/];
                 for (a in optionsToConvert) {
-                    option[parseInt10(optionsToConvert[a])] = textSpeedToNumber(option[optionsToConvert[a]]);
+                    option[optionsToConvert[a]] = textSpeedToNumber(option[optionsToConvert[a]]);
                 }
 
                 if (option[2]/*customlink*/) {
@@ -283,7 +283,7 @@
                                 stopAuto();
                             }
                             else if (target == "start") {
-                                autoTimeout = startAuto(option[14]/*pause*/);
+                                startAuto(option[14]/*pause*/);
                                 option[13]/*auto*/ = TRUE;
                             }
                             else if (target == 'block') clickable = FALSE;
@@ -296,7 +296,7 @@
 
                 runOnImagesLoaded(liConti.slice(0,option[8]/*slidecount*/), TRUE, function () {
                     if (option[13]/*auto*/) {
-                        autoTimeout = startAuto(option[14]/*pause*/);
+                        startAuto(option[14]/*pause*/);
                     }
 
                     if (destroyT) {
@@ -410,7 +410,7 @@
 
             function startAuto(pause) {
                 autoOn = TRUE;
-                return setTimeout(function(){
+                autoTimeout = setTimeout(function(){
                     if (autoOn) {
                         animateToSlide(NEXT_STRING, FALSE);
                     }
@@ -693,9 +693,9 @@
                     // Stopping auto if clicked. And also continuing after X seconds of inactivity.
                     if (clicked) {
                         stopAuto();
-                        if (option[15]/*resumepause*/) autoTimeout = startAuto(option[15]/*resumepause*/);
+                        if (option[15]/*resumepause*/) startAuto(option[15]/*resumepause*/);
                     } else {
-                        autoTimeout = startAuto(option[14]/*pause*/);
+                        startAuto(option[14]/*pause*/);
                     }
                 }
 
@@ -867,7 +867,7 @@
                     if (ajaxCallBack) ajaxCallBack();
                     startAsyncDelayedLoad();
                     // If we want, we can launch a function here.
-                    option[24]/*ajaxload*/.call(callbackTarget, parseInt10(i) + 1, img);
+                    option[24]/*ajaxload*/.call(callbackTarget, i + 1, img);
 
                     if (init) {
                         init = FALSE;
@@ -1176,7 +1176,7 @@
 
             baseSlider.startAuto = function(){
                 option[13]/*auto*/ = TRUE;
-                autoTimeout = startAuto(option[14]/*pause*/);
+                startAuto(option[14]/*pause*/);
             };
 
             baseSlider.stopAuto = function(){
@@ -1229,6 +1229,7 @@
             Rain: [
                 "",
                 "Grow",
+                "FlyIn",
                 [
                     "UpLeft",
                     "DownLeft",
@@ -1333,19 +1334,21 @@
     $.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    // dir: 1: UpRight, 2: DownRight: 3: DownLeft, 4: UpLeft
-    function boxRainTemplate(obj, grow, dir) {
-        dir++;
-        var reverseRows = dir == 2 || dir == 4;
-        var reverse = dir == 1 || dir == 4;
-        boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE);
+    // dir: 0: UpRight, 1: DownRight: 2: DownLeft, 3: UpLeft
+    // effect: 0: none, 1: grow, 2: flyIn.
+    function boxRainTemplate(obj, effect, dir) {
+        var reverseRows = dir == 1 || dir == 3;
+        var reverse = dir == 0 || dir == 3;
+        var grow = effect == 1;
+        var flyIn = effect == 2;
+        boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE, flyIn);
     }
 
     function boxRandom(obj, grow) {
         boxTemplate(obj, FALSE, FALSE, grow, TRUE);
     }
 
-    function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain) {
+    function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain, flyIn) {
         var reveal = FALSE; // TODO: Use this.
         var options = obj.options;
         var speed = options.speed;
@@ -1417,6 +1420,17 @@
                 (function (box, timeBuff) {
                     var goToWidth = box.width();
                     var goToHeight = box.height();
+
+                    if (flyIn) {
+                        var orgLeft = parseNumber(box.css("left"));
+                        var orgTop = parseNumber(box.css("top"));
+
+                        var adjustLeft = reverse ^ reverseRows ? -goToWidth : goToWidth;
+                        var adjustTop = reverse ? - goToHeight : goToHeight;
+
+                        box.css({left: orgLeft + adjustLeft, top: orgTop + adjustTop});
+                    }
+
                     if (grow) {
                         if (reveal) {
                             goToHeight = goToWidth = 0;
@@ -1432,7 +1446,9 @@
                         box.animate({
                             opacity: reveal ? 0 : 1,
                             width: goToWidth,
-                            height: goToHeight
+                            height: goToHeight,
+                            left: orgLeft,
+                            top: orgTop
                         }, speed, function () {
                             count--;
                             if (count == 0) {
@@ -1887,8 +1903,12 @@
         return parseInt(num, 10);
     }
 
+    function parseNumber(num) {
+        return parseFloat(num);
+    }
+
     function getTimeInMillis() {
-        return new Date() - 0;
+        return +new Date();
     }
 
     function mathAbs(number) {
