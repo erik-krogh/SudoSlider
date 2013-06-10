@@ -1223,13 +1223,16 @@
         box: {
             Random: [
                 "",
-                "Grow",
-                boxRandom
+                "GrowIn",
+                "GrowOut",
+                boxRandomTemplate
             ],
             Rain: [
                 "",
-                "Grow",
+                "GrowIn",
+                "GrowOut",
                 "FlyIn",
+                "FlyOut",
                 [
                     "UpLeft",
                     "DownLeft",
@@ -1335,21 +1338,23 @@
 
     // The implementations
     // dir: 0: UpRight, 1: DownRight: 2: DownLeft, 3: UpLeft
-    // effect: 0: none, 1: grow, 2: flyIn.
+    // effect: 0: none, 1: growIn, 2: growOut, 3: flyIn, 4: flyOut.
     function boxRainTemplate(obj, effect, dir) {
         var reverseRows = dir == 1 || dir == 3;
         var reverse = dir == 0 || dir == 3;
-        var grow = effect == 1;
-        var flyIn = effect == 2;
-        boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE, flyIn);
+        var grow = effect == 1 || effect == 2;
+        var flyIn = effect == 3 || effect == 4;
+        var reveal = effect == 4 || effect == 2;
+        boxTemplate(obj, reverse, reverseRows, grow, FALSE, TRUE, flyIn, reveal);
     }
 
-    function boxRandom(obj, grow) {
-        boxTemplate(obj, FALSE, FALSE, grow, TRUE);
+    // grow: 0: no grow, 1: growIn, 2: growOut
+    function boxRandomTemplate(obj, grow) {
+        var reveal = grow == 2;
+        boxTemplate(obj, FALSE, FALSE, grow, TRUE, FALSE, FALSE, reveal);
     }
 
-    function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain, flyIn) {
-        var reveal = FALSE; // TODO: Use this.
+    function boxTemplate(obj, reverse, reverseRows, grow, randomize, rain, flyIn, reveal) {
         var options = obj.options;
         var speed = options.speed;
         var boxRows = options.boxrows;
@@ -1425,8 +1430,16 @@
                         var orgLeft = parseNumber(box.css("left"));
                         var orgTop = parseNumber(box.css("top"));
 
-                        var adjustLeft = reverse ^ reverseRows ? -goToWidth : goToWidth;
+                        var adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
                         var adjustTop = reverse ? - goToHeight : goToHeight;
+
+                        if (reveal) {
+                            adjustLeft *= 1;
+                            orgLeft -= adjustLeft;
+
+                            adjustTop *= 1;
+                            orgTop -= adjustTop;
+                        }
 
                         box.css({left: orgLeft + adjustLeft, top: orgTop + adjustTop});
                     }
