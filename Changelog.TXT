@@ -323,3 +323,4 @@ Change in script: Added the animationZIndex option. So you can change the z-inde
 Change in script: Added a goToNext() method when making your own effects. By calling this the slider will instantly go to the next slide, and you can continue the effect afterwards.
 Change in script: Removed the boxes and boxesGrow effects.
 Change in script: Renamed a bunch of effects.
+Change in script: Upgraded to jQuery 1.10.1
