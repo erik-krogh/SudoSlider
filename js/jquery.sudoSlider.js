@@ -1488,6 +1488,18 @@
                         box.css({left: orgLeft + adjustLeft, top: orgTop + adjustTop});
                     }
 
+                    // This part makes so that the boxGrow animations appears to originate from the center of the box, instead of the top-left corner.
+                    var goToMarginLeft = 0;
+                    var goToMarginTop = 0;
+                    if (grow) {
+                        if (!reveal) {
+                            box.css({marginLeft: goToWidth / 2, marginTop: goToHeight / 2});
+                        } else {
+                            goToMarginLeft = goToWidth / 2;
+                            goToMarginTop = goToHeight / 2;
+                        }
+                    }
+
                     if (grow) {
                         if (reveal) {
                             goToHeight = goToWidth = 0;
@@ -1505,7 +1517,9 @@
                             width: goToWidth,
                             height: goToHeight,
                             left: orgLeft,
-                            top: orgTop
+                            top: orgTop,
+                            marginLeft: goToMarginLeft,
+                            marginTop: goToMarginTop
                         }, speed, function () {
                             count--;
                             if (count == 0) {
