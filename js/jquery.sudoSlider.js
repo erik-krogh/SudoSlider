@@ -1503,10 +1503,10 @@
         foldTemplate(obj, vertical, negative, FALSE, FALSE, 2);
     }
 
-    function slice(obj, dir) {
+    function slice(obj, reverse, dir) {
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, FALSE, FALSE, FALSE, 0, negative ? 1 : 2);
+        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2);
     }
 
     function sliceReveal(obj, reverse, dir) {
