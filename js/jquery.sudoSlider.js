@@ -242,17 +242,16 @@
                     setTimeout(adjustResponsiveLayout);
                 }
 
-                controls = FALSE;
                 if(option[3]/*controlsShow*/) {
-                    // Instead of just generating HTML, i make it a little smarter.
                     controls = $('<span ' + option[36]/*controlsattr*/ + '></span>');
-                    $(obj)[option[6]/*insertafter*/ ? 'after' : 'before'](controls);
+                    obj[option[6]/*insertafter*/ ? 'after' : 'before'](controls);
 
                     if(option[18]/*numeric*/) {
                         numericContainer = $('<ol '+ option[37]/*numericattr*/ +'></ol>');
                         controls.prepend(numericContainer);
-                        var distanceBetweenPages = option[18]/*numeric*/ == PAGES_MARKER_STRING ? numberOfVisibleSlides : 1;
-                        for(var a = 0; a < s - ((option[16]/*continuous*/ || option[18]/*numeric*/ == PAGES_MARKER_STRING) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
+                        var usePages = option[18]/*numeric*/ == PAGES_MARKER_STRING;
+                        var distanceBetweenPages = usePages ? numberOfVisibleSlides : 1;
+                        for(var a = 0; a < s - ((option[16]/*continuous*/ || usePages) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
                             numericControls[a] = $("<li rel='" + (a+1) + "'><a href='#'><span>"+ option[19]/*numerictext*/[a] +"</span></a></li>")
                                 .appendTo(numericContainer)
                                 .click(function(){
@@ -443,7 +442,6 @@
 
             // <strike>Simple function</strike><b>A litle complicated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
             function animateToSlide(i, clicked) {
-                var interruptableAnimation = FALSE; // TODO: Use this?
                 if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
@@ -453,13 +451,8 @@
                         customAni(i, clicked, FALSE);
                     }
                 } else {
-                    if (interruptableAnimation) {
-                        stopAnimation();
-                        animateToSlide(i, clicked);
-                    } else {
-                        animateToAfterCompletion = i;
-                        animateToAfterCompletionClicked = clicked;
-                    }
+                    animateToAfterCompletion = i;
+                    animateToAfterCompletionClicked = clicked;
                 }
             }
 
@@ -977,22 +970,18 @@
                         currentlyAnimating = TRUE;
                         currentAnimation = effect;
 
-                        var callbackHasYetToRun = TRUE;
                         currentAnimationCallback = function () {
-                            // Just being sure that this thing ONLY run once.
-                            if (callbackHasYetToRun) {
-                                currentlyAnimating = FALSE;
-                                callbackHasYetToRun = FALSE;
-                                goToSlide(dir, clicked);
-                                fixClearType(toSlides);
+                            currentlyAnimating = FALSE;
+                            callbackHasYetToRun = FALSE;
+                            goToSlide(dir, clicked);
+                            fixClearType(toSlides);
 
-                                // afteranimation
-                                aniCall(dir, TRUE);
+                            // afteranimation
+                            aniCall(dir, TRUE);
 
-                                while (awaitingAjaxLoads.length) {
-                                    // Removing and running the first, so we maintain FIFO.
-                                    awaitingAjaxLoads.splice(0,1)[0]();
-                                }
+                            while (awaitingAjaxLoads.length) {
+                                // Removing and running the first, so we maintain FIFO.
+                                awaitingAjaxLoads.splice(0,1)[0]();
                             }
                         };
                         var callObject = {
@@ -1354,7 +1343,6 @@
     $.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
-    // TODO: Make sure easing is used everywhere it should.
     // dir: 0: UpRight, 1: DownRight: 2: DownLeft, 3: UpLeft
     // effect: 0: none, 1: growIn, 2: growOut, 3: flyIn, 4: flyOut.
     function boxRainTemplate(obj, effect, dir) {
@@ -1384,6 +1372,7 @@
     function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal) {
         var options = obj.options;
         var speed = options.speed;
+        var ease = options.ease;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
         var totalBoxes = boxRows * boxCols;
@@ -1397,7 +1386,7 @@
             reverseArray(boxes);
         }
         if (randomize) {
-            boxes = shuffle(boxes);
+            shuffle(boxes);
         }
 
 
@@ -1437,7 +1426,7 @@
         } else if (selectionAlgorithm == 2) {
             // Spiral
             // Algorithm borrowed from the Camera plugin by Pixedelic.com
-            var rows2 = boxRows/2, x, y, z, n= reverse ? totalBoxes : -1;
+            var rows2 = boxRows/2, x, y, z, n = reverse ? totalBoxes : -1;
             var negative = reverse ? -1 : 1;
             for (z = 0; z < rows2; z++){
                 y = z;
@@ -1522,7 +1511,7 @@
                     }
                     count++;
                     setTimeout(function () {
-                        boxChildren.animate({marginLeft: -goToMarginLeft, marginTop: -goToMarginTop}, speed);
+                        boxChildren.animate({marginLeft: -goToMarginLeft, marginTop: -goToMarginTop}, speed, ease);
                         box.animate({
                             opacity: reveal ? 0 : 1,
                             width: goToWidth,
@@ -1531,7 +1520,7 @@
                             top: orgTop,
                             marginLeft: goToMarginLeft,
                             marginTop: goToMarginTop
-                        }, speed, function () {
+                        }, speed, ease, function () {
                             count--;
                             if (count == 0) {
                                 obj.callback();
@@ -1617,7 +1606,7 @@
             $(reverseArray(slicesElement.get())).appendTo(objSlider);
         }
         if (randomize) {
-            slicesElement = shuffle(slicesElement);
+            shuffle(slicesElement);
         }
         slicesElement.each(function (i) {
             var timeBuff = ((speed / slides) * i);
@@ -1737,10 +1726,8 @@
         clone.css(
                 vertical ? {left: negative * width} : {top: negative * height}
             ).animate(
-            {left: 0, top: 0}, speed, ease, function () {
-                obj.callback();
-            }
-        );
+                {left: 0, top: 0}, speed, ease, obj.callback
+            );
     }
 
     function revealTemplate(obj, dir) {
@@ -1768,9 +1755,7 @@
             }
         }
         innerBox.animate({left: 0, top: 0}, speed, ease);
-        box.animate({width: width, height: height}, speed, ease, function () {
-            obj.callback();
-        });
+        box.animate({width: width, height: height}, speed, ease, obj.callback);
     }
 
     function slide(obj) {
@@ -1803,7 +1788,7 @@
 
         var orgCallback = obj.callback;
         obj.callback = function () {
-            obj.fromSlides.animate({opacity: 1}, 0);
+            obj.fromSlides.css({opacity: 1});
             orgCallback();
         };
 
@@ -1970,9 +1955,9 @@
         return ret;
     }
 
+    // Only mutates the given array, doesn't return anything.
     function shuffle(array) {
         for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x){}
-        return array;
     }
 
     function isFunction(func) {
