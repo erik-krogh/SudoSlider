@@ -443,7 +443,7 @@
 
             // <strike>Simple function</strike><b>A litle complicated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
             function animateToSlide(i, clicked) {
-                var interruptableAnimation = FALSE; // TODO: Remove this?
+                var interruptableAnimation = FALSE; // TODO: Use this?
                 if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
@@ -938,7 +938,7 @@
                             i = dir;
                             // Finding the shortest path from where we are to where we are going.
                             var newDiff = -(t - dir - s) /* t - (realTarget + s) */;
-                            if (dir < option[8]/*slidecount*/-numberOfVisibleSlides+1 && mathAbs(newDiff) < diffAbs) {
+                            if (dir < option[8]/*slidecount*/ - numberOfVisibleSlides + 1 && mathAbs(newDiff) < diffAbs) {
                                 i = dir + s;
                                 diff = newDiff;
                                 diffAbs = mathAbs(diff);
@@ -964,9 +964,14 @@
 
                         var effect = option[0]/*effect*/;
 
-                        var slideSpecificEffect = targetLi.attr("data-effect");
+                        var specificEffectAttrName = "data-effect";
+                        var slideSpecificEffect = targetLi.attr(specificEffectAttrName);
                         if (slideSpecificEffect) {
                             effect = getEffectMethod(slideSpecificEffect);
+                        }
+                        var slideOutSpecificEffect = li.eq(t).attr(specificEffectAttrName + "out");
+                        if (slideOutSpecificEffect) {
+                            effect = getEffectMethod(slideOutSpecificEffect);
                         }
 
                         currentlyAnimating = TRUE;
@@ -1349,6 +1354,7 @@
     $.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
 
     // The implementations
+    // TODO: Make sure easing is used everywhere it should.
     // dir: 0: UpRight, 1: DownRight: 2: DownLeft, 3: UpLeft
     // effect: 0: none, 1: growIn, 2: growOut, 3: flyIn, 4: flyOut.
     function boxRainTemplate(obj, effect, dir) {
@@ -1410,6 +1416,7 @@
 
         var boxesResult = [];
         if (selectionAlgorithm == 1) {
+            // Rain
             for (var cols = 0; cols < (boxCols * 2) + 1; cols++) {
                 var prevCol = cols;
                 var boxesResultLine = [];
@@ -1428,6 +1435,7 @@
                 }
             }
         } else if (selectionAlgorithm == 2) {
+            // Spiral
             // Algorithm borrowed from the Camera plugin by Pixedelic.com
             var rows2 = boxRows/2, x, y, z, n= reverse ? totalBoxes : -1;
             var negative = reverse ? -1 : 1;
@@ -1491,9 +1499,11 @@
                     // This part makes so that the boxGrow animations appears to originate from the center of the box, instead of the top-left corner.
                     var goToMarginLeft = 0;
                     var goToMarginTop = 0;
+                    var boxChildren = box.children();
                     if (grow) {
                         if (!reveal) {
                             box.css({marginLeft: goToWidth / 2, marginTop: goToHeight / 2});
+                            boxChildren.css({marginLeft: -goToWidth / 2, marginTop: -goToHeight / 2});
                         } else {
                             goToMarginLeft = goToWidth / 2;
                             goToMarginTop = goToHeight / 2;
@@ -1512,6 +1522,7 @@
                     }
                     count++;
                     setTimeout(function () {
+                        boxChildren.animate({marginLeft: -goToMarginLeft, marginTop: -goToMarginTop}, speed);
                         box.animate({
                             opacity: reveal ? 0 : 1,
                             width: goToWidth,
