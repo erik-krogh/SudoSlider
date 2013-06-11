@@ -1,8 +1,3 @@
-// ==ClosureCompiler==
-// @output_file_name default.js
-// @compilation_level SIMPLE_OPTIMIZATIONS
-// ==/ClosureCompiler==
-
 /*
  *  Sudo Slider verion 3.1.0 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
