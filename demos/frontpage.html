@@ -73,7 +73,9 @@
 
                 var oldSlide = 0;
                 var frontPageSlider = $("#frontPageSlider").sudoSlider({
-                    effect: frontPageSliderEffect,
+                    effect: "boxRainGrowInDownRight",
+                    boxrows : 4,
+                    boxcols : 10,
                     responsive: true,
                     customlink: ".customlink",
                     history: true,
@@ -99,18 +101,6 @@
                     frontPageSlider.goToSlide(4);
                     return false;
                 })
-
-                // This effect is basically the boxRainGrow effect, but with a dynamic number of cols.
-                function frontPageSliderEffect(obj) {
-                    var width = $(window).width();
-                    var height = obj.toSlides.height();
-                    var rows = 4;
-                    var cols = Math.ceil((width / height) * rows);
-                    cols = Math.min(10, cols);
-                    obj.options.boxcols = cols;
-                    obj.options.boxrows = rows;
-                    return $.fn.sudoSlider.effects.boxRainGrow(obj);
-                }
             })();
 
             // The demo slider
@@ -293,7 +283,7 @@
                 </li>
 
 
-                <li class="textSlide" data-effect="blinds1Up" data-speed="400">
+                <li class="textSlide" data-effect="boxRainFlyOutDownRight">
                     <div id="slidercontainer" style="margin-top:10px;">
                         <div class="center"><h2>Effects explorer</h2></div>
                         <div class="center"><h3 style="display:inline;">Select effect </h3> <select id="demoSliderEffects"></select></div>
@@ -303,7 +293,6 @@
             </ul>
         </div>
         <div class="clear"></div>
-        <!-- End featured -->
     </div>
 </div>
 
