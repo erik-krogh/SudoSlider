@@ -7,6 +7,10 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
     <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
     <script type="text/javascript">
+        /****************************************
+         * Warning: The below code is to dynamicly make the "effect map" based on the list of effects in $.fn.sudoSlider.effects
+         * Its is long, confusing, and doesn't have a lot to do with SudoSlider. Its just a nice way of showing all the effects.
+         ****************************************/
         $(document).ready(function(){
 
             var effects = $.fn.sudoSlider.effects;
@@ -41,16 +45,8 @@
 
             var container = $("#effectLinksHolder");
 
-            var stackOverflowCounter = 0;
             var effectMap = makeEffectMap(0, effectsArray.length - 1, 0);
             function makeEffectMap(from, to, alreadySharedPrefixLength) {
-                if (typeof  alreadySharedPrefixLength === "undefined") {
-                    throw "Type";
-                }
-                stackOverflowCounter++;
-                if (stackOverflowCounter > 1000) {
-                    throw "Something";
-                }
                 if (from >= to) {
                     var effectName = effectsArray[from];
                     var effect = effects[effectName];
@@ -94,17 +90,36 @@
             }
 
 
-            collapseEffectMap(effectMap);
+            effectMap = collapseEffectMap(effectMap);
+            effectMap = collapseEffectMap(effectMap);
+            effectMap = collapseEffectMap(effectMap);
             function collapseEffectMap(effectMap) {
+                if ($.isFunction(effectMap)) {
+                    return effectMap;
+                }
+                var result = {};
                 $.each(effectMap, function (name, subTree) {
+                    if ($.isFunction(subTree)) {
+                        result[name] = subTree;
+                        return;
+                    }
                     collapseEffectMap(subTree);
-
-                    var subSubTree = subTree[name];
-                    if (subSubTree && !$.isFunction(subSubTree)) {
-                        effectMap[name] = subSubTree;
+                    if (objectLength(subTree) < 2) {
+                        var subTreeName;
+                        var subTreeValue;
+                        for (var a in subTree) {
+                            subTreeName = a;
+                            subTreeValue = subTree[a];
+                        }
+                        result[subTreeName] = collapseEffectMap(subTreeValue);
+                    } else {
+                        result[name] = collapseEffectMap(subTree);
                     }
                 });
+                return result;
             }
+
+
             effectMap = makeArrows(effectMap);
             function makeArrows(effectMap) {
                 var result = {};
@@ -112,7 +127,7 @@
                     if ($.isFunction(effectTree)) {
                         result[name] = effectTree;
                     } else {
-                        result[name + " &rarr;"] = effectTree;
+                        result[name + " &rarr;"] = makeArrows(effectTree);
                     }
                 });
                 return result;
@@ -127,6 +142,8 @@
             })();
 
 
+            makeEffectTreeGui(container, effectMap);
+            container.children().show();
             function makeEffectTreeGui(container, map) {
                 $.each(map, function (name, effectTree) {
                     var linkContainer = $("<div style=''></div>");
@@ -160,12 +177,14 @@
 
                 });
             }
-
-
-            makeEffectTreeGui(container, effectMap);
-
-            container.children().show();
         });
+        function objectLength(object) {
+            var length = 0;
+            $.each(object, function(name, value) {
+                length++;
+            })
+            return length;
+        }
         function findFirstEffectFromEffectMap(map) {
             var result = null;
             $.each(map, function (name, effect) {
@@ -179,13 +198,11 @@
             return result;
         }
         function findFirstUppercaseOrNumberAfter(a, b, alreadySharedPrefixLength) {
-            var i;
-            for (i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
+            for (var i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
                 var charAtA = a.charAt(i);
                 if (charAtA == charAtA.toUpperCase() || parseInt(charAtA) != NaN) {
                     return i;
                 }
-
 
                 if (a.charCodeAt(i) != b.charCodeAt(i)) {
                     return false;
