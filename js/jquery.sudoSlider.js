@@ -65,8 +65,9 @@
             prevhtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
             nexthtml:          '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
             controlsattr:      'id="controls"', /* option[36]/*controlsattr*/
-            numericattr:       'class="controls"' /* option[37]/*numericattr*/,
-            animationzindex:    10000 /* option[38]/*animationZIndex*/
+            numericattr:       'class="controls"', /* option[37]/*numericattr*/
+            animationzindex:    10000, /* option[38]/*animationZIndex*/
+            interruptibleanimations: FALSE /* option[39]/*interruptibleAnimations*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -446,8 +447,13 @@
                         customAni(i, clicked, FALSE);
                     }
                 } else {
-                    animateToAfterCompletion = i;
-                    animateToAfterCompletionClicked = clicked;
+                    if (option[39]/*interruptibleAnimations*/) {
+                        stopAnimation();
+                        animateToSlide(i, clicked);
+                    } else {
+                        animateToAfterCompletion = i;
+                        animateToAfterCompletionClicked = clicked;
+                    }
                 }
             }
 
@@ -979,6 +985,7 @@
                                 awaitingAjaxLoads.splice(0,1)[0]();
                             }
                         };
+                        var callbackHasYetToRun = TRUE;
                         var callObject = {
                             fromSlides : fromSlides,
                             toSlides : toSlides,
@@ -991,7 +998,12 @@
                                 left: leftTarget,
                                 top: topTarget
                             },
-                            callback: stopAnimation,
+                            callback: function () {
+                                if (callbackHasYetToRun) {
+                                    callbackHasYetToRun = FALSE;
+                                    stopAnimation();
+                                }
+                            },
                             goToNext: function () {
                                 adjustPositionTo(dir);
                             }

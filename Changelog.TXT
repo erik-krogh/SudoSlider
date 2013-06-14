@@ -327,3 +327,4 @@ Change in script: Added a whole bunch of new effect. And renamed some of the exi
 Change in docs: Upgraded to jQuery 1.10.1
 Change in docs: Changed the explorer effects, to show the effects in a nicer way. The old explorer effects is now "all effects".
 Change in script: If you specify the attribute "data-effectout" on a slide, that will specify the effect when leaving that slide. The data-effectout takes precedence over data-effect.
+Change in script: Added interruptibleAnimations option, by setting it to true, the current animation will be interrupted if the slider is told to go to another slide.
