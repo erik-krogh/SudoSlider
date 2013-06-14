@@ -5,270 +5,256 @@
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <link rel="STYLESHEET" type="text/css" href="../css/style.css">
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         /****************************************
-         * Warning: The below code is to dynamicly make the "effect map" based on the list of effects in $.fn.sudoSlider.effects
+         * Warning: The below code is to dynamically make the effect map based on the list of effects in $.fn.sudoSlider.effects.
          * Its is long, confusing, and doesn't have a lot to do with SudoSlider. Its just a nice way of showing all the effects.
+         * Must of it is just algorithms, to create the effect map.
          ****************************************/
-        $(document).ready(function(){
+        (function () {
+            $(document).ready(function(){
+                var effects = $.fn.sudoSlider.effects;
 
-            var effects = $.fn.sudoSlider.effects;
-
-            var useEffect = function (obj) {
-                alert("No effect specified");
-                obj.callback();
-            };
-            var sudoSlider = $("#slider").sudoSlider({
-                effect: function (obj) {
-                    useEffect(obj);
-                },
-                prevNext: false,
-                controlsFade: false,
-                continuous: true,
-                numeric: true,
-                vertical: true,
-                slideCount: 2,
-                interruptibleAnimations: true
-            });
+                var sudoSlider = $("#slider").sudoSlider({
+                    effect: function (obj) {
+                        alert("No effect specified");
+                        obj.callback();
+                    },
+                    prevNext: false,
+                    controlsFade: false,
+                    continuous: true,
+                    numeric: true,
+                    vertical: true,
+                    interruptibleAnimations: true
+                });
 
 
-            var effectsArray = [];
-            var counter = 0;
-            $.each(effects, function (name, effect) {
-                effectsArray.push(name);
-                counter++;
-                return counter < 1000;
-            });
-            effectsArray.sort();
+                var effectsArray = getKeyArray(effects);
+                effectsArray.sort();
 
+                var container = $("#effectLinksHolder");
 
-            var container = $("#effectLinksHolder");
-
-            var effectMap = makeEffectMap(0, effectsArray.length - 1, 0);
-            function makeEffectMap(from, to, alreadySharedPrefixLength) {
-                if (from >= to) {
-                    var effectName = effectsArray[from];
-                    var effect = effects[effectName];
-                    return effect;
-                }
-                var nextIndex;
-                for (nextIndex = from; nextIndex <= to; nextIndex++) {
-                    if (!sharedUntilNextBigLetter(effectsArray[from], effectsArray[nextIndex], alreadySharedPrefixLength)) {
-                        break;
+                var effectMap = makeEffectMap(0, effectsArray.length - 1, 0);
+                function makeEffectMap(from, to, alreadySharedPrefixLength) {
+                    if (from >= to) {
+                        var effectName = effectsArray[from];
+                        var effect = effects[effectName];
+                        return effect;
                     }
-                }
-                nextIndex--;
-                nextIndex = Math.max(nextIndex, from);
-                var nextPrefixLength = sharedPrefixLength(effectsArray[from], effectsArray[nextIndex], alreadySharedPrefixLength); // findFirstUppercaseOrNumberAfter
-                var nextPrefix = effectsArray[from].slice(0, nextPrefixLength);
-                var prefixlastChar = nextPrefix[nextPrefix.length - 1];
-                if (prefixlastChar == prefixlastChar.toUpperCase()) {
-                    nextPrefix = nextPrefix.slice(0, nextPrefix.length - 1);
-                }
-
-                var result = {};
-
-                if (nextIndex == to) {
-                    result[nextPrefix] = makeEffectMap(from, to, Math.max(nextPrefixLength, alreadySharedPrefixLength + 1));
-                } else {
-                    var subMap = makeEffectMap(from, nextIndex, nextPrefixLength);
-                    if ($.isFunction(subMap)) {
-                        result[effectsArray[from]] = subMap;
-                    } else {
-                        result[nextPrefix] = subMap;
-                    }
-
-                    var after = makeEffectMap(nextIndex + 1, to, alreadySharedPrefixLength);
-                    if ($.isFunction(after)) {
-                        result[effectsArray[to]] = after;
-                    } else {
-                        result = mergeObjects(result, after);
-                    }
-                }
-                return result;
-            }
-
-
-            effectMap = collapseEffectMap(effectMap);
-            effectMap = collapseEffectMap(effectMap);
-            effectMap = collapseEffectMap(effectMap);
-            function collapseEffectMap(effectMap) {
-                if ($.isFunction(effectMap)) {
-                    return effectMap;
-                }
-                var result = {};
-                $.each(effectMap, function (name, subTree) {
-                    if ($.isFunction(subTree)) {
-                        result[name] = subTree;
-                        return;
-                    }
-                    collapseEffectMap(subTree);
-                    if (objectLength(subTree) < 2) {
-                        var subTreeName;
-                        var subTreeValue;
-                        for (var a in subTree) {
-                            subTreeName = a;
-                            subTreeValue = subTree[a];
+                    var nextIndex;
+                    for (nextIndex = from; nextIndex <= to; nextIndex++) {
+                        if (!sharedUntilNextBigLetter(effectsArray[from], effectsArray[nextIndex], alreadySharedPrefixLength)) {
+                            break;
                         }
-                        result[subTreeName] = collapseEffectMap(subTreeValue);
-                    } else {
-                        result[name] = collapseEffectMap(subTree);
                     }
-                });
-                return result;
-            }
+                    nextIndex--;
+                    nextIndex = Math.max(nextIndex, from);
 
-
-            effectMap = makeArrows(effectMap);
-            function makeArrows(effectMap) {
-                var result = {};
-                $.each(effectMap, function (name, effectTree) {
-                    if ($.isFunction(effectTree)) {
-                        result[name] = effectTree;
-                    } else {
-                        result[name + " &rarr;"] = makeArrows(effectTree);
+                    var nextPrefixLength = sharedPrefixLength(effectsArray[from], effectsArray[nextIndex], alreadySharedPrefixLength);
+                    var nextPrefix = effectsArray[from].slice(0, nextPrefixLength);
+                    var prefixlastChar = nextPrefix[nextPrefix.length - 1];
+                    if (prefixlastChar == prefixlastChar.toUpperCase()) {
+                        nextPrefix = nextPrefix.slice(0, nextPrefix.length - 1);
                     }
-                });
-                return result;
-            }
 
-            (function () {
+                    var result = {};
+
+                    if (nextIndex == to) {
+                        result[nextPrefix] = makeEffectMap(from, to, Math.max(nextPrefixLength, alreadySharedPrefixLength + 1));
+                    } else {
+                        var subMap = makeEffectMap(from, nextIndex, nextPrefixLength);
+                        if ($.isFunction(subMap)) {
+                            result[effectsArray[from]] = subMap;
+                        } else {
+                            result[nextPrefix] = subMap;
+                        }
+
+                        var after = makeEffectMap(nextIndex + 1, to, alreadySharedPrefixLength);
+                        if ($.isFunction(after)) {
+                            result[effectsArray[to]] = after;
+                        } else {
+                            result = mergeObjects(result, after);
+                        }
+                    }
+                    return result;
+                }
+
+
+                effectMap = collapseEffectMap(effectMap);
+                effectMap = collapseEffectMap(effectMap);
+                effectMap = collapseEffectMap(effectMap);
+                function collapseEffectMap(effectMap) {
+                    if ($.isFunction(effectMap)) {
+                        return effectMap;
+                    }
+                    var result = {};
+                    $.each(effectMap, function (name, subTree) {
+                        if ($.isFunction(subTree)) {
+                            result[name] = subTree;
+                            return;
+                        }
+                        collapseEffectMap(subTree);
+                        if (objectLength(subTree) < 2) {
+                            var subTreeName;
+                            var subTreeValue;
+                            for (var a in subTree) {
+                                subTreeName = a;
+                                subTreeValue = subTree[a];
+                            }
+                            result[subTreeName] = collapseEffectMap(subTreeValue);
+                        } else {
+                            result[name] = collapseEffectMap(subTree);
+                        }
+                    });
+                    return result;
+                }
+
+
+                effectMap = makeArrows(effectMap);
+                function makeArrows(effectMap) {
+                    var result = {};
+                    $.each(effectMap, function (name, effectTree) {
+                        if ($.isFunction(effectTree)) {
+                            result[name] = effectTree;
+                        } else {
+                            result[name + " &rarr;"] = makeArrows(effectTree);
+                        }
+                    });
+                    return result;
+                }
+
                 var count = 0;
                 $.each(effects, function (effectName, effect) {
                     count++;
                 });
                 $("#effectCounter").text(count);
-            })();
 
 
-            makeEffectTreeGui(container, effectMap);
-            container.children().show();
-            function makeEffectTreeGui(container, map) {
-                $.each(map, function (name, effectTree) {
-                    var linkContainer = $("<div style=''></div>");
-                    var link = $("<a href=\"javascript:void(0);\">" + name + "</a>");
-                    linkContainer.append(link);
-                    container.append(linkContainer);
+                makeEffectTreeGui(container, effectMap);
+                container.children().show();
+                function makeEffectTreeGui(container, map) {
+                    $.each(map, function (name, effectTree) {
+                        var linkContainer = $("<div style=''></div>");
+                        var link = $("<a href=\"javascript:void(0);\">" + name + "</a>");
+                        linkContainer.append(link);
+                        container.append(linkContainer);
 
-                    if ($.isFunction(effectTree)) {
-                        link.click(function () {
-                            useEffect = effectTree;
-                            $("#selectedEffectContainer").text(name);
-                            sudoSlider.goToSlide("next");
-                        })
-                    } else {
-                        var subLinksContainer = $("<div style='margin-left: 40px;display: none;'></div>");
-                        linkContainer.append(subLinksContainer);
-                        makeEffectTreeGui(subLinksContainer, effectTree);
-                        link.click(function () {
-                            if (subLinksContainer.is(":visible")) {
-                                subLinksContainer.slideUp(400);
-                            } else {
-                                subLinksContainer.slideDown(400);
-                            }
-                            var useEffectName = findFirstEffectFromEffectMap(effectTree);
-                            $("#selectedEffectContainer").text(useEffectName);
-                            useEffect = effects[useEffectName];
-                            sudoSlider.goToSlide("next");
-                            return false;
-                        });
+                        var effectName;
+                        if (name.indexOf(" ") != -1) {
+                            effectName = name.slice(0, name.indexOf(" "));
+                        } else {
+                            effectName = name;
+                        }
+
+                        if ($.isFunction(effectTree)) {
+                            link.click(function () {
+                                setEffectAndSlide(effectName);
+                            });
+                        } else {
+                            var subLinksContainer = $("<div style='margin-left: 40px;display: none;'></div>");
+                            linkContainer.append(subLinksContainer);
+                            makeEffectTreeGui(subLinksContainer, effectTree);
+                            link.click(function () {
+                                if (subLinksContainer.is(":visible")) {
+                                    subLinksContainer.slideUp(400);
+                                } else {
+                                    subLinksContainer.slideDown(400);
+                                }
+                                setEffectAndSlide(effectName);
+                                return false;
+                            });
+                        }
+
+                    });
+                    function setEffectAndSlide(name) {
+                        sudoSlider.setOption("effect", name);
+                        $("#selectedEffectContainer").text(name);
+                        sudoSlider.goToSlide("next");
                     }
-
-                });
-            }
-        });
-        function objectLength(object) {
-            var length = 0;
-            $.each(object, function(name, value) {
-                length++;
-            })
-            return length;
-        }
-        function findFirstEffectFromEffectMap(map) {
-            var result = null;
-            $.each(map, function (name, effect) {
-                if ($.isFunction(effect)) {
-                    result = name;
-                } else {
-                    result = findFirstEffectFromEffectMap(effect);
                 }
-                return false;
             });
-            return result;
-        }
-        function findFirstUppercaseOrNumberAfter(a, b, alreadySharedPrefixLength) {
-            for (var i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
-                var charAtA = a.charAt(i);
-                if (charAtA == charAtA.toUpperCase() || parseInt(charAtA) != NaN) {
-                    return i;
-                }
 
+            function getKeyArray(object) {
+                var keys = [];
+                $.each(object, function (key) {
+                    keys.push(key);
+                });
+                return keys;
+            }
 
-                if (a.charCodeAt(i) != b.charCodeAt(i)) {
+            function objectLength(object) {
+                var length = 0;
+                $.each(object, function(name, value) {
+                    length++;
+                })
+                return length;
+            }
+            function findFirstEffectFromEffectMap(map) {
+                var result = null;
+                $.each(map, function (name, effect) {
+                    if ($.isFunction(effect)) {
+                        result = name;
+                    } else {
+                        result = findFirstEffectFromEffectMap(effect);
+                    }
+                    return false;
+                });
+                return result;
+            }
+
+            function sharedUntilNextBigLetter(a, b, alreadySharedPrefixLength) {
+                if (alreadySharedPrefixLength > a.length || alreadySharedPrefixLength > b.length) {
                     return false;
                 }
-            }
-            return true;
-        }
+                for (var i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
+                    var charAtA = a.charAt(i);
+                    if ((charAtA == charAtA.toUpperCase()) || !isNaN(parseInt(charAtA))) {
+                        if (i == alreadySharedPrefixLength && charAtA != b.charAt(i)) {
+                            return false;
+                        }
+                        return true;
+                    }
 
-        function sharedUntilNextBigLetter(a, b, alreadySharedPrefixLength) {
-
-            if (alreadySharedPrefixLength > a.length || alreadySharedPrefixLength > b.length) {
-                return false;
-            }
-            for (var i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
-                var charAtA = a.charAt(i);
-                if ((charAtA == charAtA.toUpperCase()) || !isNaN(parseInt(charAtA))) {
-                    if (i == alreadySharedPrefixLength && charAtA != b.charAt(i)) {
+                    if (a.charCodeAt(i) != b.charCodeAt(i)) {
                         return false;
                     }
-                    return true;
                 }
-
-
-                if (a.charCodeAt(i) != b.charCodeAt(i)) {
-                    return false;
-                }
+                return true;
             }
-            return true;
-        }
 
-
-        function sharedPrefixLength(a, b, from) {
-            var prefixCounter = from;
-            for (var i = from; i < a.length && i < b.length; i++) {
-                var aChar = a.charAt(i);
-                if (a.charCodeAt(i) != b.charCodeAt(i) || aChar.toUpperCase() == aChar) {
-                    if (aChar.toUpperCase() == aChar) {
-                        prefixCounter++;
+            function sharedPrefixLength(a, b, from) {
+                var prefixCounter = from;
+                for (var i = from; i < a.length && i < b.length; i++) {
+                    var aChar = a.charAt(i);
+                    if (a.charCodeAt(i) != b.charCodeAt(i) || aChar.toUpperCase() == aChar) {
+                        if (aChar.toUpperCase() == aChar) {
+                            prefixCounter++;
+                        }
+                        break;
                     }
-                    break;
+                    prefixCounter++;
                 }
-                prefixCounter++;
+                return prefixCounter;
             }
-            return prefixCounter;
-        }
-        function mergeObjects(){
-            var result = {};
-            var args = arguments;
-            for (var i in args) {
-                var obj = args[i];
-                for (var attrname in obj) {
-                    result[attrname] = obj[attrname];
+            function mergeObjects(){
+                var result = {};
+                var args = arguments;
+                for (var i in args) {
+                    var obj = args[i];
+                    for (var attrname in obj) {
+                        result[attrname] = obj[attrname];
+                    }
                 }
+                return result;
             }
-            return result;
-        }
+        })();
     </script>
     <style>
-        #slider li img {width: 400px;}
-        .nextBtn {left: 400px;}
+        #slider li img {width: 450px;}
+        .nextBtn {left: 450px;}
         .prevBtn, .nextBtn {top: 30px;}
     </style>
-
-
-
 
 </head>
 <body>
