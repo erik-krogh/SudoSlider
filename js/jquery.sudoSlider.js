@@ -331,28 +331,6 @@
              * The functions do the magic.
              */
 
-            function arrayToRandomEffect(array) {
-                return function (obj) {
-                    var effect = pickRandomValue(array);
-                    return getEffectMethod(effect)(obj);
-                }
-            }
-
-            function getEffectMethod(inputEffect) {
-                if (isArray(inputEffect)) {
-                    return arrayToRandomEffect(inputEffect);
-                } else if (isFunction(inputEffect)) {
-                    return inputEffect
-                } else {
-                    if (inputEffect.indexOf(",") != -1) {
-                        var array = inputEffect.split(",");
-                        return arrayToRandomEffect(array);
-                    } else {
-                        return objectToLowercase($.fn.sudoSlider.effects)[inputEffect.toLowerCase()];
-                    }
-                }
-            }
-
             // Adjusts the slider when a change in layout has happened.
             function adjustResponsiveLayout() {
                 var oldWidth = liConti.width();
@@ -1340,10 +1318,7 @@
     parsePrefixedEffects(allEffects, normalEffectsPrefixObject, "", FALSE, []);
 
     var randomEffects = {
-        random: function (obj) {
-            var effectFunction = pickRandomValue(allEffects);
-            return effectFunction(obj);
-        }
+        random: makeRandomEffect(allEffects)
     };
 
     // Saving it
@@ -1941,6 +1916,10 @@
         setTimeout(func, 0);
     }
 
+    function startsWith(string, prefix) {
+        return string.indexOf(prefix) == 0;
+    }
+
     function cloneArray(arrayToClone) {
         return arrayToClone.slice();
     }
@@ -2005,6 +1984,44 @@
             }
         }
         return result;
+    }
+
+    function getEffectMethod(inputEffect) {
+        if (isArray(inputEffect)) {
+            return makeRandomEffect(inputEffect);
+        } else if (isFunction(inputEffect)) {
+            return inputEffect
+        } else /* if (typeof inputEffect === "string") */{
+            if (inputEffect.indexOf(",") != -1) {
+                var array = inputEffect.split(",");
+                return makeRandomEffect(array);
+            } else {
+                var effects = objectToLowercase($.fn.sudoSlider.effects);
+                var effectName = inputEffect.toLowerCase();
+                var result = effects[effectName];
+                if (result) {
+                    return result;
+                } else {
+                    var array = [];
+                    for (var name in effects) {
+                        if (startsWith(name, effectName)) {
+                            array.push(effects[name]);
+                        }
+                    }
+                    if (!array.length) {
+                        return getEffectMethod("slide");
+                    }
+                    return makeRandomEffect(array);
+                }
+            }
+        }
+    }
+
+    function makeRandomEffect(array) {
+        return function (obj) {
+            var effect = pickRandomValue(array);
+            return getEffectMethod(effect)(obj);
+        }
     }
 
     function pickRandomValue(obj) {

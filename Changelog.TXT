@@ -323,8 +323,9 @@ Change in script: Added the animationZIndex option. So you can change the z-inde
 Change in script: Added a goToNext() method when making your own effects. By calling this the slider will instantly go to the next slide, and you can continue the effect afterwards.
 Change in script: Removed the boxes and boxesGrow effects.
 Change in script: Changed the remaining box effects, so that when they grow (in/out) the movement originates from the center.
-Change in script: Added a whole bunch of new effect. And renamed some of the existing effects.
+Change in script: Added a whole bunch of new effect. And renamed some of the existing effects. (Now there is 105 effects).
 Change in docs: Upgraded to jQuery 1.10.1
 Change in docs: Changed the explorer effects, to show the effects in a nicer way. The old explorer effects is now "all effects".
 Change in script: If you specify the attribute "data-effectout" on a slide, that will specify the effect when leaving that slide. The data-effectout takes precedence over data-effect.
 Change in script: Added interruptibleAnimations option, by setting it to true, the current animation will be interrupted if the slider is told to go to another slide.
+Change in script: If you set an effect like "box" it will result in a random effect that chooses between all effects starting with "box". This work for all strings that doesn't hit a specific effect.
