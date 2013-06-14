@@ -1247,28 +1247,24 @@
 
     // Generic effects needs to have a "dir" attribute as their last argument.
     var genericEffectsPrefixObject = {
-        blinds : {
-            "1": blinds1,
-            "2": blinds2
-        },
+        blinds : [
+            "1",
+            "2",
+            blinds
+        ],
         fold: fold,
         push: pushTemplate,
         reveal: revealTemplate,
         slice: {
             "": [
                 "",
-                "Reverse",
-                slice
-            ],
-            Reveal: [
-                "",
-                "Reverse",
-                sliceReveal
-            ],
-            Random: [
-                "",
                 "Reveal",
-                slicesRandom
+                [
+                    "",
+                    "Reverse",
+                    "Random",
+                    slice
+                ]
             ],
             Fade: slicesFade
         },
@@ -1317,12 +1313,11 @@
     parsePrefixedEffects(allEffects, genericEffectsPrefixObject, "", TRUE, []);
     parsePrefixedEffects(allEffects, normalEffectsPrefixObject, "", FALSE, []);
 
-    var randomEffects = {
-        random: makeRandomEffect(allEffects)
-    };
+    allEffects.random = makeRandomEffect(allEffects);
 
-    // Saving it
-    $.fn.sudoSlider.effects = mergeObjects(allEffects, randomEffects);
+    // Saving it.
+    $.fn.sudoSlider.effects = allEffects;
+
 
     // The implementations
     // dir: 0: UpRight, 1: DownRight: 2: DownLeft, 3: UpLeft
@@ -1531,28 +1526,18 @@
         foldTemplate(obj, vertical, FALSE, TRUE);
     }
 
-    function blinds1(obj, dir) {
+    function blinds(obj, blindsEffect, dir) {
+        blindsEffect++;
         var vertical = dir == 2 || dir == 4;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, negative, FALSE, FALSE, 1);
+        foldTemplate(obj, vertical, negative, FALSE, FALSE, blindsEffect);
     }
 
-    function blinds2(obj, dir) {
-        var vertical = dir == 2 || dir == 4;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, negative, FALSE, FALSE, 2);
-    }
-
-    function slice(obj, reverse, dir) {
+    function slice(obj, reveal, reverse, dir) {
+        var random = reverse == 2;
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2);
-    }
-
-    function sliceReveal(obj, reverse, dir) {
-        var vertical = dir == 1 || dir == 3;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, reverse, FALSE, FALSE, 0, negative ? 1 : 2, TRUE);
+        foldTemplate(obj, vertical, reverse, random, FALSE, 0, negative ? 1 : 2, reveal);
     }
 
     function zip(obj, dir) {
@@ -1565,12 +1550,6 @@
         var vertical = dir == 2 || dir == 4;
         var negative = dir == 1 || dir == 4;
         foldTemplate(obj, vertical, negative, FALSE, FALSE, 0, 3, TRUE);
-    }
-
-    function slicesRandom(obj, reveal, dir) {
-        var vertical = dir == 1 || dir == 3;
-        var negative = dir == 1 || dir == 4;
-        foldTemplate(obj, vertical, FALSE, TRUE, FALSE, 0, negative ? 1 : 2, reveal);
     }
 
     function foldTemplate(obj, vertical, reverse, randomize, onlyFade, curtainEffect, upDownEffect, reveal) {
@@ -1972,18 +1951,6 @@
 
     function mathMax(a, b) {
         return a > b ? a : b;
-    }
-
-    function mergeObjects(){
-        var result = {};
-        var args = arguments;
-        for (var i in args) {
-            var obj = args[i];
-            for (var attrname in obj) {
-                result[attrname] = obj[attrname];
-            }
-        }
-        return result;
     }
 
     function getEffectMethod(inputEffect) {
