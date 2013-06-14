@@ -94,17 +94,45 @@
             }
 
 
-            collapseEffectMap(effectMap);
+            effectMap = collapseEffectMap(effectMap);
+            effectMap = collapseEffectMap(effectMap);
+            effectMap = collapseEffectMap(effectMap);
             function collapseEffectMap(effectMap) {
+                if ($.isFunction(effectMap)) {
+                    return effectMap;
+                }
+                var result = {};
                 $.each(effectMap, function (name, subTree) {
+                    if ($.isFunction(subTree)) {
+                        result[name] = subTree;
+                        return;
+                    }
                     collapseEffectMap(subTree);
-
-                    var subSubTree = subTree[name];
-                    if (subSubTree && !$.isFunction(subSubTree)) {
-                        effectMap[name] = subSubTree;
+                    if (objectLength(subTree) < 2) {
+                        var subTreeName;
+                        var subTreeValue;
+                        for (var a in subTree) {
+                            subTreeName = a;
+                            subTreeValue = subTree[a];
+                        }
+                        result[subTreeName] = collapseEffectMap(subTreeValue);
+                    } else {
+                        result[name] = collapseEffectMap(subTree);
                     }
                 });
+                return result;
             }
+
+            function objectLength(object) {
+                var length = 0;
+                $.each(object, function(name, value) {
+                    length++;
+                })
+                return length;
+            }
+
+
+
             effectMap = makeArrows(effectMap);
             function makeArrows(effectMap) {
                 var result = {};
@@ -179,13 +207,11 @@
             return result;
         }
         function findFirstUppercaseOrNumberAfter(a, b, alreadySharedPrefixLength) {
-            var i;
-            for (i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
+            for (var i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
                 var charAtA = a.charAt(i);
                 if (charAtA == charAtA.toUpperCase() || parseInt(charAtA) != NaN) {
                     return i;
                 }
-
 
                 if (a.charCodeAt(i) != b.charCodeAt(i)) {
                     return false;
