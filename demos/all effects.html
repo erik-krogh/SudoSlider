@@ -8,15 +8,10 @@
     <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            var effects = $.fn.sudoSlider.effects;
-            var effectUsed = function (obj) {
-                alert("Effect not specified");
-                obj.callback();
-            };
-
             var sudoSlider = $("#slider").sudoSlider({
                 effect: function (obj) {
-                    effectUsed(obj);
+                    alert("Effect not specified");
+                    obj.callback();
                 },
                 prevNext: true,
                 controlsFade: false,
@@ -24,10 +19,10 @@
             });
             var container = $("#effectLinksHolder");
             var count = 0;
-            $.each(effects, function (effectName, effect) {
+            $.each($.fn.sudoSlider.effects, function (effectName, effect) {
                 count++;
-                container.append($("<a> " + effectName + " </a> <span>|</span> ").click(function () {
-                    effectUsed = effect;
+                container.append($("<a> " + effectName + " </a> <span>| </span>").click(function () {
+                    sudoSlider.setOption("effect", effect);
                     sudoSlider.goToSlide("next");
                 }))
             });
