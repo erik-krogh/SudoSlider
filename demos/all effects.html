@@ -9,14 +9,14 @@
     <script type="text/javascript">
         $(document).ready(function(){
             var effects = $.fn.sudoSlider.effects;
-            var useEffect = function (obj) {
+            var effectUsed = function (obj) {
                 alert("Effect not specified");
                 obj.callback();
             };
 
             var sudoSlider = $("#slider").sudoSlider({
                 effect: function (obj) {
-                    useEffect(obj);
+                    effectUsed(obj);
                 },
                 prevNext: true,
                 controlsFade: false,
@@ -27,7 +27,7 @@
             $.each(effects, function (effectName, effect) {
                 count++;
                 container.append($("<a> " + effectName + " </a> <span>|</span> ").click(function () {
-                    useEffect = effect;
+                    effectUsed = effect;
                     sudoSlider.goToSlide("next");
                 }))
             });

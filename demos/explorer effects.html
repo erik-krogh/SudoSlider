@@ -1,60 +1,279 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Sudo Slider | Explorer the effects</title>
+    <title>Sudo Slider | All the effects</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <link rel="STYLESHEET" type="text/css" href="../css/style.css">
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
     <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
+
             var effects = $.fn.sudoSlider.effects;
+
             var useEffect = function (obj) {
-                alert("Effect not specified");
+                alert("No effect specified");
                 obj.callback();
             };
-
             var sudoSlider = $("#slider").sudoSlider({
                 effect: function (obj) {
                     useEffect(obj);
                 },
-                prevNext: true,
+                prevNext: false,
                 controlsFade: false,
-                continuous: true
+                continuous: true,
+                numeric: true,
+                vertical: true,
+                slideCount: 2
             });
+
+
+            var effectsArray = [];
+            var counter = 0;
+            $.each(effects, function (name, effect) {
+                effectsArray.push(name);
+                counter++;
+                return counter < 1000;
+            });
+            effectsArray.sort();
+
+
             var container = $("#effectLinksHolder");
-            var count = 0;
-            $.each(effects, function (effectName, effect) {
-                count++;
-                container.append($("<a> " + effectName + " </a> <span>|</span> ").click(function () {
-                    useEffect = effect;
-                    sudoSlider.goToSlide("next");
-                }))
-            });
-            $("#effectCounter").text(count);
+
+            var stackOverflowCounter = 0;
+            var effectMap = makeEffectMap(0, effectsArray.length - 1, 0);
+            function makeEffectMap(from, to, alreadySharedPrefixLength) {
+                if (typeof  alreadySharedPrefixLength === "undefined") {
+                    throw "Type";
+                }
+                stackOverflowCounter++;
+                if (stackOverflowCounter > 1000) {
+                    throw "Something";
+                }
+                if (from >= to) {
+                    var effectName = effectsArray[from];
+                    var effect = effects[effectName];
+                    return effect;
+                }
+                var nextIndex;
+                for (nextIndex = from; nextIndex <= to; nextIndex++) {
+                    if (!sharedUntilNextBigLetter(effectsArray[from], effectsArray[nextIndex], alreadySharedPrefixLength)) {
+                        break;
+                    }
+                }
+                nextIndex--;
+                nextIndex = Math.max(nextIndex, from);
+                var nextPrefixLength = sharedPrefixLength(effectsArray[from], effectsArray[nextIndex], alreadySharedPrefixLength); // findFirstUppercaseOrNumberAfter
+                var nextPrefix = effectsArray[from].slice(0, nextPrefixLength);
+                var prefixlastChar = nextPrefix[nextPrefix.length - 1];
+                if (prefixlastChar == prefixlastChar.toUpperCase()) {
+                    nextPrefix = nextPrefix.slice(0, nextPrefix.length - 1);
+                }
+
+                var result = {};
+
+                if (nextIndex == to) {
+                    result[nextPrefix] = makeEffectMap(from, to, Math.max(nextPrefixLength, alreadySharedPrefixLength + 1));
+                } else {
+                    var subMap = makeEffectMap(from, nextIndex, nextPrefixLength);
+                    if ($.isFunction(subMap)) {
+                        result[effectsArray[from]] = subMap;
+                    } else {
+                        result[nextPrefix] = subMap;
+                    }
+
+                    var after = makeEffectMap(nextIndex + 1, to, alreadySharedPrefixLength);
+                    if ($.isFunction(after)) {
+                        result[effectsArray[to]] = after;
+                    } else {
+                        result = mergeObjects(result, after);
+                    }
+                }
+                return result;
+            }
+
+
+            collapseEffectMap(effectMap);
+            function collapseEffectMap(effectMap) {
+                $.each(effectMap, function (name, subTree) {
+                    collapseEffectMap(subTree);
+
+                    var subSubTree = subTree[name];
+                    if (subSubTree && !$.isFunction(subSubTree)) {
+                        effectMap[name] = subSubTree;
+                    }
+                });
+            }
+            effectMap = makeArrows(effectMap);
+            function makeArrows(effectMap) {
+                var result = {};
+                $.each(effectMap, function (name, effectTree) {
+                    if ($.isFunction(effectTree)) {
+                        result[name] = effectTree;
+                    } else {
+                        result[name + " &rarr;"] = effectTree;
+                    }
+                });
+                return result;
+            }
+
+            (function () {
+                var count = 0;
+                $.each(effects, function (effectName, effect) {
+                    count++;
+                });
+                $("#effectCounter").text(count);
+            })();
+
+
+            function makeEffectTreeGui(container, map) {
+                $.each(map, function (name, effectTree) {
+                    var linkContainer = $("<div style=''></div>");
+                    var link = $("<a href=\"javascript:void(0);\">" + name + "</a>");
+                    linkContainer.append(link);
+                    container.append(linkContainer);
+
+                    if ($.isFunction(effectTree)) {
+                        link.click(function () {
+                            useEffect = effectTree;
+                            $("#selectedEffectContainer").text(name);
+                            sudoSlider.goToSlide("next");
+                        })
+                    } else {
+                        var subLinksContainer = $("<div style='margin-left: 40px;display: none;'></div>");
+                        linkContainer.append(subLinksContainer);
+                        makeEffectTreeGui(subLinksContainer, effectTree);
+                        link.click(function () {
+                            if (subLinksContainer.is(":visible")) {
+                                subLinksContainer.slideUp(400);
+                            } else {
+                                subLinksContainer.slideDown(400);
+                            }
+                            var useEffectName = findFirstEffectFromEffectMap(effectTree);
+                            $("#selectedEffectContainer").text(useEffectName);
+                            useEffect = effects[useEffectName];
+                            sudoSlider.goToSlide("next");
+                            return false;
+                        });
+                    }
+
+                });
+            }
+
+
+            makeEffectTreeGui(container, effectMap);
+
+            container.children().show();
         });
+        function findFirstEffectFromEffectMap(map) {
+            var result = null;
+            $.each(map, function (name, effect) {
+                if ($.isFunction(effect)) {
+                    result = name;
+                } else {
+                    result = findFirstEffectFromEffectMap(effect);
+                }
+                return false;
+            });
+            return result;
+        }
+        function findFirstUppercaseOrNumberAfter(a, b, alreadySharedPrefixLength) {
+            var i;
+            for (i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
+                var charAtA = a.charAt(i);
+                if (charAtA == charAtA.toUpperCase() || parseInt(charAtA) != NaN) {
+                    return i;
+                }
+
+
+                if (a.charCodeAt(i) != b.charCodeAt(i)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function sharedUntilNextBigLetter(a, b, alreadySharedPrefixLength) {
+
+            if (alreadySharedPrefixLength > a.length || alreadySharedPrefixLength > b.length) {
+                return false;
+            }
+            for (var i = alreadySharedPrefixLength; i < a.length && i < b.length; i++) {
+                var charAtA = a.charAt(i);
+                if ((charAtA == charAtA.toUpperCase()) || !isNaN(parseInt(charAtA))) {
+                    if (i == alreadySharedPrefixLength && charAtA != b.charAt(i)) {
+                        return false;
+                    }
+                    return true;
+                }
+
+
+                if (a.charCodeAt(i) != b.charCodeAt(i)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
+        function sharedPrefixLength(a, b, from) {
+            var prefixCounter = from;
+            for (var i = from; i < a.length && i < b.length; i++) {
+                var aChar = a.charAt(i);
+                if (a.charCodeAt(i) != b.charCodeAt(i) || aChar.toUpperCase() == aChar) {
+                    if (aChar.toUpperCase() == aChar) {
+                        prefixCounter++;
+                    }
+                    break;
+                }
+                prefixCounter++;
+            }
+            return prefixCounter;
+        }
+        function mergeObjects(){
+            var result = {};
+            var args = arguments;
+            for (var i in args) {
+                var obj = args[i];
+                for (var attrname in obj) {
+                    result[attrname] = obj[attrname];
+                }
+            }
+            return result;
+        }
     </script>
+    <style>
+        #slider li img {width: 400px;}
+        .nextBtn {left: 400px;}
+        .prevBtn, .nextBtn {top: 30px;}
+    </style>
 
 
 
 
 </head>
 <body>
-<div id="container">
-    <h1>Sudo Slider jQuery Plugin - Explorer the <span id="effectCounter"></span> effects</h1>
-    <div style="position:relative;">
-        <div id="slider">
-            <ul>
-                <li><img src="../images/01.jpg" alt="image description"/><div style="position:absolute;top:50px;left:50px;"><p style="font-size:50px;color:white;">This is a text</p></div></li>
-                <li><img src="../images/02.jpg" alt="image description"/><div style="position:absolute;top:50px;left:50px;"><p style="font-size:50px;color:blue;">IM AM WRITING HERE</p></div></li>
-                <li><img src="../images/03.jpg" alt="image description"/><div style="position:absolute;top:50px;left:50px;"><p style="font-size:50px;color:green;">Rich text stuff</p></div></li>
-                <li><img src="../images/04.jpg" alt="image description"/><div style="position:absolute;top:50px;left:50px;"><p style="font-size:50px;color:red;">UGA UGA UGACHAKA</p></div></li>
-                <li><img src="../images/05.jpg" alt="image description"/><div style="position:absolute;top:50px;left:50px;"><p style="font-size:50px;color:pink;">Holy crap, THIS IS AWESOME</p></div></li>
-            </ul>
-        </div>
+<div style="width: 940px;margin:0 auto;">
+    <h1>Sudo Slider jQuery Plugin - All the <span id="effectCounter"></span> effects</h1>
+    <h2>Click on the links to the left to see them in action</h2>
+    <div style="position:relative;width:450px;display:block;float:left;">
         <div id="effectLinksHolder"></div>
     </div>
+    <div style="position:relative;width:450px;display:block;float:left;">
+        <h2>Selected effect: <span id="selectedEffectContainer"></span></h2>
+        <div id="slider">
+            <ul>
+                <li><img src="../images/01.jpg" alt="image description"/></li>
+                <li><img src="../images/02.jpg" alt="image description"/></li>
+                <li><img src="../images/03.jpg" alt="image description"/></li>
+                <li><img src="../images/04.jpg" alt="image description"/></li>
+                <li><img src="../images/05.jpg" alt="image description"/></li>
+            </ul>
+        </div>
+    </div>
 </div>
+
+
 <script type="text/javascript">
     /* Google Analytics, please remove
      var _gaq = _gaq || [];

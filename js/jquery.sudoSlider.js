@@ -1986,7 +1986,7 @@
     function mergeObjects(){
         var result = {};
         var args = arguments;
-        for (var i = 0; i < args.length; i++) {
+        for (var i in args) {
             var obj = args[i];
             for (var attrname in obj) {
                 result[attrname] = obj[attrname];
