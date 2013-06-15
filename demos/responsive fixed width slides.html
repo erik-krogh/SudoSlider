@@ -14,6 +14,7 @@
 				numeric:true,
 				continuous:true,
                 speed: 1200,
+                // You can use any effect you like, it just made this effect as an exercise for myself.
                 effect: myResponsiveEffect
 			});
         });
@@ -27,12 +28,8 @@
             clone.prependTo(obj.slider);
             var width = Math.max(clone.width(), fromSlides.width());
             var speed = options.speed / 1.5;
-            clone.css(
-                    {left: negative * width}
-                    ).animate(
-                    {left: 0, top: 0}, speed, ease, function () {
-//                        obj.callback();
-                    }
+            clone.css({left: negative * width}).animate(
+                    {left: 0, top: 0}, speed, ease
             );
             setTimeout(function () {
                 var hideSlides = obj.slider.children().not(".sudo-box").children().not(obj.fromSlides);

@@ -25,7 +25,7 @@
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
 
-    $.fn.sudoSlider = function(optionsOrg) {
+    $.fn.sudoSlider = function(options) {
         // default configuration properties
         var defaults = {
             effect:            FALSE,  /*option[0]/*effect*/
@@ -72,7 +72,7 @@
         // Defining the base element.
         var baseSlider = this;
 
-        optionsOrg = $.extend(defaults, objectToLowercase(optionsOrg));
+        options = $.extend(defaults, objectToLowercase(options));
 
         return this.each(function() {
             var init,
@@ -99,7 +99,7 @@
                 continuousClones = FALSE,
                 numberOfVisibleSlides,
                 beforeanimationFired = FALSE,
-                asyncTimedLoad,
+                asyncDelayedSlideLoadTimeout,
                 callBackList,
                 obj = $(this),
                 finishedAdjustingTo = FALSE, // This variable teels if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff.
@@ -109,12 +109,13 @@
                 currentAnimation,
                 currentAnimationCallback,
                 awaitingAjaxLoads = [],
+                awaitingAjaxCallbacks = [],
+                startedAjaxLoads = [],
+                finishedAjaxLoads = [],
                 animateToAfterCompletion = FALSE,
                 animateToAfterCompletionClicked,
-
-            // Making a "private" copy that i put the "public" options in. The private options can then be changed if i wan't to.
-                options = optionsOrg,
                 option = [];
+
             // The call to the init function is after the definition of all the functions.
             function initSudoSlider(destroyT) {
                 // Storing the public options in an array.
@@ -315,12 +316,12 @@
                     setCurrent(t);
                 });
                 if (option[31]/*ajax*/[option[10]/*startslide*/]) {
-                    ajaxLoad(option[10]/*startslide*/, FALSE, 0);
+                    ajaxLoad(option[10]);
                 }
                 if (option[32]/*preloadajax*/ === TRUE) {
                     for (var i = 0; i <= ts; i++) {
                         if (option[31]/*ajax*/[i] && option[10]/*startslide*/ != i) {
-                            ajaxLoad(i, FALSE, 0);
+                            ajaxLoad(i);
                         }
                     }
                 } else {
@@ -366,10 +367,10 @@
                 if (option[31]/*ajax*/ && preloadAjaxTime) {
                     for (a in option[31]/*ajax*/) {
                         if (option[31]/*ajax*/[a]) {
-                            clearTimeout(asyncTimedLoad);
-                            asyncTimedLoad = setTimeout(function(){
+                            clearTimeout(asyncDelayedSlideLoadTimeout);
+                            asyncDelayedSlideLoadTimeout = setTimeout(function(){
                                 if (option[31]/*ajax*/[a]) {
-                                    ajaxLoad(a, FALSE, 0);
+                                    ajaxLoad(parseInt10(a));
                                 } else {
                                     startAsyncDelayedLoad();
                                 }
@@ -436,7 +437,7 @@
             }
 
             // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
-            function fadeControl (fadeOpacity, fadetime ,nextcontrol) {
+            function fadeControl (fadeOpacity, fadetime, nextcontrol) {
                 if (nextcontrol) {
                     var eA = nextbutton,
                         directionA = NEXT_STRING;
@@ -500,8 +501,9 @@
                                         return TRUE;
                                     }
                                 }
+                            } else {
+                                return elementTarget == i;
                             }
-                            else return elementTarget == i;
                             return FALSE;
                         })
                         .addClass("current");
@@ -510,7 +512,7 @@
 
             function getUrlHashTarget() {
                 var hashString = location.hash.substr(1)
-                for (i in option[19]/*numerictext*/) {
+                for (var i in option[19]/*numerictext*/) {
                     if (option[19]/*numerictext*/[i] == hashString) {
                         return i;
                     }
@@ -518,7 +520,7 @@
                 return hashString ? t : 0;
             }
 
-            function runOnImagesLoaded (target, allSlides, callback) {
+            function runOnImagesLoaded (target, waitForAllImages, callback) {
                 var elems = target.add(target.find("img")).filter("img");
                 var len = elems.length;
                 if (!len) {
@@ -533,7 +535,7 @@
                     if (that.naturalHeight && !that.clientHeight) {
                         $(that).height(that.naturalHeight).width(that.naturalWidth);
                     }
-                    if (allSlides) {
+                    if (waitForAllImages) {
                         len--;
                         if (len == 0) {
                             callback();
@@ -593,8 +595,8 @@
             // Axis: TRUE == height, FALSE == width.
             function autoheightwidth(i, axis) {
                 obj.ready(function() {
-                    adjustHeightWidth (i, axis);
-                    runOnImagesLoaded (li.eq(i), FALSE, function(){
+                    adjustHeightWidth(i, axis);
+                    runOnImagesLoaded(li.eq(i), FALSE, function(){
                         adjustHeightWidth (i, axis);
                     });
                 });
@@ -678,7 +680,9 @@
                 if (animateToAfterCompletion !== FALSE) {
                     var animateTo = animateToAfterCompletion;
                     animateToAfterCompletion = FALSE;
-                    animateToSlide(animateTo, animateToAfterCompletionClicked);
+                    callAsync(function () {
+                        animateToSlide(animateTo, animateToAfterCompletionClicked);
+                    });
                 }
             }
 
@@ -757,8 +761,23 @@
             // Load a ajax document (or image) into a slide.
             // If testing this locally (loading everything from a harddisk instead of the internet), it may not work.
             // But then try to upload it to a server, and see it shine.
-            function ajaxLoad(i, adjust, speed, ajaxCallBack) {
-                if (asyncTimedLoad) clearTimeout(asyncTimedLoad);// I dont want it to run to often.
+            function ajaxLoad(i, ajaxCallBack) {
+                if (ajaxCallBack) {
+                    var callbackList = awaitingAjaxCallbacks[i];
+                    if (!callbackList) {
+                        callbackList = awaitingAjaxCallbacks[i] = [];
+                    }
+                    callbackList.push(ajaxCallBack);
+                }
+
+                if (startedAjaxLoads[i]) {
+                    return;
+                }
+                startedAjaxLoads[i] = TRUE;
+
+
+                if (asyncDelayedSlideLoadTimeout) clearTimeout(asyncDelayedSlideLoadTimeout);// I dont want it to run to often.
+
                 var target = option[31]/*ajax*/[i];
                 var targetslide = li.eq(i);
 
@@ -767,28 +786,30 @@
                 $.ajax({
                     url: target,
                     success: function(data, textStatus, jqXHR){
-                        performAjaxCallback(function () {
+                        enqueueAjaxCallback(function () {
                             var type = jqXHR.getResponseHeader('Content-Type');
                             if (type.substr(0,1) != "i") {
                                 textloaded = TRUE;
                                 targetslide.html(data);
-                                ajaxAdjust(i, speed, ajaxCallBack, adjust, FALSE);
+                                ajaxAdjust(i, FALSE);
                             }
                         });
                     },
-                    complete: function(){
-                        performAjaxCallback(function () {
-                            // Some browsers wont load images this way, so i treat an error as an image.
-                            // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
-                            if (!textloaded) {
-                                // Load the image.
-                                image = new Image();
-                                targetslide.html('').append(image);
-                                image.src = target;
-                                // Lets just make some adjustments
-                                ajaxAdjust(i, speed, ajaxCallBack, adjust, TRUE);
-                            }
-                        });
+                    complete: function() {
+                        // Some browsers wont load images this way, so i treat an error as an image.
+                        // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
+                        if (!textloaded) {
+                            // Load the image.
+                            var image = new Image();
+                            image.src = target;
+                            runOnImagesLoaded($(image), true, function () {
+                                enqueueAjaxCallback(function () {
+                                    targetslide.html('').append(image);
+
+                                    ajaxAdjust(i, TRUE);
+                                });
+                            });
+                        }
                     }
                 });
                 // It is loaded, we dont need to do that again.
@@ -797,9 +818,9 @@
                 options.ajax[i] = FALSE;
             }
 
-            // Performs the callback immediately is no animation is running.
+            // Performs the callback immediately if no animation is running.
             // Otherwise waits for the animation to complete in a FIFO queue.
-            function performAjaxCallback(completeFunction) {
+            function enqueueAjaxCallback(completeFunction) {
                 if (currentlyAnimating) {
                     awaitingAjaxLoads.push(completeFunction);
                 } else {
@@ -807,19 +828,17 @@
                 }
             }
 
-            function ajaxAdjust(i, speed, ajaxCallBack, adjust, img){
+            function ajaxAdjust(i, img) {
                 var target = li.eq(i);
-                var callbackTarget = target;
                 // Now to see if the generated content needs to be inserted anywhere else.
                 if (continuousClones) {
                     var notFirst = FALSE;
-                    for (a in callBackList[i]) {
+                    for (var a in callBackList[i]) {
                         if (notFirst) {
                             var newSlide = target.clone();
                             continuousClones.push(newSlide);
                             callBackList[i][a].replaceWith(newSlide);
                             callBackList[i][a] = newSlide;
-                            callbackTarget = callbackTarget.add(newSlide);
                         }
                         notFirst = TRUE;
                     }
@@ -828,36 +847,38 @@
                     liConti = childrenNotAnimationClones(ul);
                 }
 
-                if (adjust || finishedAdjustingTo == i) autoadjust(i, speed);
+                adjustPositionTo(t);
 
-                // adjustPositionTo();
+                runOnImagesLoaded(target, TRUE, function() {
+                    adjustPositionTo(t);
 
-                runOnImagesLoaded (target, TRUE, function() {
-                    if (!currentlyAnimating) adjustPositionTo(t);
+                    finishedAjaxLoads[i] = TRUE;
 
-                    // And the callback.
-                    if (ajaxCallBack) ajaxCallBack();
+                    var callbacks = awaitingAjaxCallbacks[i];
+                    if (callbacks) {
+                        performCallbacks(callbacks);
+                    }
+
                     startAsyncDelayedLoad();
-                    // If we want, we can launch a function here.
-                    option[24]/*ajaxload*/.call(callbackTarget, i + 1, img);
+
+                    option[24]/*ajaxload*/.call(getSlideElements(i), parseInt10(i) + 1, img);
 
                     if (init) {
                         init = FALSE;
-                        callAsync(function () {
-                            option[23]/*initCallback*/.call(baseSlider);
-                        });
+                        callAsync(performInitCallback);
                     }
                 });
+            }
 
-                // In some cases, i want to call the beforeanimation here.
-                if (ajaxCallBack == 2) {
-                    aniCall(i, FALSE);
-                    if (!beforeanimationFired) {
-                        aniCall(i, TRUE);
-                        beforeanimationFired = TRUE;
-                    }
+            function performInitCallback() {
+                option[23]/*initCallback*/.call(baseSlider);
+            }
+
+            function performCallbacks(callbacks) {
+                while (callbacks.length) {
+                    // Removing and running the first, so we maintain FIFO.
+                    callbacks.splice(0, 1)[0]();
                 }
-
             }
 
             function customAni(i, clicked, ajaxcallback) {
@@ -878,8 +899,8 @@
                         // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation may include cloning of the target elements.
                         dontCountinue = 0;
                         for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
-                            if (option[31]/*ajax*/[a]) {
-                                ajaxLoad(getRealPos(a), FALSE, option[1]/*speed*/, function(){
+                            if (option[31]/*ajax*/[a] || (startedAjaxLoads[i] && !finishedAjaxLoads[i])) {
+                                ajaxLoad(getRealPos(a), function(){
                                     customAni(i, clicked, TRUE);
                                 });
                                 dontCountinue++;
@@ -958,10 +979,7 @@
                             // afteranimation
                             aniCall(dir, TRUE);
 
-                            while (awaitingAjaxLoads.length) {
-                                // Removing and running the first, so we maintain FIFO.
-                                awaitingAjaxLoads.splice(0,1)[0]();
-                            }
+                            performCallbacks(awaitingAjaxLoads);
                         };
                         var callbackHasYetToRun = TRUE;
                         var callObject = {
@@ -1032,11 +1050,9 @@
                     if (init) fadetime = 0;
                     fadeControls (t,fadetime);
                 }
-                if (init && !option[31]/*ajax*/[t]) {
+                if (init && !option[31]/*ajax*/[t] && !startedAjaxLoads[t]) {
                     init = FALSE;
-                    callAsync(function () {
-                        option[23]/*initCallback*/.call(baseSlider);
-                    });
+                    callAsync(performInitCallback);
                 }
             }
 
