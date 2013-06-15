@@ -342,7 +342,6 @@
 
                 if (oldWidth != newWidth) {
                     stopAnimation();
-                    adjustHeightWidth(t, 0);
                     adjustPositionTo(t);
                 }
             }
@@ -576,7 +575,7 @@
                 });
             }
 
-            function adjustHeightWidth(i, speed) {
+            function autoadjust(i, speed) {
                 i = getRealPos(i); // I assume that the continuous clones, and the original element is the same height. So i always adjust acording to the original element.
 
                 adjustingTo = i;
@@ -589,12 +588,12 @@
                 }
 
                 // Both autoheight and autowidth can be enabled at the same time. It's a kind of magic.
-                if (option[28]/*autoheight*/) adjustAxis(i, TRUE);//autoheight(i);
-                if (option[29]/*autowidth*/) adjustAxis(i, FALSE);//autowidth(i);
+                if (option[28]/*autoheight*/) autoheightwidth(i, TRUE);//autoheight(i, speed);
+                if (option[29]/*autowidth*/) autoheightwidth(i, FALSE);//autowidth(i, speed);
             }
 
             // Axis: TRUE == height, FALSE == width.
-            function adjustAxis(i, axis) {
+            function autoheightwidth(i, axis) {
                 obj.ready(function() {
                     adjustHeightWidth(i, axis);
                     runOnImagesLoaded(li.eq(i), FALSE, function(){
@@ -603,7 +602,7 @@
                 });
             }
 
-            function adjustHeightWidth(i, axis) {
+            function adjustHeightWidth (i, axis) {
                 if (i != adjustingTo) {
                     return;
                 }
@@ -643,7 +642,7 @@
                     getSlidePosition(slide, TRUE)
                 )
 
-                adjustHeightWidth(t, 0);
+                autoadjust(t, 0);
             }
 
             function setUlMargins(left, top) {
@@ -659,6 +658,7 @@
             }
 
             function adjust(clicked) {
+                autoadjust(t, 0);
                 t = getRealPos(t); // Going to the real slide, away from the clone.
                 if(!option[30]/*updateBefore*/) setCurrent(t);
                 adjustPositionTo(t);
@@ -1003,7 +1003,7 @@
                             }
                         };
 
-                        adjustHeightWidth(dir, option[1]/*speed*/);
+                        autoadjust(dir, option[1]/*speed*/);
 
                         callAsync(function () {
                             // beforeanimation
@@ -1179,7 +1179,7 @@
 
             baseSlider.adjust = function(){
                 var autoAdjustSpeed = adjustTargetTime - getTimeInMillis();
-                adjustHeightWidth(t, autoAdjustSpeed);
+                autoadjust(t, autoAdjustSpeed);
                 if (!currentlyAnimating) {
                     adjustPositionTo(t);
                 }
