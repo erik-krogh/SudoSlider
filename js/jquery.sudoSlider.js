@@ -9,6 +9,7 @@
  *	 http://jquery.com
  *
  */
+// TODO: Make sure all animations take exactly options.speed time to finish.
 (function($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -30,49 +31,49 @@
         var defaults = {
             effect:            FALSE,  /*option[0]/*effect*/
             speed:             800, /*   option[1]/*speed*/
-            customlink:        FALSE, /* option[2]/*customlink*/
-            controlsshow:      TRUE, /*  option[3]/*controlsShow*/
-            controlsfadespeed: 400, /*   option[4]/*controlsfadespeed*/
-            controlsfade:      TRUE, /*  option[5]/*controlsfade*/
-            insertafter:       TRUE, /*  option[6]/*insertafter*/
+            customLink:        FALSE, /* option[2]/*customlink*/
+            controlsShow:      TRUE, /*  option[3]/*controlsShow*/
+            controlsFadeSpeed: 400, /*   option[4]/*controlsfadespeed*/
+            controlsFade:      TRUE, /*  option[5]/*controlsfade*/
+            insertAfter:       TRUE, /*  option[6]/*insertafter*/
             vertical:          FALSE, /* option[7]/*vertical*/
-            slidecount:        1, /*     option[8]/*slidecount*/
-            movecount:         1, /*     option[9]/*movecount*/
-            startslide:        1, /*     option[10]/*startslide*/
+            slideCount:        1, /*     option[8]/*slidecount*/
+            moveCount:         1, /*     option[9]/*movecount*/
+            startSlide:        1, /*     option[10]/*startslide*/
             responsive:        FALSE, /* option[11]/*responsive*/
             ease:              'swing', /* option[12]/*ease*/
             auto:              FALSE, /* option[13]/*auto*/
             pause:             2000, /*  option[14]/*pause*/
-            resumepause:       FALSE, /* option[15]/*resumepause*/
+            resumePause:       FALSE, /* option[15]/*resumepause*/
             continuous:        FALSE, /* option[16]/*continuous*/
-            prevnext:          TRUE, /*  option[17]/*prevnext*/
+            prevNext:          TRUE, /*  option[17]/*prevnext*/
             numeric:           FALSE, /* option[18]/*numeric*/
-            numerictext:       [], /*    option[19]/*numerictext*/
+            numericText:       [], /*    option[19]/*numerictext*/
             slices:            15,  /*   option[20]/*slices*/
-            boxcols:           8,  /*    option[21]/*boxCols*/
-            boxrows:           4,  /*    option[22]/*boxRows*/
-            initcallback:      EMPTY_FUNCTION, /* option[23]/*initCallback*/
-            ajaxload:          EMPTY_FUNCTION, /* option[24]/*ajaxload*/
-            beforeanimation:   EMPTY_FUNCTION, /* option[25]/*beforeanimation*/
-            afteranimation:    EMPTY_FUNCTION, /* option[26]/*afteranimation*/
+            boxCols:           8,  /*    option[21]/*boxCols*/
+            boxRows:           4,  /*    option[22]/*boxRows*/
+            initCallback:      EMPTY_FUNCTION, /* option[23]/*initCallback*/
+            ajaxLoad:          EMPTY_FUNCTION, /* option[24]/*ajaxload*/
+            beforeAnimation:   EMPTY_FUNCTION, /* option[25]/*beforeanimation*/
+            afterAnimation:    EMPTY_FUNCTION, /* option[26]/*afteranimation*/
             history:           FALSE, /* option[27]/*history*/
-            autoheight:        TRUE, /*  option[28]/*autoheight*/
-            autowidth:         TRUE, /*  option[29]/*autowidth*/
-            updatebefore:      FALSE, /* option[30]/*updateBefore*/
+            autoHeight:        TRUE, /*  option[28]/*autoheight*/
+            autoWidth:         TRUE, /*  option[29]/*autowidth*/
+            updateBefore:      FALSE, /* option[30]/*updateBefore*/
             ajax:              FALSE, /* option[31]/*ajax*/
-            preloadajax:       100, /*   option[32]/*preloadajax*/
-            loadingtext:       '', /*    option[33]/*loadingtext*/
-            prevhtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
-            nexthtml:          '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
-            controlsattr:      'id="controls"', /* option[36]/*controlsattr*/
-            numericattr:       'class="controls"', /* option[37]/*numericattr*/
-            animationzindex:    10000, /* option[38]/*animationZIndex*/
-            interruptibleanimations: FALSE /* option[39]/*interruptibleAnimations*/
+            preloadAjax:       100, /*   option[32]/*preloadajax*/
+            loadingText:       '', /*    option[33]/*loadingtext*/
+            prevHtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
+            nextHtml:          '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
+            controlsAttr:      'id="controls"', /* option[36]/*controlsattr*/
+            numericAttr:       'class="controls"', /* option[37]/*numericattr*/
+            animationZIndex:    10000, /* option[38]/*animationZIndex*/
+            interruptibleAnimations: FALSE /* option[39]/*interruptibleAnimations*/
         };
         // Defining the base element.
         var baseSlider = this;
 
-        options = $.extend(defaults, objectToLowercase(options));
+        options = $.extend(objectToLowercase(defaults), objectToLowercase(options));
 
         return this.each(function() {
             var init,
@@ -96,9 +97,8 @@
                 oldSpeed,
                 dontCountinue,
                 autoOn,
-                continuousClones = FALSE,
+                continuousClones,
                 numberOfVisibleSlides,
-                beforeanimationFired = FALSE,
                 asyncDelayedSlideLoadTimeout,
                 callBackList,
                 obj = $(this),
@@ -114,10 +114,11 @@
                 finishedAjaxLoads = [],
                 animateToAfterCompletion = FALSE,
                 animateToAfterCompletionClicked,
+                slideContainerCreated = FALSE,
                 option = [];
 
             // The call to the init function is after the definition of all the functions.
-            function initSudoSlider(destroyT) {
+            function initSudoSlider() {
                 // Storing the public options in an array.
                 var optionIndex = 0;
                 for (var key in options) {
@@ -134,10 +135,11 @@
                 var newUl = $("<div></div>");
                 if (!ulLength) {
                     obj.append(ul = newUl);
-                } else if (!ul.is("ul")) {
+                } else if (!ul.is("ul") && !slideContainerCreated) {
                     newUl.append(ul);
                     obj.append(ul = newUl);
                 }
+                slideContainerCreated = TRUE;
 
 
                 li = childrenNotAnimationClones(ul);
@@ -340,7 +342,7 @@
 
                 if (oldWidth != newWidth) {
                     stopAnimation();
-                    autoadjust(t, 0);
+                    adjustHeightWidth(t, 0);
                     adjustPositionTo(t);
                 }
             }
@@ -421,7 +423,6 @@
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
 
-                    beforeanimationFired = FALSE;
                     if (!destroyed) {
                         customAni(i, clicked, FALSE);
                     }
@@ -575,7 +576,7 @@
                 });
             }
 
-            function autoadjust(i, speed) {
+            function adjustHeightWidth(i, speed) {
                 i = getRealPos(i); // I assume that the continuous clones, and the original element is the same height. So i always adjust acording to the original element.
 
                 adjustingTo = i;
@@ -588,12 +589,12 @@
                 }
 
                 // Both autoheight and autowidth can be enabled at the same time. It's a kind of magic.
-                if (option[28]/*autoheight*/) autoheightwidth(i, TRUE);//autoheight(i, speed);
-                if (option[29]/*autowidth*/) autoheightwidth(i, FALSE);//autowidth(i, speed);
+                if (option[28]/*autoheight*/) adjustAxis(i, TRUE);//autoheight(i);
+                if (option[29]/*autowidth*/) adjustAxis(i, FALSE);//autowidth(i);
             }
 
             // Axis: TRUE == height, FALSE == width.
-            function autoheightwidth(i, axis) {
+            function adjustAxis(i, axis) {
                 obj.ready(function() {
                     adjustHeightWidth(i, axis);
                     runOnImagesLoaded(li.eq(i), FALSE, function(){
@@ -602,7 +603,7 @@
                 });
             }
 
-            function adjustHeightWidth (i, axis) {
+            function adjustHeightWidth(i, axis) {
                 if (i != adjustingTo) {
                     return;
                 }
@@ -641,6 +642,8 @@
                     getSlidePosition(slide, FALSE),
                     getSlidePosition(slide, TRUE)
                 )
+
+                adjustHeightWidth(t, 0);
             }
 
             function setUlMargins(left, top) {
@@ -656,7 +659,6 @@
             }
 
             function adjust(clicked) {
-                autoadjust(t, 0);
                 t = getRealPos(t); // Going to the real slide, away from the clone.
                 if(!option[30]/*updateBefore*/) setCurrent(t);
                 adjustPositionTo(t);
@@ -671,10 +673,6 @@
                     } else {
                         startAuto(option[14]/*pause*/);
                     }
-                }
-
-                if (beforeanimationFired) {
-                    aniCall(t, TRUE); // I'm not running it at init, if i'm loading the slide.
                 }
 
                 if (animateToAfterCompletion !== FALSE) {
@@ -804,7 +802,7 @@
                             image.src = target;
                             runOnImagesLoaded($(image), true, function () {
                                 enqueueAjaxCallback(function () {
-                                    targetslide.html('').append(image);
+                                    targetslide.empty().append(image);
 
                                     ajaxAdjust(i, TRUE);
                                 });
@@ -1005,7 +1003,7 @@
                             }
                         };
 
-                        autoadjust(dir, option[1]/*speed*/);
+                        adjustHeightWidth(dir, option[1]/*speed*/);
 
                         callAsync(function () {
                             // beforeanimation
@@ -1181,7 +1179,7 @@
 
             baseSlider.adjust = function(){
                 var autoAdjustSpeed = adjustTargetTime - getTimeInMillis();
-                autoadjust(t, autoAdjustSpeed);
+                adjustHeightWidth(t, autoAdjustSpeed);
                 if (!currentlyAnimating) {
                     adjustPositionTo(t);
                 }
