@@ -9,7 +9,6 @@
  *	 http://jquery.com
  *
  */
-// TODO: Make sure all animations take exactly options.speed time to finish.
 (function($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -30,7 +29,7 @@
         // default configuration properties
         var defaults = {
             effect:            FALSE,  /*option[0]/*effect*/
-            speed:             800, /*   option[1]/*speed*/
+            speed:             1500, /*  option[1]/*speed*/
             customLink:        FALSE, /* option[2]/*customlink*/
             controlsShow:      TRUE, /*  option[3]/*controlsShow*/
             controlsFadeSpeed: 400, /*   option[4]/*controlsfadespeed*/
@@ -641,8 +640,6 @@
                     getSlidePosition(slide, FALSE),
                     getSlidePosition(slide, TRUE)
                 )
-
-                autoadjust(t, 0);
             }
 
             function setUlMargins(left, top) {
@@ -846,9 +843,11 @@
                 }
 
                 adjustPositionTo(t);
+                autoadjust(t, 0);
 
                 runOnImagesLoaded(target, TRUE, function() {
                     adjustPositionTo(t);
+                    autoadjust(t, 0);
 
                     finishedAjaxLoads[i] = TRUE;
 
@@ -1097,6 +1096,7 @@
                 }
 
                 adjustPositionTo(t);
+                autoadjust(t, 0);
             }
 
             baseSlider.destroy = publicDestroy;
@@ -1362,7 +1362,7 @@
     // SelectionAlgorithm: 0: Standard selection, 1: rain, 2: spiral
     function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal) {
         var options = obj.options;
-        var speed = options.speed;
+        var speed = options.speed / 2.5; // To make the actual time spent equal to options.speed.
         var ease = options.ease;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
@@ -1520,7 +1520,7 @@
                     }, timeBuff);
                 })(box, timeBuff);
             }
-            timeBuff += (speed / boxesResult.length) * 2;
+            timeBuff += (speed / boxesResult.length) * 1.5;
         }
     }
 
@@ -1569,7 +1569,7 @@
     function foldTemplate(obj, vertical, reverse, randomize, onlyFade, curtainEffect, upDownEffect, reveal) {
         var options = obj.options;
         var slides = options.slices;
-        var speed = options.speed;
+        var speed = options.speed / 2; // To make the actual time spent be equal to options.speed
         var ease = options.ease;
         var objSlider = obj.slider;
         var slicesElement = createBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
@@ -1673,7 +1673,7 @@
                 slice.animate({
                     width: orgWidth,
                     height: orgHeight,
-                    opacity: 1,
+                    opacity: reveal ? 0 : 1,
                     left: goToLeft,
                     top: goToTop
                 }, speed, ease, function () {

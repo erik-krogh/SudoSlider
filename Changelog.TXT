@@ -331,3 +331,5 @@ Change in script: Added interruptibleAnimations option, by setting it to true, t
 Change in script: If you set an effect like "box" it will result in a random effect that chooses between all effects starting with "box". This work for all strings that doesn't hit a specific effect.
 Change in script: Fixed that the slider sometimes tried to animate to the next slide, before it had finished the first one. (If you clicked while the slider was animating).
 Change in script: Fixed that the slider would flicker in some browsers when using startSlide > 1 and AJAX.
+Change in script: All effects now take exactly the amount of time specified in the options to complete.
+Change in script: Changed the default speed to 1500.
