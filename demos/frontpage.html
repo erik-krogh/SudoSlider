@@ -5,7 +5,7 @@
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css" />
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
     <style type="text/css">
         body {
             background: url('http://webbies.dk/assets/templates/SudoSlider/images/bg/bg_limited.gif') repeat-x #fff;
@@ -81,7 +81,7 @@
                     history: true,
                     updatebefore: true,
                     numerictext: ["home", "download", "video", "donate", "demo"],
-                    speed: 700,
+                    speed: 1700,
                     prevNext: false,
                     afteranimation: function (slide) {
                         if (slide == 3) {
@@ -243,7 +243,7 @@
                 </li>
 
 
-                <li class="textSlide" data-effect="slide" style="height:315px;background: #f0f0f0">
+                <li class="textSlide" data-effect="slide" data-speed="700" style="height:315px;background: #f0f0f0">
                     <div style="position:absolute;top:40px;left:10px;">
                         <h1 style="font-size: 30px">
                             <a href="javascript:void(0)" rel="2" class="customlink">&larr; Back to download</a><br/>
@@ -257,7 +257,7 @@
                 </li>
 
 
-                <li class="textSlide donate" data-effect="blinds1Down" data-speed="400">
+                <li class="textSlide donate" data-effect="blinds1Down" data-speed="700">
                     <div style="margin-top:20px;margin-left:40px;">
                         <h2 style="font-size:300%;">Help me, <span class="orange">donate!</span></h2>
                         <form action="https://www.paypal.com/cgi-bin/webscr" method="post">

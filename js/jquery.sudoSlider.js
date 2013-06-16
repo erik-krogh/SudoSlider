@@ -93,7 +93,6 @@
                 nextbutton,
                 prevbutton,
                 autoTimeout,
-                oldSpeed,
                 dontCountinue,
                 autoOn,
                 continuousClones,
@@ -113,6 +112,7 @@
                 finishedAjaxLoads = [],
                 animateToAfterCompletion = FALSE,
                 animateToAfterCompletionClicked,
+                animateToAfterCompletionSpeed,
                 slideContainerCreated = FALSE,
                 option = [];
 
@@ -416,21 +416,22 @@
             }
 
             // <strike>Simple function</strike><b>A litle complicated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
-            function animateToSlide(i, clicked) {
+            function animateToSlide(i, clicked, speed) {
                 if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
 
                     if (!destroyed) {
-                        customAni(i, clicked, FALSE);
+                        customAni(i, clicked, FALSE, speed);
                     }
                 } else {
                     if (option[39]/*interruptibleAnimations*/) {
                         stopAnimation();
-                        animateToSlide(i, clicked);
+                        animateToSlide(i, clicked, speed);
                     } else {
                         animateToAfterCompletion = i;
                         animateToAfterCompletionClicked = clicked;
+                        animateToAfterCompletionSpeed = speed;
                     }
                 }
             }
@@ -676,7 +677,7 @@
                     var animateTo = animateToAfterCompletion;
                     animateToAfterCompletion = FALSE;
                     callAsync(function () {
-                        animateToSlide(animateTo, animateToAfterCompletionClicked);
+                        animateToSlide(animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed);
                     });
                 }
             }
@@ -797,8 +798,12 @@
                             // Load the image.
                             var image = new Image();
                             image.src = target;
-                            runOnImagesLoaded($(image), true, function () {
+                            var thatImage = $(image);
+                            runOnImagesLoaded(thatImage, true, function () {
                                 enqueueAjaxCallback(function () {
+                                    // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
+                                    thatImage.height("").width("");
+
                                     targetslide.empty().append(image);
 
                                     ajaxAdjust(i, TRUE);
@@ -858,7 +863,9 @@
 
                     startAsyncDelayedLoad();
 
-                    option[24]/*ajaxload*/.call(getSlideElements(i), parseInt10(i) + 1, img);
+                    callAsync(function () {
+                        option[24]/*ajaxload*/.call(getSlideElements(i), parseInt10(i) + 1, img);
+                    });
 
                     if (init) {
                         init = FALSE;
@@ -878,7 +885,7 @@
                 }
             }
 
-            function customAni(i, clicked, ajaxcallback) {
+            function customAni(i, clicked, ajaxcallback, speed) {
                 var dir = filterDir(i);
 
                 if (dir != t) {
@@ -890,7 +897,6 @@
                     if(option[5]/*controlsfade*/) fadeControls (dir,option[4]/*controlsfadespeed*/);
 
                     if (ajaxcallback) {
-                        speed = oldSpeed;
                         if (dontCountinue) dontCountinue--; // Short for if(dontCountinue == 0).
                     } else if (option[31]/*ajax*/) {
                         // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation may include cloning of the target elements.
@@ -898,7 +904,7 @@
                         for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
                             if (option[31]/*ajax*/[a] || (startedAjaxLoads[i] && !finishedAjaxLoads[i])) {
                                 ajaxLoad(getRealPos(a), function(){
-                                    customAni(i, clicked, TRUE);
+                                    customAni(i, clicked, TRUE, speed);
                                 });
                                 dontCountinue++;
                             }
@@ -951,6 +957,9 @@
                         if (attributeSpeed != undefined) {
                             callOptions.speed = attributeSpeed;
                         }
+                        if (speed) {
+                            callOptions.speed = speed;
+                        }
 
                         var effect = option[0]/*effect*/;
 
@@ -994,7 +1003,7 @@
                             callback: function () {
                                 if (callbackHasYetToRun) {
                                     callbackHasYetToRun = FALSE;
-                                    stopAnimation();
+                                    callAsync(stopAnimation);
                                 }
                             },
                             goToNext: function () {
@@ -1103,7 +1112,7 @@
 
             function publicInit(){
                 if (destroyed) {
-                    initSudoSlider(destroyT);
+                    initSudoSlider();
                 }
             }
 
@@ -1155,8 +1164,8 @@
                 publicInit();
             };
 
-            baseSlider.goToSlide = function(a){
-                animateToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE);
+            baseSlider.goToSlide = function(a, speed){
+                animateToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE, speed);
             };
 
             baseSlider.block = function(){
@@ -1362,11 +1371,11 @@
     // SelectionAlgorithm: 0: Standard selection, 1: rain, 2: spiral
     function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal) {
         var options = obj.options;
-        var speed = options.speed / 2.5; // To make the actual time spent equal to options.speed.
         var ease = options.ease;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
         var totalBoxes = boxRows * boxCols;
+        var speed = options.speed / (totalBoxes == 1 ? 1 : 2.5); // To make the actual time spent equal to options.speed.
         var boxes = createBoxes(obj, boxCols, boxRows, !reveal);
         var timeBuff = 0;
         var rowIndex = 0;
@@ -1734,10 +1743,10 @@
     }
 
     function slide(obj) {
-        var ul = obj.slider.children();
+        var ul = childrenNotAnimationClones(obj.slider);
         var options = obj.options;
         var ease = options.ease;
-        var speed = options.speed * Math.sqrt(mathAbs(obj.diff));
+        var speed = options.speed;
         var target = obj.target;
         var left = target.left;
         var top = target.top;

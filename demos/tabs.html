@@ -9,7 +9,8 @@
 	<script type="text/javascript">
 		$(document).ready(function(){	
 		    var oldt = 0;
-		    var sudoSlider = $("#slider").sudoSlider({ 
+		    var sudoSlider = $("#slider").sudoSlider({
+                speed: 800,
 		        beforeAnimation: function(t){ 
 		            var substract = $('#slidemenu ul').offset();
 					var posi = $('#slidemenu ul li').eq(t-1).offset();
@@ -62,70 +63,7 @@
 	        </ul>
 	    </div>
 	</div>
-	<h3>Usage</h3>
-	<h4>Include the javascripts</h4>
-	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-	<h4>The Javascript to start it.</h4>
-	<pre>
-&lt;script type="text/javascript" &gt;
-$(document).ready(function(){   
-   var oldt = 0;
-   var sudoSlider = $("#slider").sudoSlider({ 
-      beforeAnimation: function(t){ 
-         var substract = $('#slidemenu ul').offset();
-         var posi = $('#slidemenu ul li').eq(t-1).offset();
-         var left =  posi.left - substract.left;
-         var diff = Math.sqrt(Math.abs(oldt-t));
-         var speed = parseInt(diff*800);
-         var text = $('#slidemenu ul li').eq(t-1).text();
-         var width = $('#slidemenu ul li').eq(t-1).width();
-         $('#slidemenu ul li.currentone').animate({
-            left: left
-            }, speed).children().animate({
-            width: width
-            }, speed);
-         oldt = t;
-      },
-      customLink: '.custom',
-      continuous:true
-   });
-});
-&lt;/script&gt;</pre>
-	<h4>The CSS</h4>
-	<pre>
-#slidemenu{height: 40px;text-align:center;}
-#slidemenu ul{text-align:center;margin: 0;padding: 0;list-style-type: none;font-weight: bold;}
-#slidemenu ul li{float:left;display:block;position:relative;height:40px;background:#5DC9E1;margin-right:15px;}
-#slidemenu ul li a{z-index:40;	float: left;padding: 12px 15px;text-decoration: none;color: #FFF;background: transparent;position:relative;}
-#slidemenu ul li .hover{height:40px;position:absolute;width:100px;z-index:20;	background: #333 url('../images/hover.png') repeat-x;}
-
-</pre>
-	<h4>The HTML</h4>
-<pre>
-&lt;div style="position:relative;"&gt;
-   &lt;div id="slidemenu"&gt;
-      &lt;ul style="position:relative;"&gt;
-         &lt;li rel="1" class="custom current"&gt;&lt;a href="javascript:void(0);"&gt;Sunset&lt;/a&gt;&lt;/li&gt;
-         &lt;li rel="2" class="custom"&gt;&lt;a href="javascript:void(0);"&gt;Mountains&lt;/a&gt;&lt;/li&gt;
-         &lt;li rel="3" class="custom"&gt;&lt;a href="javascript:void(0);"&gt;Road&lt;/a&gt;&lt;/li&gt;
-         &lt;li rel="4" class="custom"&gt;&lt;a href="javascript:void(0);"&gt;Sunset + people&lt;/a&gt;&lt;/li&gt;
-         &lt;li rel="5" class="custom"&gt;&lt;a href="javascript:void(0);"&gt;Goat&lt;/a&gt;&lt;/li&gt;
-         &lt;li class="currentone" style="position: absolute; left: 0px; "&gt;&lt;div class="hover" style="display: block; width: 71px; "&gt;&lt;/div&gt;&lt;/li&gt;
-      &lt;/ul&gt;
-   &lt;/div&gt;
-    &lt;div id="slider" style="position:relative;" class="slidecontainer slider"&gt;
-        &lt;ul&gt;                
-            &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
-            &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;            
-        &lt;/ul&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-</pre>
+	<h3>Usage: See the source code</h3>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">
