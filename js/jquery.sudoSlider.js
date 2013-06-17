@@ -88,7 +88,7 @@
                 numericControls,
                 numericContainer,
                 destroyed,
-                destroyT,
+                destroyT = FALSE,
                 controls,
                 nextbutton,
                 prevbutton,
@@ -158,7 +158,7 @@
                     }
                 }
 
-                t = 0;
+                t = destroyT === FALSE ? 0 : destroyT;
                 ot = t;
                 ts = s-1;
 
@@ -296,7 +296,7 @@
                         startAuto(option[14]/*pause*/);
                     }
 
-                    if (destroyT) {
+                    if (destroyT !== FALSE) {
                         goToSlide(destroyT,FALSE);
                     } else if (option[27]/*history*/) {
                         // I support the jquery.address plugin, Ben Alman's hashchange plugin and Ben Alman's jQuery.BBQ.
@@ -1165,7 +1165,8 @@
             };
 
             baseSlider.goToSlide = function(a, speed){
-                animateToSlide((a == parseInt10(a)) ? a - 1 : a, TRUE, speed);
+                var parsedDirection = (a == parseInt10(a)) ? a - 1 : a;
+                animateToSlide(parsedDirection, TRUE, speed);
             };
 
             baseSlider.block = function(){
