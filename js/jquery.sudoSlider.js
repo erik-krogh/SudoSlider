@@ -238,8 +238,7 @@
                 option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
 
                 if (option[11]/*responsive*/) {
-                    $(win).on("resize focus", adjustResponsiveLayout).resize();
-                    setTimeout(adjustResponsiveLayout);
+                    $(win).on("resize focus", adjustResponsiveLayout);
                 }
 
                 if(option[3]/*controlsShow*/) {
@@ -337,6 +336,9 @@
 
             // Adjusts the slider when a change in layout has happened.
             function adjustResponsiveLayout() {
+                if (cantDoAdjustments()) {
+                    return;
+                }
                 var oldWidth = liConti.width();
                 var newWidth = getResponsiveWidth();
                 liConti.width(newWidth);
@@ -344,6 +346,7 @@
                 if (oldWidth != newWidth) {
                     stopAnimation();
                     adjustPositionTo(t);
+                    autoadjust(t, 0);
                 }
             }
 
@@ -623,7 +626,7 @@
                 speed = mathMax(speed, 0);
                 // Doing CSS if speed == 0, 1: its faster. 2: it fixes bugs.
                 var adjustObject = axis ? {height: pixels} : {width: pixels};
-                if (!obj.is(":visible") || init) {
+                if (cantDoAdjustments()) {
                     return;
                 }
                 if (speed == 0) {
@@ -882,6 +885,9 @@
 
             function performInitCallback() {
                 autoadjust(t, 0);
+                if (option[11]/*responsive*/) {
+                    $(win).resize();
+                }
                 option[23]/*initCallback*/.call(baseSlider);
             }
 
@@ -1044,6 +1050,10 @@
                         defaultStopFunction();
                     }
                 }
+            }
+
+            function cantDoAdjustments() {
+                return !obj.is(":visible") || init;
             }
 
             function defaultStopFunction() {
