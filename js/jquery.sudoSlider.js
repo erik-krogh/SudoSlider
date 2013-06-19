@@ -25,7 +25,7 @@
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
 
-    $.fn.sudoSlider = function(options) {
+    $.fn.sudoSlider = function(optionsOrg) {
         // default configuration properties
         var defaults = {
             effect:            FALSE,  /*option[0]/*effect*/
@@ -72,7 +72,7 @@
         // Defining the base element.
         var baseSlider = this;
 
-        options = $.extend(objectToLowercase(defaults), objectToLowercase(options));
+        optionsOrg = $.extend(objectToLowercase(defaults), objectToLowercase(optionsOrg));
 
         return this.each(function() {
             var init,
@@ -114,7 +114,9 @@
                 animateToAfterCompletionClicked,
                 animateToAfterCompletionSpeed,
                 slideContainerCreated = FALSE,
-                option = [];
+                option = [],
+                options = {};
+            $.extend(TRUE, options, optionsOrg);
 
             // The call to the init function is after the definition of all the functions.
             function initSudoSlider() {
@@ -383,6 +385,7 @@
             }
 
             function startAuto(pause) {
+                stopAuto();
                 autoOn = TRUE;
                 autoTimeout = setTimeout(function(){
                     if (autoOn) {
@@ -448,19 +451,19 @@
 
                 if (option[3]/*controlsShow*/ && option[17]/*prevnext*/) {
                     if (fadeOpacity) {
-                        eA.stop().fadeIn(fadetime);
+                        eA.fadeIn(fadetime);
                     }
                     else {
-                        eA.stop().fadeOut(fadetime);
+                        eA.fadeOut(fadetime);
                     }
                 }
                 if(option[2]/*customlink*/) {
                     var filterString = "[rel='" + directionA + "']";
                     if (fadeOpacity) {
-                        $(option[2]/*customlink*/).filter(filterString).stop().fadeIn(fadetime);
+                        $(option[2]/*customlink*/).filter(filterString).fadeIn(fadetime);
                     }
                     else {
-                        $(option[2]/*customlink*/).filter(filterString).stop().fadeOut(fadetime);
+                        $(option[2]/*customlink*/).filter(filterString).fadeOut(fadetime);
                     }
                 }
             }
@@ -620,6 +623,9 @@
                 speed = mathMax(speed, 0);
                 // Doing CSS if speed == 0, 1: its faster. 2: it fixes bugs.
                 var adjustObject = axis ? {height: pixels} : {width: pixels};
+                if (!obj.is(":visible") || init) {
+                    return;
+                }
                 if (speed == 0) {
                     obj.stop().css(adjustObject);
                 } else {
@@ -875,6 +881,7 @@
             }
 
             function performInitCallback() {
+                autoadjust(t, 0);
                 option[23]/*initCallback*/.call(baseSlider);
             }
 
@@ -953,13 +960,15 @@
 
                         var targetLi = li.eq(dir);
                         var callOptions = $.extend(TRUE, {}, options); // Making a copy, to enforce read-only.
+                        var overwritingSpeed = option[1]/*speed*/;
                         var attributeSpeed = targetLi.attr("data-speed");
                         if (attributeSpeed != undefined) {
-                            callOptions.speed = attributeSpeed;
+                            overwritingSpeed = parseInt10(attributeSpeed);
                         }
-                        if (speed) {
-                            callOptions.speed = speed;
+                        if (speed != undefined) {
+                            overwritingSpeed = parseInt10(speed);
                         }
+                        callOptions.speed = overwritingSpeed;
 
                         var effect = option[0]/*effect*/;
 
@@ -1011,7 +1020,7 @@
                             }
                         };
 
-                        autoadjust(dir, option[1]/*speed*/);
+                        autoadjust(dir, overwritingSpeed);
 
                         callAsync(function () {
                             // beforeanimation
@@ -1752,15 +1761,9 @@
         var left = target.left;
         var top = target.top;
 
-        ul.animate(
-            { marginTop: top, marginLeft: left},
-            {
-                queue:FALSE,
-                duration:speed,
-                easing: ease,
-                complete: obj.callback
-            }
-        );
+        ul.animate({marginTop: top, marginLeft: left}, speed, ease, function () {
+            obj.callback();
+        });
     }
 
     function fadeOutIn(obj) {
