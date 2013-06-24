@@ -22,7 +22,10 @@
             $.each($.fn.sudoSlider.effects, function (effectName, effect) {
                 count++;
                 container.append($("<a> " + effectName + " </a> <span>| </span>").click(function () {
-                    sudoSlider.setOption("effect", effect);
+                    if (sudoSlider.getOption("effect") != effect) {
+                        sudoSlider.setOption("effect", effect);
+                    }
+                    sudoSlider.stopAnimation();
                     sudoSlider.goToSlide("next");
                 }))
             });

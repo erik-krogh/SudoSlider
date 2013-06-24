@@ -31,6 +31,7 @@
             // If this is defined, it will always run when obj.callback() is called.
             // Or when the slider needs to stop the animation (that only happens the slider is being destroyed or the window is resized and responsive is on)
             // If not defined a default stop() animation will run, this is the "defaultStopFunction" in the main script.
+            // The top function can also be specified by adding it as the property "stop" to the obj given in the effect.
             ownEffect.stop = function () {
                 var slider = callObject.slider;
                 $(".sudo-box", slider).remove();

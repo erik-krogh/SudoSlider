@@ -78,13 +78,12 @@
             var init,
                 ul,
                 li,
-                liConti,
+                allSlides,
                 s,
                 t,
                 ot,
                 ts,
                 clickable,
-                ajaxloading,
                 numericControls,
                 numericContainer,
                 destroyed,
@@ -93,7 +92,6 @@
                 nextbutton,
                 prevbutton,
                 autoTimeout,
-                dontCountinue,
                 autoOn,
                 continuousClones,
                 numberOfVisibleSlides,
@@ -106,6 +104,7 @@
                 currentlyAnimating = FALSE,
                 currentAnimation,
                 currentAnimationCallback,
+                currentAnimationObject,
                 awaitingAjaxLoads = [],
                 awaitingAjaxCallbacks = [],
                 startedAjaxLoads = [],
@@ -165,7 +164,6 @@
                 ts = s-1;
 
                 clickable = TRUE;
-                ajaxloading = FALSE;
                 numericControls = [];
                 destroyed = FALSE;
 
@@ -192,7 +190,7 @@
                 // Every animation is defined using effect.
                 // This if statement keeps backward compatibility.
                 if (!option[0]/*effect*/) {
-                    option[0]/*effect*/ = "slide";
+                    option[0]/*effect*/ = slideCSS;
                 }
 
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
@@ -230,9 +228,9 @@
                 option[5]/*controlsfade*/ = option[5]/*controlsfade*/ && !option[16]/*continuous*/;
 
                 // Making sure that i have enough room in the <ul> (Through testing, i found out that the max supported size (height or width) in Firefox is 17895697px, Chrome supports up to 134217726px, and i didn't find any limits in IE (6/7/8/9)).
-                ul[option[7]/*vertical*/ ? 'height' : 'width'](9000000); // That gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in Firefox on OSX.
+                ul[option[7]/*vertical*/ ? 'height' : 'width'](9000000); // That gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in FireFox on OSX.
 
-                liConti = childrenNotAnimationClones(ul);
+                allSlides = childrenNotAnimationClones(ul);
 
                 // If responsive is turned on, autowidth doesn't work.
                 option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
@@ -254,7 +252,7 @@
                             numericControls[a] = $("<li rel='" + (a+1) + "'><a href='#'><span>"+ option[19]/*numerictext*/[a] +"</span></a></li>")
                                 .appendTo(numericContainer)
                                 .click(function(){
-                                    animateToSlide(getRelAttribute(this) - 1, TRUE);
+                                    enqueueAnimation(getRelAttribute(this) - 1, TRUE);
                                     return FALSE;
                                 });
                         }
@@ -286,13 +284,18 @@
                             }
                             else if (target == 'block') clickable = FALSE;
                             else if (target == 'unblock') clickable = TRUE;
-                            else animateToSlide((target == parseInt10(target)) ? target - 1 : target, TRUE);
+                            else enqueueAnimation((target == parseInt10(target)) ? target - 1 : target, TRUE);
                         }
                         return FALSE;
                     });
                 }
 
-                runOnImagesLoaded(liConti.slice(0,option[8]/*slidecount*/), TRUE, function () {
+                var initiallyVisibleSlides = $();
+                for (var i = 0; i < option[8]/*slidecount*/; i++) {
+                    initiallyVisibleSlides = initiallyVisibleSlides.add(getSlideElements(option[10]/*startslide*/ + i));
+                }
+
+                runOnImagesLoaded(initiallyVisibleSlides, TRUE, function () {
                     if (option[13]/*auto*/) {
                         startAuto(option[14]/*pause*/);
                     }
@@ -339,9 +342,9 @@
                 if (cantDoAdjustments()) {
                     return;
                 }
-                var oldWidth = liConti.width();
+                var oldWidth = allSlides.width();
                 var newWidth = getResponsiveWidth();
-                liConti.width(newWidth);
+                allSlides.width(newWidth);
 
                 if (oldWidth != newWidth) {
                     stopAnimation();
@@ -364,7 +367,7 @@
             function URLChange() {
                 var target = getUrlHashTarget();
                 if (init) goToSlide(target,FALSE);
-                else animateToSlide(target, FALSE);
+                else enqueueAnimation(target, FALSE);
             }
 
             function startAsyncDelayedLoad () {
@@ -392,7 +395,7 @@
                 autoOn = TRUE;
                 autoTimeout = setTimeout(function(){
                     if (autoOn) {
-                        animateToSlide(NEXT_STRING, FALSE);
+                        enqueueAnimation(NEXT_STRING, FALSE);
                     }
                 },pause);
             }
@@ -416,26 +419,26 @@
 
             function makecontrol(html, action) {
                 return $(html).prependTo(controls).click(function () {
-                    animateToSlide(action, TRUE);
+                    enqueueAnimation(action, TRUE);
                     return FALSE;
                 });
             }
 
-            // <strike>Simple function</strike><b>A litle complicated function after moving the auto-slideshow code and introducing some "smart" animations</b>. great work.
-            function animateToSlide(i, clicked, speed) {
+            function enqueueAnimation(direction, clicked, speed) {
                 if (clickable) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
 
                     if (!destroyed) {
-                        customAni(i, clicked, FALSE, speed);
+                        loadSlidesAndAnimate(direction, clicked, speed);
                     }
                 } else {
+                    // TODO: Start Ajax-loads.
                     if (option[39]/*interruptibleAnimations*/) {
                         stopAnimation();
-                        animateToSlide(i, clicked, speed);
+                        enqueueAnimation(direction, clicked, speed);
                     } else {
-                        animateToAfterCompletion = i;
+                        animateToAfterCompletion = direction;
                         animateToAfterCompletionClicked = clicked;
                         animateToAfterCompletionSpeed = speed;
                     }
@@ -660,7 +663,7 @@
             }
 
             function getSlidePosition(slide, vertical) {
-                slide = liConti.eq(slide + (continuousClones ? option[8]/*slidecount*/ : 0));
+                slide = allSlides.eq(slide + (continuousClones ? option[8]/*slidecount*/ : 0));
                 return slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
             }
 
@@ -686,7 +689,7 @@
                     var animateTo = animateToAfterCompletion;
                     animateToAfterCompletion = FALSE;
                     callAsync(function () {
-                        animateToSlide(animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed);
+                        enqueueAnimation(animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed);
                     });
                 }
             }
@@ -715,10 +718,11 @@
                 option[25]/*beforeanimation*/.call(el, a);
             }
 
-            function getSlideElements(i) {
+            function getSlideElements(slide) {
+                slide = getRealPos(slide);
                 var callBackThis = $();
-                for (a in callBackList[i]) {
-                    callBackThis = callBackThis.add(callBackList[i][a]);
+                for (var index in callBackList[slide]) {
+                    callBackThis = callBackThis.add(callBackList[slide][index]);
                 }
                 return callBackThis;
             }
@@ -742,7 +746,11 @@
             // This method was added in 2.1.8, se the changelog as to why.
             function limitDir(i, dir) {
                 if (option[16]/*continuous*/) {
-                    return getRealPos(i);
+                    if (dir == NEXT_STRING || dir == PREV_STRING) {
+                        return i;
+                    } else {
+                        return getRealPos(i);
+                    }
                 } else {
                     var maxSlide = s - numberOfVisibleSlides;
                     if (i > maxSlide) {
@@ -766,37 +774,37 @@
             // Load a ajax document (or image) into a slide.
             // If testing this locally (loading everything from a harddisk instead of the internet), it may not work.
             // But then try to upload it to a server, and see it shine.
-            function ajaxLoad(i, ajaxCallBack) {
+            function ajaxLoad(slide, ajaxCallBack) {
                 if (ajaxCallBack) {
-                    var callbackList = awaitingAjaxCallbacks[i];
+                    var callbackList = awaitingAjaxCallbacks[slide];
                     if (!callbackList) {
-                        callbackList = awaitingAjaxCallbacks[i] = [];
+                        callbackList = awaitingAjaxCallbacks[slide] = [];
                     }
                     callbackList.push(ajaxCallBack);
                 }
 
-                if (startedAjaxLoads[i]) {
+                if (startedAjaxLoads[slide]) {
                     return;
                 }
-                startedAjaxLoads[i] = TRUE;
+                startedAjaxLoads[slide] = TRUE;
 
 
                 if (asyncDelayedSlideLoadTimeout) clearTimeout(asyncDelayedSlideLoadTimeout);// I dont want it to run to often.
 
-                var target = option[31]/*ajax*/[i];
-                var targetslide = li.eq(i);
+                var target = option[31]/*ajax*/[slide];
+                var targetslide = li.eq(slide);
 
                 var textloaded = FALSE;
 
                 $.ajax({
                     url: target,
                     success: function(data, textStatus, jqXHR){
-                        enqueueAjaxCallback(function () {
+                        runWhenNotAnimating(function () {
                             var type = jqXHR.getResponseHeader('Content-Type');
                             if (type.substr(0,1) != "i") {
                                 textloaded = TRUE;
                                 targetslide.html(data);
-                                ajaxAdjust(i, FALSE);
+                                ajaxAdjust(slide, FALSE);
                             }
                         });
                     },
@@ -809,34 +817,37 @@
                             image.src = target;
                             var thatImage = $(image);
                             runOnImagesLoaded(thatImage, true, function () {
-                                enqueueAjaxCallback(function () {
+                                runWhenNotAnimating(function () {
                                     // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
                                     thatImage.height("").width("");
 
                                     targetslide.empty().append(image);
 
-                                    ajaxAdjust(i, TRUE);
+                                    ajaxAdjust(slide, TRUE);
                                 });
                             });
                         }
                     }
                 });
                 // It is loaded, we dont need to do that again.
-                option[31]/*ajax*/[i] = FALSE;
+                option[31]/*ajax*/[slide] = FALSE;
                 // It is the only option that i need to change for good.
-                options.ajax[i] = FALSE;
+                options.ajax[slide] = FALSE;
             }
 
             // Performs the callback immediately if no animation is running.
             // Otherwise waits for the animation to complete in a FIFO queue.
-            function enqueueAjaxCallback(completeFunction) {
-                if (currentlyAnimating) {
-                    awaitingAjaxLoads.push(completeFunction);
-                } else {
-                    completeFunction();
-                }
+            function runWhenNotAnimating(completeFunction) {
+                setTimeout(function () {
+                    if (currentlyAnimating) {
+                        awaitingAjaxLoads.push(completeFunction);
+                    } else {
+                        callAsync(completeFunction);
+                    }
+                }, 2000)
             }
 
+            // TODO: Test MoveCount slideCount etc.
             function ajaxAdjust(i, img) {
                 var target = li.eq(i);
                 // Now to see if the generated content needs to be inserted anywhere else.
@@ -852,39 +863,41 @@
                         notFirst = TRUE;
                     }
 
-                    // The liConti gets messed up a bit in the above code, therefore i fix it.
-                    liConti = childrenNotAnimationClones(ul);
+                    allSlides = childrenNotAnimationClones(ul);
                 }
 
                 adjustPositionTo(t);
                 autoadjust(t, 0);
 
                 runOnImagesLoaded(target, TRUE, function() {
-                    adjustPositionTo(t);
-                    autoadjust(t, 0);
+                    runWhenNotAnimating(function () {
+                        adjustPositionTo(t);
+                        autoadjust(t, 0);
 
-                    finishedAjaxLoads[i] = TRUE;
+                        finishedAjaxLoads[i] = TRUE;
 
-                    var callbacks = awaitingAjaxCallbacks[i];
-                    if (callbacks) {
-                        performCallbacks(callbacks);
-                    }
+                        var callbacks = awaitingAjaxCallbacks[i];
+                        if (callbacks) {
+                            performCallbacks(callbacks);
+                        }
 
-                    startAsyncDelayedLoad();
+                        startAsyncDelayedLoad();
 
-                    callAsync(function () {
-                        option[24]/*ajaxload*/.call(getSlideElements(i), parseInt10(i) + 1, img);
+                        callAsync(function () {
+                            option[24]/*ajaxload*/.call(getSlideElements(i), parseInt10(i) + 1, img);
+                        });
+
+                        if (init) {
+                            init = FALSE;
+                            callAsync(performInitCallback);
+                        }
                     });
-
-                    if (init) {
-                        init = FALSE;
-                        callAsync(performInitCallback);
-                    }
                 });
             }
 
             function performInitCallback() {
                 autoadjust(t, 0);
+                adjustPositionTo(t);
                 if (option[11]/*responsive*/) {
                     $(win).resize();
                 }
@@ -898,144 +911,147 @@
                 }
             }
 
-            function customAni(i, clicked, ajaxcallback, speed) {
+            function loadSlidesAndAnimate(i, clicked, speed) {
+                // TODO: onLoad() and onFinish();
                 var dir = filterDir(i);
 
-                if (dir != t) {
-                    // Just leave the below code as it is, i've allready spent enough time trying to improve it, it allways ended up in me making nothing that worked like it should.
-                    ajaxloading = FALSE;
-
-                    if (option[30]/*updateBefore*/) setCurrent(dir);
-
-                    if(option[5]/*controlsfade*/) fadeControls (dir,option[4]/*controlsfadespeed*/);
-
-                    if (ajaxcallback) {
-                        if (dontCountinue) dontCountinue--; // Short for if(dontCountinue == 0).
-                    } else if (option[31]/*ajax*/) {
-                        // Before i can fade anywhere, i need to load the slides that i'm fading too (needs to be done before the animation, since the animation may include cloning of the target elements.
-                        dontCountinue = 0;
-                        for (var a = dir; a < dir + numberOfVisibleSlides; a++) {
-                            if (option[31]/*ajax*/[a] || (startedAjaxLoads[i] && !finishedAjaxLoads[i])) {
-                                ajaxLoad(getRealPos(a), function(){
-                                    customAni(i, clicked, TRUE, speed);
-                                });
-                                dontCountinue++;
-                            }
-                        }
-                    } else {
-                        dontCountinue = FALSE;
-                    }
-                    if (!dontCountinue) {
-                        clickable = FALSE;
-                        var fromSlides = $();
-                        var toSlides = $();
-                        for (var a = 0 ; a < numberOfVisibleSlides; a++) {
-                            if (continuousClones) {
-                                fromSlides = fromSlides.add(liConti.eq((t + a) + (continuousClones ? option[8]/*slidecount*/ : 0)));
-                                toSlides = toSlides.add(liConti.eq((dir + a) + (continuousClones ? option[8]/*slidecount*/ : 0)));
-                            } else {
-                                fromSlides = fromSlides.add(getSlideElements(getRealPos(t + a)));
-                                toSlides = toSlides.add(getSlideElements(getRealPos(dir + a)));
-                            }
-                        }
-
-
-                        // Finding a "shortcut", used for calculating the offsets.
-                        var diff = -(t-dir);
-                        if (option[16]/*continuous*/) {
-                            var diffAbs = mathAbs(diff);
-                            i = dir;
-                            // Finding the shortest path from where we are to where we are going.
-                            var newDiff = -(t - dir - s) /* t - (realTarget + s) */;
-                            if (dir < option[8]/*slidecount*/ - numberOfVisibleSlides + 1 && mathAbs(newDiff) < diffAbs) {
-                                i = dir + s;
-                                diff = newDiff;
-                                diffAbs = mathAbs(diff);
-                            }
-                            newDiff = -(t - dir + s)/* t - (realTarget - s) */;
-                            if (dir > ts - option[8]/*slidecount*/ && mathAbs(newDiff)  < diffAbs) {
-                                i = dir - s;
-                                diff = newDiff;
-                            }
-                        } else {
-                            i = filterDir(i);
-                        }
-
-                        var leftTarget = getSlidePosition(i, FALSE);
-                        var topTarget = getSlidePosition(i, TRUE);
-
-                        var targetLi = li.eq(dir);
-                        var callOptions = $.extend(TRUE, {}, options); // Making a copy, to enforce read-only.
-                        var overwritingSpeed = option[1]/*speed*/;
-                        var attributeSpeed = targetLi.attr("data-speed");
-                        if (attributeSpeed != undefined) {
-                            overwritingSpeed = parseInt10(attributeSpeed);
-                        }
-                        if (speed != undefined) {
-                            overwritingSpeed = parseInt10(speed);
-                        }
-                        callOptions.speed = overwritingSpeed;
-
-                        var effect = option[0]/*effect*/;
-
-                        var specificEffectAttrName = "data-effect";
-                        var slideSpecificEffect = targetLi.attr(specificEffectAttrName);
-                        if (slideSpecificEffect) {
-                            effect = getEffectMethod(slideSpecificEffect);
-                        }
-                        var slideOutSpecificEffect = li.eq(t).attr(specificEffectAttrName + "out");
-                        if (slideOutSpecificEffect) {
-                            effect = getEffectMethod(slideOutSpecificEffect);
-                        }
-
-                        currentlyAnimating = TRUE;
-                        currentAnimation = effect;
-
-                        currentAnimationCallback = function () {
-                            currentlyAnimating = FALSE;
-                            callbackHasYetToRun = FALSE;
-                            goToSlide(dir, clicked);
-                            fixClearType(toSlides);
-
-                            // afteranimation
-                            aniCall(dir, TRUE);
-
-                            performCallbacks(awaitingAjaxLoads);
-                        };
-                        var callbackHasYetToRun = TRUE;
-                        var callObject = {
-                            fromSlides : fromSlides,
-                            toSlides : toSlides,
-                            slider : obj,
-                            options: callOptions,
-                            to: dir + 1,
-                            from: t + 1,
-                            diff: diff,
-                            target: {
-                                left: leftTarget,
-                                top: topTarget
-                            },
-                            callback: function () {
-                                if (callbackHasYetToRun) {
-                                    callbackHasYetToRun = FALSE;
-                                    callAsync(stopAnimation);
-                                }
-                            },
-                            goToNext: function () {
-                                adjustPositionTo(dir);
-                            }
-                        };
-
-                        autoadjust(dir, overwritingSpeed);
-
-                        callAsync(function () {
-                            // beforeanimation
-                            aniCall(dir, FALSE, TRUE);
-
-                            effect.call(baseSlider, callObject);
-                        });
-                    }
+                var targetSlide = getRealPos(dir);
+                if (targetSlide == t) {
+                    return;
                 }
+                if (option[31]/*ajax*/) {
+                    var waitCounter = 0;
+                    for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
+                        if (option[31]/*ajax*/[loadSlide] || (startedAjaxLoads[loadSlide] && !finishedAjaxLoads[loadSlide])) {
+                            waitCounter++;
+                            ajaxLoad(getRealPos(loadSlide), function () {
+                                // This runs aync, so every callback is placed before the first is run. Therefore this works.
+                                waitCounter--;
+                                if (waitCounter == 0) {
+                                    performAnimation(dir, speed, clicked);
+                                }
+                            });
+                        }
+                    }
+                    if (waitCounter == 0) {
+                        performAnimation(dir, speed, clicked);
+                    }
+                } else {
+                    performAnimation(dir, speed, clicked);
+                }
+            }
+
+            function performAnimation(dir, speed, clicked) {
+                if (option[30]/*updateBefore*/) setCurrent(dir);
+
+                if (option[5]/*controlsfade*/) fadeControls(dir, option[4]/*controlsfadespeed*/);
+
+                clickable = FALSE;
+                var fromSlides = $();
+                var toSlides = $();
+                for (var a = 0; a < numberOfVisibleSlides; a++) {
+                    // TODO: Test FromSlides and toSlides
+                    fromSlides = fromSlides.add(getSlideElements(t + a));
+                    toSlides = toSlides.add(getSlideElements(dir + a));
+                }
+
+
+                // Finding a "shortcut", used for calculating the offsets.
+                var diff = -(t - dir);
+                var targetSlide;
+                if (option[16]/*continuous*/) {
+                    var diffAbs = mathAbs(diff);
+                    targetSlide = dir;
+                    // Finding the shortest path from where we are to where we are going.
+                    var newDiff = -(t - dir - s) /* t - (realTarget + s) */;
+                    if (dir < option[8]/*slidecount*/ - numberOfVisibleSlides + 1 && mathAbs(newDiff) < diffAbs) {
+                        targetSlide = dir + s;
+                        diff = newDiff;
+                        diffAbs = mathAbs(diff);
+                    }
+                    newDiff = -(t - dir + s)/* t - (realTarget - s) */;
+                    if (dir > ts - option[8]/*slidecount*/ && mathAbs(newDiff) < diffAbs) {
+                        targetSlide = dir - s;
+                        diff = newDiff;
+                    }
+                } else {
+                    targetSlide = dir;
+                }
+
+                var leftTarget = getSlidePosition(targetSlide, FALSE);
+                var topTarget = getSlidePosition(targetSlide, TRUE);
+
+                var targetLi = li.eq(dir);
+                var callOptions = $.extend(TRUE, {}, options); // Making a copy, to enforce read-only.
+                var overwritingSpeed = option[1]/*speed*/;
+                var attributeSpeed = targetLi.attr("data-speed");
+                if (attributeSpeed != undefined) {
+                    overwritingSpeed = parseInt10(attributeSpeed);
+                }
+                if (speed != undefined) {
+                    overwritingSpeed = parseInt10(speed);
+                }
+                callOptions.speed = overwritingSpeed;
+
+                var effect = option[0]/*effect*/;
+
+                var specificEffectAttrName = "data-effect";
+                var slideSpecificEffect = targetLi.attr(specificEffectAttrName);
+                if (slideSpecificEffect) {
+                    effect = getEffectMethod(slideSpecificEffect);
+                }
+                var slideOutSpecificEffect = li.eq(t).attr(specificEffectAttrName + "out");
+                if (slideOutSpecificEffect) {
+                    effect = getEffectMethod(slideOutSpecificEffect);
+                }
+
+                currentlyAnimating = TRUE;
+                currentAnimation = effect;
+
+                var callbackHasYetToRun = TRUE;
+                currentAnimationCallback = function () {
+                    currentlyAnimating = FALSE;
+                    callbackHasYetToRun = FALSE;
+                    goToSlide(dir, clicked);
+                    fixClearType(toSlides);
+
+                    // afteranimation
+                    aniCall(dir, TRUE);
+
+                    performCallbacks(awaitingAjaxLoads);
+                };
+                currentAnimationObject = {
+                    fromSlides: fromSlides,
+                    toSlides: toSlides,
+                    slider: obj,
+                    options: callOptions,
+                    to: dir + 1,
+                    from: t + 1,
+                    diff: diff,
+                    target: {
+                        left: leftTarget,
+                        top: topTarget
+                    },
+                    callback: function () {
+                        if (callbackHasYetToRun) {
+                            callbackHasYetToRun = FALSE;
+                            callAsync(stopAnimation);
+                        }
+                    },
+                    goToNext: function () {
+                        if (callbackHasYetToRun) {
+                            adjustPositionTo(dir);
+                        }
+                    }
+                };
+
+                autoadjust(dir, overwritingSpeed);
+                callAsync(function () {
+                    // beforeanimation
+                    aniCall(dir, FALSE, TRUE);
+
+                    effect.call(baseSlider, currentAnimationObject);
+                });
             }
 
             function stopAnimation() {
@@ -1043,12 +1059,13 @@
                     // Doing it in this order isn't a problem in relation to the user-callbacks, since they are run in a setTimeout(callback, 0) anyway.
                     currentAnimationCallback();
 
-                    var stopFunction = currentAnimation.stop;
+                    var stopFunction = currentAnimation.stop || currentAnimationObject.stop;
                     if (stopFunction) {
                         stopFunction();
                     } else {
                         defaultStopFunction();
                     }
+                    baseSlider.adjust(); // TODO:
                 }
             }
 
@@ -1185,7 +1202,7 @@
 
             baseSlider.goToSlide = function(a, speed){
                 var parsedDirection = (a == parseInt10(a)) ? a - 1 : a;
-                animateToSlide(parsedDirection, TRUE, speed);
+                enqueueAnimation(parsedDirection, TRUE, speed);
             };
 
             baseSlider.block = function(){
@@ -1207,7 +1224,7 @@
             };
 
             baseSlider.adjust = function(){
-                var autoAdjustSpeed = adjustTargetTime - getTimeInMillis();
+                var autoAdjustSpeed = mathMax(adjustTargetTime - getTimeInMillis(), 0);
                 autoadjust(t, autoAdjustSpeed);
                 if (!currentlyAnimating) {
                     adjustPositionTo(t);
@@ -1225,7 +1242,7 @@
             };
 
             baseSlider.getSlide = function (number) {
-                number = getRealPos(parseInt10(number) - 1);
+                number = parseInt10(number) - 1;
                 return getSlideElements(number);
             };
 
@@ -1285,7 +1302,8 @@
             "Vertical",
             foldRandom
         ],
-        slide : slide
+        slide : slide,
+        slideCSS: slideCSS
     }
 
     // Generic effects needs to have a "dir" attribute as their last argument.
@@ -1770,10 +1788,48 @@
         var target = obj.target;
         var left = target.left;
         var top = target.top;
-
         ul.animate({marginTop: top, marginLeft: left}, speed, ease, function () {
             obj.callback();
         });
+    }
+
+    // TODO: Optimizations
+    function slideCSS(obj) {
+        var vendorPrefix = getCSSVendorPrefix();
+        var ul = childrenNotAnimationClones(obj.slider);
+        var options = obj.options;
+        var ease = options.ease;
+        var speed = options.speed;
+        var target = obj.target;
+        var left = target.left;
+        var top = target.top;
+        if (vendorPrefix === FALSE) {
+            slide(obj);
+            return;
+        }
+
+
+        var CSSObject = {marginTop: top, marginLeft: left};
+        var transitionPrefix = '-' + vendorPrefix + '-transition-';
+        var easeProperty = transitionPrefix + 'timing-function';
+        CSSObject[easeProperty] = ease;
+        var transitionProperty = transitionPrefix + 'duration';
+        CSSObject[transitionProperty] = speed + "ms";
+        ul.css(CSSObject);
+
+        var bindingProperties = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
+        var stopFunction = function () {
+            ul.unbind(bindingProperties);
+            CSSObject[easeProperty] = "";
+            CSSObject[transitionProperty] = "0s";
+            ul.css(CSSObject);
+        }
+        obj.stop = stopFunction;
+        ul.bind(bindingProperties, function(){
+            stopFunction();
+            obj.callback();
+        });
+
     }
 
     function fadeOutIn(obj) {
@@ -1927,6 +1983,22 @@
     /*
      * Util scripts.
      */
+    function getCSSVendorPrefix() {
+        var property = "Perspective";
+        var testElement = $("<div>")[0];
+        var possiblePrefixes = ["Webkit","Moz","O","ms","Khtml"];
+        var testProperties = (possiblePrefixes.join(property + ' ') + property.toLowerCase()).split(' ');
+
+        for (var n = 0; n < testProperties.length; n++) {
+            var resultingProperty = testProperties[n];
+            if (testElement.style[resultingProperty] === "") {
+                return resultingProperty.slice(0, resultingProperty.length - property.length);
+            }
+        }
+
+        return false;
+    }
+
     // Puts the specified function in a setTimeout([function], 0);
     function callAsync(func) {
         setTimeout(func, 0);

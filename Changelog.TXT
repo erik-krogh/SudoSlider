@@ -336,3 +336,4 @@ Change in script: Changed the default speed to 1500.
 Change in script: Fixed that Ajax loaded images in some browsers where forced to have the images original resolution (overwriting any CSS rules).
 Change in script: Added a speed argument to the goToSlide method.
 Change in script: Fixed that the autoHeight/width animation didn't take the amount of time specified in the attribute data-speed.
+Change in script: Using a CSS version of the slide transition as default (its called slideCSS).
