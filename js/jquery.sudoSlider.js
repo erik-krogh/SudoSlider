@@ -190,7 +190,7 @@
                 // Every animation is defined using effect.
                 // This if statement keeps backward compatibility.
                 if (!option[0]/*effect*/) {
-                    option[0]/*effect*/ = slideCSS;
+                    option[0]/*effect*/ = slide;
                 }
 
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
@@ -949,10 +949,9 @@
                 clickable = FALSE;
                 var fromSlides = $();
                 var toSlides = $();
-                for (var a = 0; a < numberOfVisibleSlides; a++) {
-                    // TODO: Test FromSlides and toSlides
-                    fromSlides = fromSlides.add(getSlideElements(t + a));
-                    toSlides = toSlides.add(getSlideElements(dir + a));
+                for (var a = 0 ; a < numberOfVisibleSlides; a++) {
+                    fromSlides = fromSlides.add(allSlides.eq((t + a) + (continuousClones ? option[8]/*slidecount*/ : 0)));
+                    toSlides = toSlides.add(allSlides.eq((dir + a) + (continuousClones ? option[8]/*slidecount*/ : 0)));
                 }
 
 
@@ -1302,8 +1301,7 @@
             "Vertical",
             foldRandom
         ],
-        slide : slide,
-        slideCSS: slideCSS
+        slide : slide
     }
 
     // Generic effects needs to have a "dir" attribute as their last argument.
@@ -1549,8 +1547,8 @@
                     }
                     count++;
                     setTimeout(function () {
-                        boxChildren.animate({marginLeft: -goToMarginLeft, marginTop: -goToMarginTop}, speed, ease);
-                        box.animate({
+                        animate(boxChildren, {marginLeft: -goToMarginLeft, marginTop: -goToMarginTop}, speed, ease);
+                        animate(box, {
                             opacity: reveal ? 0 : 1,
                             width: goToWidth,
                             height: goToHeight,
@@ -1717,7 +1715,7 @@
 
             count++;
             setTimeout(function () {
-                slice.animate({
+                animate(slice, {
                     width: orgWidth,
                     height: orgHeight,
                     opacity: reveal ? 0 : 1,
@@ -1745,11 +1743,8 @@
         var height = mathMax(clone.height(), fromSlides.height());
         var width = mathMax(clone.width(), fromSlides.width());
         var speed = options.speed;
-        clone.css(
-                vertical ? {left: negative * width} : {top: negative * height}
-            ).animate(
-                {left: 0, top: 0}, speed, ease, obj.callback
-            );
+        clone.css(vertical ? {left: negative * width} : {top: negative * height});
+        animate(clone,{left: 0, top: 0}, speed, ease, obj.callback);
     }
 
     function revealTemplate(obj, dir) {
@@ -1776,8 +1771,8 @@
                 box.css({right: 0, left: "auto"});
             }
         }
-        innerBox.animate({left: 0, top: 0}, speed, ease);
-        box.animate({width: width, height: height}, speed, ease, obj.callback);
+        animate(innerBox, {left: 0, top: 0}, speed, ease);
+        animate(box, {width: width, height: height}, speed, ease, obj.callback);
     }
 
     function slide(obj) {
@@ -1788,48 +1783,56 @@
         var target = obj.target;
         var left = target.left;
         var top = target.top;
-        ul.animate({marginTop: top, marginLeft: left}, speed, ease, function () {
-            obj.callback();
-        });
+
+        animate(ul, {marginTop: top, marginLeft: left}, speed, ease, obj.callback);
     }
 
     // TODO: Optimizations
-    function slideCSS(obj) {
-        var vendorPrefix = getCSSVendorPrefix();
-        var ul = childrenNotAnimationClones(obj.slider);
-        var options = obj.options;
-        var ease = options.ease;
-        var speed = options.speed;
-        var target = obj.target;
-        var left = target.left;
-        var top = target.top;
-        if (vendorPrefix === FALSE) {
-            slide(obj);
+    var vendorPrefix = getCSSVendorPrefix();
+    // TODO: See why any animation going from the left is fucked up from time to time.
+    // TODO: Easing
+    // TODO: Stop Function
+    function animate(elem, properties, speed, ease, callback) {
+        var useCSS = TRUE;
+        if (vendorPrefix === FALSE || !useCSS) {
+            elem.animate(properties, speed, ease, callback);
             return;
         }
 
+        var CSSObject = {};
+        CSSObject['-' + vendorPrefix + '-transition'] = Object.keys(properties).join(", ");
 
-        var CSSObject = {marginTop: top, marginLeft: left};
         var transitionPrefix = '-' + vendorPrefix + '-transition-';
-        var easeProperty = transitionPrefix + 'timing-function';
-        CSSObject[easeProperty] = ease;
-        var transitionProperty = transitionPrefix + 'duration';
-        CSSObject[transitionProperty] = speed + "ms";
-        ul.css(CSSObject);
 
-        var bindingProperties = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
-        var stopFunction = function () {
-            ul.unbind(bindingProperties);
-            CSSObject[easeProperty] = "";
-            CSSObject[transitionProperty] = "0s";
-            ul.css(CSSObject);
-        }
-        obj.stop = stopFunction;
-        ul.bind(bindingProperties, function(){
-            stopFunction();
-            obj.callback();
+        var transitionTiming = transitionPrefix + 'duration';
+        CSSObject[transitionTiming] = speed + "ms";
+
+        elem.css(CSSObject);
+        elem.css(properties);
+
+        var bindOn = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
+        elem.height();
+        elem.width();
+
+        /*
+         /*var suffix = " " + speed + "ms";
+         var CSSObject = {};
+         CSSObject['-' + vendorPrefix + '-transition'] = Object.keys(properties).join(suffix + ", ") + suffix;
+         console.log(CSSObject['-' + vendorPrefix + '-transition']);
+
+         elem.css(CSSObject);
+         elem.css(properties);*/
+
+        elem.bind(bindOn, function(){
+            console.log("Callback");
+            elem.unbind(bindOn);
+            var cssObject = {};
+            cssObject[transitionTiming] = "0s";
+            elem.css(cssObject);
+            if (callback) {
+                callback();
+            }
         });
-
     }
 
     function fadeOutIn(obj) {
@@ -1841,20 +1844,14 @@
         var fadeoutspeed = fadeSpeed - fadeinspeed;
 
         var orgCallback = obj.callback;
+        // TODO: Make the obj.stop an array, and push a function that resets the opacity of the fromSlides
         obj.callback = function () {
             obj.fromSlides.css({opacity: 1});
             orgCallback();
         };
 
-        obj.fromSlides.animate(
-            { opacity: 0.0001 },
-            {
-                queue: FALSE,
-                duration:fadeoutspeed,
-                easing:ease,
-                complete:function () {
-                    finishFadeAnimation(obj, fadeSpeed);
-                }
+        animate(obj.fromSlides, { opacity: 0.0001 }, fadeoutspeed, ease, function () {
+                finishFadeAnimation(obj, fadeSpeed);
             }
         );
     }
@@ -1903,11 +1900,12 @@
                 var innerBox = makeClone(obj, useToSlides);
 
                 if (first) {
+                    // TODO: Play with these
                     first = FALSE;
                     boxWidth = innerBox.width() / numberOfCols;
                     boxHeight = innerBox.height() / numberOfRows;
-                    adjustedBoxWidth = Math.ceil(boxWidth);
-                    adjustBoxHeight = Math.ceil(boxHeight);
+                    adjustedBoxWidth = boxWidth + 1;
+                    adjustBoxHeight = boxHeight + 1;
                 }
 
                 var boxWidthToUse;
