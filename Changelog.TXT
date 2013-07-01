@@ -336,4 +336,7 @@ Change in script: Changed the default speed to 1500.
 Change in script: Fixed that Ajax loaded images in some browsers where forced to have the images original resolution (overwriting any CSS rules).
 Change in script: Added a speed argument to the goToSlide method.
 Change in script: Fixed that the autoHeight/width animation didn't take the amount of time specified in the attribute data-speed.
-Change in script: Using a CSS version of the slide transition as default (its called slideCSS).
+Change in script: Using all CSS animations pr default, with JavaScript animations as a fallback. This means that the easing option (if used) should be adjusted to work with CSS transformations (or disable the CSS transformations). The default "swing" ease is automaticly converted to a "cubic-bezier"
+Change in script: Added the useCSS option, which can be used to turn off CSS animations.
+Change in script: When the next/prev controls are hidden, it is done using visibility:hidden instead of display:none.
+Change in script: Added the loadStart and loadFinish options. They are callbacks that run when the sliders waits with an animation because a slide (or more) isn't loaded. (Note: Not at init).

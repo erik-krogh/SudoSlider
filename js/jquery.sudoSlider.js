@@ -68,7 +68,9 @@
             numericAttr:       'class="controls"', /* option[37]/*numericattr*/
             animationZIndex:    10000, /* option[38]/*animationZIndex*/
             interruptibleAnimations: FALSE, /* option[39]/*interruptibleAnimations*/
-            useCSS:             TRUE /* option[40]/*useCSS*/
+            useCSS:             TRUE, /* option[40]/*useCSS*/
+            loadStart:          EMPTY_FUNCTION, /* option[41]/*loadStart*/
+            loadFinish:         EMPTY_FUNCTION /* option[42]/*loadFinish*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -169,7 +171,7 @@
                 destroyed = FALSE;
 
                 if (option[12]/*ease*/ == "swing" && option[40]/*useCSS*/) {
-                    option[12]/*ease*/ = "cubic-bezier(.02, .01, .47, 1)";
+                    option[12]/*ease*/ = "cubic-bezier(.02,.01,.47,1)"; // Thanks to: http://stackoverflow.com/questions/9245030/looking-for-a-swing-like-easing-expressible-both-with-jquery-and-css3
                 }
 
                 // Set obj overflow to hidden (and position to relative <strike>, if fade is enabled. </strike>)
@@ -959,7 +961,6 @@
             }
 
             function loadSlidesAndAnimate(i, clicked, speed) {
-                // TODO: onLoad() and onFinish();
                 var dir = filterDir(i);
 
                 var targetSlide = getRealPos(dir);
@@ -967,14 +968,16 @@
                     return;
                 }
                 if (option[31]/*ajax*/) {
+                    var slideElements = getSlideElements(t);
                     var waitCounter = 0;
                     for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
-                        if (option[31]/*ajax*/[loadSlide]) {
+                        if (option[31]/*ajax*/[loadSlide] || (startedAjaxLoads[loadSlide] && !finishedAjaxLoads[loadSlide])) {
                             waitCounter++;
                             ajaxLoad(getRealPos(loadSlide), function () {
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
                                 waitCounter--;
                                 if (waitCounter == 0) {
+                                    option[42]/*loadFinish*/.call(slideElements, t);
                                     performAnimation(dir, speed, clicked);
                                 }
                             });
@@ -982,6 +985,8 @@
                     }
                     if (waitCounter == 0) {
                         performAnimation(dir, speed, clicked);
+                    } else {
+                        option[41]/*loadStart*/.call(slideElements, t);
                     }
                 } else {
                     performAnimation(dir, speed, clicked);
@@ -1830,7 +1835,7 @@
         var left = target.left;
         var top = target.top;
 
-        if (obj.options.usecss && FALSE) {
+        if (obj.options.usecss) {
             ul.css({top: "0px", left: "0px"});
 
             function resetTransform() {
@@ -1859,7 +1864,9 @@
 
         var CSSObject = {};
         var transitionProperty = vendorPrefix + 'transition';
-        CSSObject[transitionProperty] = getKeys(properties).join(", ");
+        var keys = getKeys(properties);
+        // Adding vendor prefix, because sometimes it's needed.
+        CSSObject[transitionProperty] = keys.join(" ") + " " + vendorPrefix + keys.join(" " + vendorPrefix);
 
         var transitionTiming = transitionProperty + '-duration';
         CSSObject[transitionTiming] = speed + "ms";
@@ -1872,6 +1879,18 @@
             if (elem.css(name) != properties[name]) {
                 allPropertiesAlreadyAnimated = FALSE;
             }
+        }
+
+        function resetCSS() {
+            var cssObject = {};
+            cssObject[transitionTiming] = "0s";
+            cssObject[transitionEase] = "";
+            cssObject[transitionProperty] = "";
+            elem.css(cssObject);
+        }
+
+        if (obj) {
+            obj.stopCallbacks.push(resetCSS);
         }
 
         callAsync(function () {
@@ -1894,11 +1913,7 @@
 
                 elem.bind(events, function () {
                     elem.unbind(events);
-                    var cssObject = {};
-                    cssObject[transitionTiming] = "0s";
-                    cssObject[transitionEase] = "";
-                    cssObject[transitionProperty] = "";
-                    elem.css(cssObject);
+                    resetCSS();
                     if (callback) {
                         callback();
                     }

@@ -6,11 +6,13 @@
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
 	<script type="text/javascript" >
-	$(document).ready(function(){	
+	$(document).ready(function(){
+        var loadFadeSpeed = 400;
 		var sudoSlider = $("#slider").sudoSlider({
 			numeric:true,
+            preloadAjax: false,
             // Using AJAX is of course optional.
             // But i use it here to show that it works.
             ajax: [
@@ -20,6 +22,26 @@
                 '../images/04.jpg',
                 '../images/05.jpg'
             ],
+            loadStart: function () {
+                console.log("Start");
+                $(this).animate(
+                        {opacity: 0.5},
+                        {
+                            queue: false,
+                            duration: loadFadeSpeed
+                        }
+                );
+            },
+            loadFinish: function () {
+                console.log("Finish");
+                $(this).animate(
+                        {opacity: 1},
+                        {
+                            queue: false,
+                            duration: loadFadeSpeed
+                        }
+                );
+            },
             initcallback: function () {
                 var container = $(".slideContainer");
                 // A little hack to get the actual height of the slider.
@@ -45,49 +67,7 @@
 	<div class="slideContainer" style="position:relative;">
         <div id="slider"></div>
 	</div>
-    <h3>Usage</h3>
-    <h4>Include the javascripts</h4>
-	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"&gt;&lt;/script&gt;
-&lt;script type="text/javascript" src="js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-    <h4>The Javascript to start it.</h4>
-	<pre>
-&lt;script type="text/javascript" &gt;
-   $(document).ready(function(){
-      var sudoSlider = $("#slider").sudoSlider({
-         numeric:true,
-         // Using AJAX is of course optional.
-         // But i use it here to show that it works.
-         ajax: [
-            '../images/01.jpg',
-            '../images/02.jpg',
-            '../images/03.jpg',
-            '../images/04.jpg',
-            '../images/05.jpg'
-         ],
-         initcallback: function () {
-            var container = $(".slideContainer");
-            // A little hack to get the actual height of the slider.
-            container.height("auto");
-            var height = container.height();
-            container.height(0);
-
-            // Fadein and SlideIn.
-            container.animate({opacity: 1, height: height}, 800, function () {
-               container.height("auto");
-            });
-         }
-      });
-   });
-&lt;/script&gt;</pre>
-    <h4>The CSS</h4>
-	<pre>
-.slideContainer {opacity: 0.001;height: 0px;}</pre>
-    <h4>The HTML</h4>
-	<pre>
-&lt;div class="slideContainer"&gt;
-   &lt;div id="slider"&gt;&lt;/div&gt;
-&lt;/div&gt;</pre>
+    <h3>Usage: see source code</h3>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">
