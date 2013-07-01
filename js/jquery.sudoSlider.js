@@ -273,7 +273,7 @@
 
                 // Lets make those fast/normal/fast into some numbers we can make calculations with.
                 var optionsToConvert = [4/*controlsfadespeed*/, 1/*speed*/, 14/*pause*/];
-                for (a in optionsToConvert) {
+                for (var a in optionsToConvert) {
                     option[optionsToConvert[a]] = textSpeedToNumber(option[optionsToConvert[a]]);
                 }
 
@@ -381,12 +381,12 @@
             function startAsyncDelayedLoad() {
                 var preloadAjaxTime = parseInt10(option[32]/*preloadajax*/);
                 if (option[31]/*ajax*/ && preloadAjaxTime) {
-                    for (a in option[31]/*ajax*/) {
-                        if (option[31]/*ajax*/[a]) {
+                    for (var ajaxUrl in option[31]/*ajax*/) {
+                        if (option[31]/*ajax*/[ajaxUrl]) {
                             clearTimeout(asyncDelayedSlideLoadTimeout);
                             asyncDelayedSlideLoadTimeout = setTimeout(function () {
-                                if (option[31]/*ajax*/[a]) {
-                                    ajaxLoad(parseInt10(a));
+                                if (option[31]/*ajax*/[ajaxUrl]) {
+                                    ajaxLoad(parseInt10(ajaxUrl));
                                 } else {
                                     startAsyncDelayedLoad();
                                 }
@@ -519,7 +519,7 @@
                     i = s;
                 }
 
-                if (option[18]/*numeric*/) for (a in numericControls) setCurrentElement(numericControls[a], i);
+                if (option[18]/*numeric*/) for (var control in numericControls) setCurrentElement(numericControls[control], i);
                 if (option[2]/*customlink*/) setCurrentElement($(option[2]/*customlink*/), i);
             }
 
@@ -626,7 +626,7 @@
                 }
 
                 if (option[28]/*autoheight*/ || option[29]/*autowidth*/) {
-                    autoheightwidth(i, speed);
+                    autoheightwidth(i);
                 }
             }
 
@@ -1836,10 +1836,8 @@
         var top = target.top;
 
         if (obj.options.usecss) {
-            ul.css({top: "0px", left: "0px"});
-
             function resetTransform() {
-                ul.css({transform: "translate(0px, 0px)", top: 0, left: 0});
+                ul.css({transform: "translate(0px, 0px)"});
             }
 
             obj.stopCallbacks.push(resetTransform);
@@ -1907,9 +1905,8 @@
                 elem.css(properties);
 
                 var eventsVendorPrefix = vendorPrefix.replace(/\-/g,""); // replaces all "-" with "";
-                var transitionEndSuffix = "ransitionend";
-                var eventsSuffix = (eventsVendorPrefix ? "T" : "t") + transitionEndSuffix;
-                var events = eventsVendorPrefix + eventsSuffix + " t" + transitionEndSuffix;
+                var eventsSuffix = (eventsVendorPrefix ? "T" : "t") + "ransitionend";
+                var events = eventsVendorPrefix + eventsSuffix + " t" + "ransitionend";
 
                 elem.bind(events, function () {
                     elem.unbind(events);
@@ -2058,9 +2055,9 @@
     function getCSSVendorPrefix() {
         var property = "transition";
         var styleElement = $("<div>")[0].style;
-        for (var a in styleElement) {
-            if (endsWith(a.toLowerCase(), property)) {
-                var result = a.slice(0, a.length - property.length);
+        for (var styleName in styleElement) {
+            if (endsWith(styleName.toLowerCase(), property)) {
+                var result = styleName.slice(0, styleName.length - property.length);
                 if (result.length != 0) {
                     return "-" + result + "-";
                 }
@@ -2077,7 +2074,7 @@
 
     function getKeys(obj){
         var keys = [];
-        for(var key in obj){
+        for (var key in obj){
             keys.push(key);
         }
         return keys;
@@ -2113,10 +2110,10 @@
         return ret;
     }
 
-    // Only mutates the given array, doesn't return anything.
+    // Mutates and returns the array.
     function shuffle(array) {
-        for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) {
-        }
+        for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) { }
+        return array;
     }
 
     function isFunction(func) {
@@ -2186,12 +2183,7 @@
     }
 
     function pickRandomValue(obj) {
-        var result;
-        var count = 0;
-        for (var prop in obj)
-            if (Math.random() < 1 / ++count)
-                result = prop;
-        return obj[result];
+        return obj[shuffle(getKeys(obj))[0]];
     }
 
 })(jQuery, window);
