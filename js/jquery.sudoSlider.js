@@ -67,7 +67,8 @@
             controlsAttr:      'id="controls"', /* option[36]/*controlsattr*/
             numericAttr:       'class="controls"', /* option[37]/*numericattr*/
             animationZIndex:    10000, /* option[38]/*animationZIndex*/
-            interruptibleAnimations: FALSE /* option[39]/*interruptibleAnimations*/
+            interruptibleAnimations: FALSE, /* option[39]/*interruptibleAnimations*/
+            useCSS:             TRUE /* option[40]/*useCSS*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -152,7 +153,7 @@
                     // Do we have enough list elements to fill out all the ajax documents.
                     if (option[31]/*ajax*/.length > s) {
                         for (var a = 1; a <= option[31]/*ajax*/.length - s; a++) {
-                            ul.append("<div>" +  option[33]/*loadingtext*/ + "</div>");
+                            ul.append("<div>" + option[33]/*loadingtext*/ + "</div>");
                         }
                         li = childrenNotAnimationClones(ul);
                         s = li.length;
@@ -166,6 +167,10 @@
                 clickable = TRUE;
                 numericControls = [];
                 destroyed = FALSE;
+
+                if (option[12]/*ease*/ == "swing" && option[40]/*useCSS*/) {
+                    option[12]/*ease*/ = "cubic-bezier(.02, .01, .47, 1)";
+                }
 
                 // Set obj overflow to hidden (and position to relative <strike>, if fade is enabled. </strike>)
                 obj.css({overflow: "hidden"});
@@ -199,7 +204,7 @@
 
                 for (var a = 0; a < s; a++) {
                     if (!option[19]/*numerictext*/[a] && option[19]/*numerictext*/[a] != "") {
-                        option[19]/*numerictext*/[a] = (a+1);
+                        option[19]/*numerictext*/[a] = (a + 1);
                     }
                     option[31]/*ajax*/[a] = option[31]/*ajax*/[a] || FALSE;
                 }
@@ -211,10 +216,10 @@
                 }
 
                 // Clone elements for continuous scrolling
-                if(continuousClones) {
-                    for (var i = option[8]/*slidecount*/ ; i >= 1 && s > 0 ; i--) {
+                if (continuousClones) {
+                    for (var i = option[8]/*slidecount*/; i >= 1 && s > 0; i--) {
                         var appendRealPos = getRealPos(-option[8]/*slidecount*/ + i - 1);
-                        var prependRealPos = getRealPos(option[8]/*slidecount*/-i);
+                        var prependRealPos = getRealPos(option[8]/*slidecount*/ - i);
                         var appendClone = li.eq(appendRealPos).clone();
                         continuousClones.push(appendClone);
                         var prependClone = li.eq(prependRealPos).clone();
@@ -239,25 +244,25 @@
                     $(win).on("resize focus", adjustResponsiveLayout);
                 }
 
-                if(option[3]/*controlsShow*/) {
+                if (option[3]/*controlsShow*/) {
                     controls = $('<span ' + option[36]/*controlsattr*/ + '></span>');
                     obj[option[6]/*insertafter*/ ? 'after' : 'before'](controls);
 
-                    if(option[18]/*numeric*/) {
-                        numericContainer = $('<ol '+ option[37]/*numericattr*/ +'></ol>');
+                    if (option[18]/*numeric*/) {
+                        numericContainer = $('<ol ' + option[37]/*numericattr*/ + '></ol>');
                         controls.prepend(numericContainer);
                         var usePages = option[18]/*numeric*/ == PAGES_MARKER_STRING;
                         var distanceBetweenPages = usePages ? numberOfVisibleSlides : 1;
-                        for(var a = 0; a < s - ((option[16]/*continuous*/ || usePages) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
-                            numericControls[a] = $("<li rel='" + (a+1) + "'><a href='#'><span>"+ option[19]/*numerictext*/[a] +"</span></a></li>")
+                        for (var a = 0; a < s - ((option[16]/*continuous*/ || usePages) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
+                            numericControls[a] = $("<li rel='" + (a + 1) + "'><a href='#'><span>" + option[19]/*numerictext*/[a] + "</span></a></li>")
                                 .appendTo(numericContainer)
-                                .click(function(){
+                                .click(function () {
                                     enqueueAnimation(getRelAttribute(this) - 1, TRUE);
                                     return FALSE;
                                 });
                         }
                     }
-                    if(option[17]/*prevnext*/){
+                    if (option[17]/*prevnext*/) {
                         nextbutton = makecontrol(option[35]/*nexthtml*/, NEXT_STRING);
                         prevbutton = makecontrol(option[34]/*prevhtml*/, PREV_STRING);
                     }
@@ -265,13 +270,13 @@
 
 
                 // Lets make those fast/normal/fast into some numbers we can make calculations with.
-                var optionsToConvert = [4/*controlsfadespeed*/,1/*speed*/,14/*pause*/];
+                var optionsToConvert = [4/*controlsfadespeed*/, 1/*speed*/, 14/*pause*/];
                 for (a in optionsToConvert) {
                     option[optionsToConvert[a]] = textSpeedToNumber(option[optionsToConvert[a]]);
                 }
 
                 if (option[2]/*customlink*/) {
-                    $(document).on("click", option[2]/*customlink*/, function() {
+                    $(document).on("click", option[2]/*customlink*/, function () {
                         var target;
                         if (target = getRelAttribute(this)) {
                             if (target == 'stop') {
@@ -301,7 +306,7 @@
                     }
 
                     if (destroyT !== FALSE) {
-                        goToSlide(destroyT,FALSE);
+                        goToSlide(destroyT, FALSE);
                     } else if (option[27]/*history*/) {
                         // I support the jquery.address plugin, Ben Alman's hashchange plugin and Ben Alman's jQuery.BBQ.
                         var window = $(win); // BYTES!
@@ -316,12 +321,12 @@
                         }
                         URLChange();
                     }
-                    else goToSlide(option[10]/*startslide*/,FALSE);
+                    else goToSlide(option[10]/*startslide*/, FALSE);
 
                     setCurrent(t);
                 });
                 if (option[31]/*ajax*/[option[10]/*startslide*/]) {
-                    ajaxLoad(option[10]);
+                    ajaxLoad(option[10]/*startslide*/);
                 }
                 if (option[32]/*preloadajax*/ === TRUE) {
                     for (var i = 0; i <= ts; i++) {
@@ -333,6 +338,7 @@
                     startAsyncDelayedLoad();
                 }
             }
+
             /*
              * The functions do the magic.
              */
@@ -366,17 +372,17 @@
             // Triggered when the URL changes.
             function URLChange() {
                 var target = getUrlHashTarget();
-                if (init) goToSlide(target,FALSE);
+                if (init) goToSlide(target, FALSE);
                 else enqueueAnimation(target, FALSE);
             }
 
-            function startAsyncDelayedLoad () {
+            function startAsyncDelayedLoad() {
                 var preloadAjaxTime = parseInt10(option[32]/*preloadajax*/);
                 if (option[31]/*ajax*/ && preloadAjaxTime) {
                     for (a in option[31]/*ajax*/) {
                         if (option[31]/*ajax*/[a]) {
                             clearTimeout(asyncDelayedSlideLoadTimeout);
-                            asyncDelayedSlideLoadTimeout = setTimeout(function(){
+                            asyncDelayedSlideLoadTimeout = setTimeout(function () {
                                 if (option[31]/*ajax*/[a]) {
                                     ajaxLoad(parseInt10(a));
                                 } else {
@@ -393,11 +399,11 @@
             function startAuto(pause) {
                 stopAuto();
                 autoOn = TRUE;
-                autoTimeout = setTimeout(function(){
+                autoTimeout = setTimeout(function () {
                     if (autoOn) {
                         enqueueAnimation(NEXT_STRING, FALSE);
                     }
-                },pause);
+                }, pause);
             }
 
             function stopAuto(autoPossibleStillOn) {
@@ -425,7 +431,7 @@
             }
 
             function enqueueAnimation(direction, clicked, speed) {
-                if (clickable) {
+                if (clickable && !init) {
                     // Stopping, because if its needed then its restarted after the end of the animation.
                     stopAuto(TRUE);
 
@@ -433,7 +439,6 @@
                         loadSlidesAndAnimate(direction, clicked, speed);
                     }
                 } else {
-                    // TODO: Start Ajax-loads.
                     if (option[39]/*interruptibleAnimations*/) {
                         stopAnimation();
                         enqueueAnimation(direction, clicked, speed);
@@ -441,43 +446,64 @@
                         animateToAfterCompletion = direction;
                         animateToAfterCompletionClicked = clicked;
                         animateToAfterCompletionSpeed = speed;
+
+                        // I can just as well start the ajax loads
+                        if (option[31]/*ajax*/) {
+                            var targetSlide = filterDir(direction);
+                            for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
+                                if (option[31]/*ajax*/[loadSlide]) {
+                                    ajaxLoad(getRealPos(loadSlide));
+                                }
+                            }
+                        }
                     }
                 }
             }
 
             // It may not sound like it, but the variable fadeOpacity is only for TRUE/FALSE.
-            function fadeControl (fadeOpacity, fadetime, nextcontrol) {
-                if (nextcontrol) {
-                    var eA = nextbutton,
-                        directionA = NEXT_STRING;
-                } else {
-                    var eA = prevbutton,
-                        directionA = PREV_STRING;
-                }
+            function fadeControl(fadeOpacity, fadetime, nextcontrol) {
+                fadeOpacity = fadeOpacity ? 1 : 0;
+                var fadeElement = $();
 
                 if (option[3]/*controlsShow*/ && option[17]/*prevnext*/) {
-                    if (fadeOpacity) {
-                        eA.fadeIn(fadetime);
-                    }
-                    else {
-                        eA.fadeOut(fadetime);
+                    fadeElement = nextcontrol ? nextbutton : prevbutton;
+                }
+
+                if (option[2]/*customlink*/) {
+                    var customLink = $(option[2]/*customlink*/).filter("[rel='" + (nextcontrol ? NEXT_STRING : PREV_STRING) + "']");
+                    fadeElement = fadeElement.add(customLink);
+                }
+
+                var adjustObject = {opacity: fadeOpacity};
+
+                function callback() {
+                    if (!fadeOpacity) {
+                        fadeElement.css({visibility: "hidden"});
                     }
                 }
-                if(option[2]/*customlink*/) {
-                    var filterString = "[rel='" + directionA + "']";
-                    if (fadeOpacity) {
-                        $(option[2]/*customlink*/).filter(filterString).fadeIn(fadetime);
-                    }
-                    else {
-                        $(option[2]/*customlink*/).filter(filterString).fadeOut(fadetime);
-                    }
+                if (fadeOpacity) {
+                    fadeElement.css({visibility: "visible"});
+                }
+
+                if (option[40]/*useCSS*/) {
+                    animate(fadeElement, adjustObject, fadetime, option[12]/*ease*/, callback);
+                } else {
+                    fadeElement.animate(
+                        adjustObject,
+                        {
+                            queue: FALSE,
+                            duration: fadetime,
+                            easing: option[12]/*ease*/,
+                            callback: callback
+                        }
+                    );
                 }
             }
 
             // Fade the controls, if we are at the end of the slide.
             // It's all the different kind of controls.
-            function fadeControls (a,fadetime) {
-                fadeControl (a,fadetime,FALSE); // abusing that the number 0 == FALSE.
+            function fadeControls(a, fadetime) {
+                fadeControl(a, fadetime, FALSE); // abusing that the number 0 == FALSE.
                 // The new way of doing it.
                 fadeControl(a < s - numberOfVisibleSlides, fadetime, TRUE);
             }
@@ -495,14 +521,14 @@
                 if (option[2]/*customlink*/) setCurrentElement($(option[2]/*customlink*/), i);
             }
 
-            function setCurrentElement(element,i) {
+            function setCurrentElement(element, i) {
                 if (element.filter) {
                     element
                         .filter(".current")
                         .removeClass("current");
 
                     element
-                        .filter(function() {
+                        .filter(function () {
                             var elementTarget = getRelAttribute(this);
                             if (option[18]/*numeric*/ == PAGES_MARKER_STRING) {
                                 for (var a = numberOfVisibleSlides - 1; a >= 0; a--) {
@@ -529,7 +555,7 @@
                 return hashString ? t : 0;
             }
 
-            function runOnImagesLoaded (target, waitForAllImages, callback) {
+            function runOnImagesLoaded(target, waitForAllImages, callback) {
                 var elems = target.add(target.find("img")).filter("img");
                 var len = elems.length;
                 if (!len) {
@@ -554,7 +580,8 @@
                         callback();
                     }
                 }
-                elems.each(function(){
+
+                elems.each(function () {
                     var that = this;
                     $(that).on('load error', function () {
                         loadFunction(that);
@@ -596,27 +623,25 @@
                     finishedAdjustingTo = FALSE;
                 }
 
-                // Both autoheight and autowidth can be enabled at the same time. It's a kind of magic.
-                if (option[28]/*autoheight*/) autoheightwidth(i, TRUE);//autoheight(i, speed);
-                if (option[29]/*autowidth*/) autoheightwidth(i, FALSE);//autowidth(i, speed);
+                if (option[28]/*autoheight*/ || option[29]/*autowidth*/) {
+                    autoheightwidth(i, speed);
+                }
             }
 
-            // Axis: TRUE == height, FALSE == width.
-            function autoheightwidth(i, axis) {
-                obj.ready(function() {
-                    adjustHeightWidth(i, axis);
-                    runOnImagesLoaded(li.eq(i), FALSE, function(){
-                        adjustHeightWidth (i, axis);
+
+            function autoheightwidth(i) {
+                obj.ready(function () {
+                    adjustHeightWidth(i);
+                    runOnImagesLoaded(li.eq(i), FALSE, function () {
+                        adjustHeightWidth(i);
                     });
                 });
             }
 
-            function adjustHeightWidth (i, axis) {
-                if (i != adjustingTo) {
-                    return;
-                }
+            // Axis: TRUE == height, FALSE == width.
+            function getSliderDimensions(fromSlide, axis) {
                 var pixels = 0;
-                for (var slide = i; slide < i + numberOfVisibleSlides; slide++) {
+                for (var slide = fromSlide; slide < fromSlide + numberOfVisibleSlides; slide++) {
                     var targetPixels = li.eq(getRealPos(slide))['outer' + (axis ? "Height" : "Width")](TRUE);
                     if (axis == option[7]/*vertical*/) {
                         pixels += targetPixels;
@@ -624,31 +649,45 @@
                         pixels = mathMax(targetPixels, pixels);
                     }
                 }
+                return pixels;
+            }
+
+            function adjustHeightWidth(i) {
+                if (i != adjustingTo || cantDoAdjustments()) {
+                    return;
+                }
 
                 var speed = adjustTargetTime - getTimeInMillis();
                 speed = mathMax(speed, 0);
-                // Doing CSS if speed == 0, 1: its faster. 2: it fixes bugs.
-                var adjustObject = axis ? {height: pixels} : {width: pixels};
-                if (cantDoAdjustments()) {
-                    return;
+                var adjustObject = {};
+                if (option[28]/*autoheight*/) {
+                    adjustObject["height"] = getSliderDimensions(i, TRUE);
                 }
-                if (speed == 0) {
-                    obj.stop().css(adjustObject);
+                if (option[29]/*autowidth*/) {
+                    adjustObject["width"] = getSliderDimensions(i, FALSE);
+                }
+
+                if (option[40]/*useCSS*/) {
+                    animate(obj, adjustObject, speed, option[12]/*ease*/)
                 } else {
-                    obj.animate(
-                        adjustObject,
-                        {
-                            queue:FALSE,
-                            duration:speed,
-                            easing:option[12]/*ease*/
-                        }
-                    );
+                    if (speed == 0) {
+                        // Doing CSS if speed == 0, 1: its faster. 2: it fixes bugs.
+                        obj.stop().css(adjustObject);
+                    } else {
+                        obj.animate(
+                            adjustObject,
+                            {
+                                queue: FALSE,
+                                duration: speed,
+                                easing: option[12]/*ease*/
+                            }
+                        );
+                    }
                 }
             }
 
             function adjustPositionTo(slide) {
-                setUlMargins(0,0);
-
+                setUlMargins(0, 0);
                 setUlMargins(
                     getSlidePosition(slide, FALSE),
                     getSlidePosition(slide, TRUE)
@@ -657,8 +696,8 @@
 
             function setUlMargins(left, top) {
                 ul.css({
-                    marginLeft : left,
-                    marginTop : top
+                    marginLeft: left,
+                    marginTop: top
                 });
             }
 
@@ -667,13 +706,23 @@
                 return slide.length ? - slide.position()[vertical ? "top" : "left"] : 0;
             }
 
+            function callQueuedAnimation() {
+                if (animateToAfterCompletion !== FALSE) {
+                    var animateTo = animateToAfterCompletion;
+                    animateToAfterCompletion = FALSE;
+                    callAsync(function () {
+                        enqueueAnimation(animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed);
+                    });
+                }
+            }
+
             function adjust(clicked) {
                 autoadjust(t, 0);
                 t = getRealPos(t); // Going to the real slide, away from the clone.
-                if(!option[30]/*updateBefore*/) setCurrent(t);
+                if (!option[30]/*updateBefore*/) setCurrent(t);
                 adjustPositionTo(t);
                 clickable = TRUE;
-                if(option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[t];
+                if (option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[t];
 
                 if (option[13]/*auto*/) {
                     // Stopping auto if clicked. And also continuing after X seconds of inactivity.
@@ -685,18 +734,12 @@
                     }
                 }
 
-                if (animateToAfterCompletion !== FALSE) {
-                    var animateTo = animateToAfterCompletion;
-                    animateToAfterCompletion = FALSE;
-                    callAsync(function () {
-                        enqueueAnimation(animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed);
-                    });
-                }
+                callQueuedAnimation();
             }
 
             // This function is called when i need a callback on the current element and it's continuous clones (if they are there).
             // after:  TRUE == afteranimation : FALSE == beforeanimation;
-            function aniCall (i, after, synchronous) {
+            function aniCall(i, after, synchronous) {
                 i = getRealPos(i);
                 var slideElements = getSlideElements(i);
                 // Wierd fix to let IE accept the existance of the sudoSlider object.
@@ -783,6 +826,13 @@
                     callbackList.push(ajaxCallBack);
                 }
 
+                if (finishedAjaxLoads[slide]) {
+                    if (ajaxCallBack) {
+                        callAsync(ajaxCallBack);
+                    }
+                    return;
+                }
+
                 if (startedAjaxLoads[slide]) {
                     return;
                 }
@@ -798,17 +848,17 @@
 
                 $.ajax({
                     url: target,
-                    success: function(data, textStatus, jqXHR){
+                    success: function (data, textStatus, jqXHR) {
                         runWhenNotAnimating(function () {
                             var type = jqXHR.getResponseHeader('Content-Type');
-                            if (type.substr(0,1) != "i") {
+                            if (type.substr(0, 1) != "i") {
                                 textloaded = TRUE;
                                 targetslide.html(data);
                                 ajaxAdjust(slide, FALSE);
                             }
                         });
                     },
-                    complete: function() {
+                    complete: function () {
                         // Some browsers wont load images this way, so i treat an error as an image.
                         // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
                         if (!textloaded) {
@@ -838,16 +888,13 @@
             // Performs the callback immediately if no animation is running.
             // Otherwise waits for the animation to complete in a FIFO queue.
             function runWhenNotAnimating(completeFunction) {
-                setTimeout(function () {
-                    if (currentlyAnimating) {
-                        awaitingAjaxLoads.push(completeFunction);
-                    } else {
-                        callAsync(completeFunction);
-                    }
-                }, 2000)
+                if (currentlyAnimating) {
+                    awaitingAjaxLoads.push(completeFunction);
+                } else {
+                    callAsync(completeFunction);
+                }
             }
 
-            // TODO: Test MoveCount slideCount etc.
             function ajaxAdjust(i, img) {
                 var target = li.eq(i);
                 // Now to see if the generated content needs to be inserted anywhere else.
@@ -869,7 +916,7 @@
                 adjustPositionTo(t);
                 autoadjust(t, 0);
 
-                runOnImagesLoaded(target, TRUE, function() {
+                runOnImagesLoaded(target, TRUE, function () {
                     runWhenNotAnimating(function () {
                         adjustPositionTo(t);
                         autoadjust(t, 0);
@@ -897,7 +944,7 @@
 
             function performInitCallback() {
                 autoadjust(t, 0);
-                adjustPositionTo(t);
+                callQueuedAnimation();
                 if (option[11]/*responsive*/) {
                     $(win).resize();
                 }
@@ -922,7 +969,7 @@
                 if (option[31]/*ajax*/) {
                     var waitCounter = 0;
                     for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
-                        if (option[31]/*ajax*/[loadSlide] || (startedAjaxLoads[loadSlide] && !finishedAjaxLoads[loadSlide])) {
+                        if (option[31]/*ajax*/[loadSlide]) {
                             waitCounter++;
                             ajaxLoad(getRealPos(loadSlide), function () {
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
@@ -947,9 +994,10 @@
                 if (option[5]/*controlsfade*/) fadeControls(dir, option[4]/*controlsfadespeed*/);
 
                 clickable = FALSE;
+
                 var fromSlides = $();
                 var toSlides = $();
-                for (var a = 0 ; a < numberOfVisibleSlides; a++) {
+                for (var a = 0; a < numberOfVisibleSlides; a++) {
                     fromSlides = fromSlides.add(allSlides.eq((t + a) + (continuousClones ? option[8]/*slidecount*/ : 0)));
                     toSlides = toSlides.add(allSlides.eq((dir + a) + (continuousClones ? option[8]/*slidecount*/ : 0)));
                 }
@@ -976,9 +1024,8 @@
                 } else {
                     targetSlide = dir;
                 }
-
-                var leftTarget = getSlidePosition(targetSlide, FALSE);
-                var topTarget = getSlidePosition(targetSlide, TRUE);
+                var leftTarget = getSlidePosition(targetSlide, FALSE) - parseNumber(ul.css("marginLeft"));
+                var topTarget = getSlidePosition(targetSlide, TRUE) - parseNumber(ul.css("marginTop"));
 
                 var targetLi = li.eq(dir);
                 var callOptions = $.extend(TRUE, {}, options); // Making a copy, to enforce read-only.
@@ -1031,10 +1078,11 @@
                         left: leftTarget,
                         top: topTarget
                     },
+                    stopCallbacks: [],
                     callback: function () {
                         if (callbackHasYetToRun) {
                             callbackHasYetToRun = FALSE;
-                            callAsync(stopAnimation);
+                            stopAnimation();
                         }
                     },
                     goToNext: function () {
@@ -1058,13 +1106,17 @@
                     // Doing it in this order isn't a problem in relation to the user-callbacks, since they are run in a setTimeout(callback, 0) anyway.
                     currentAnimationCallback();
 
-                    var stopFunction = currentAnimation.stop || currentAnimationObject.stop;
+                    performCallbacks(currentAnimationObject.stopCallbacks);
+
+
+                    var stopFunction = currentAnimation.stop;
                     if (stopFunction) {
                         stopFunction();
                     } else {
                         defaultStopFunction();
                     }
-                    baseSlider.adjust(); // TODO:
+                    autoadjust(t, 0);
+                    adjustPositionTo(t);
                 }
             }
 
@@ -1082,15 +1134,12 @@
                 ot = t;
                 t = slide;
 
-                ul.css({marginTop: getSlidePosition(t, TRUE), marginLeft: getSlidePosition(t, FALSE)});
-
                 adjust(clicked);
 
-                if(option[5]/*controlsfade*/) {
-                    var fadetime = option[4]/*controlsfadespeed*/;
-                    if (init) fadetime = 0;
-                    fadeControls (t,fadetime);
+                if (option[5]/*controlsfade*/ && init) {
+                    fadeControls(t, 0);
                 }
+                // This is handles in AjaxAdjust, if something is loading.
                 if (init && !option[31]/*ajax*/[t] && !startedAjaxLoads[t]) {
                     init = FALSE;
                     callAsync(performInitCallback);
@@ -1109,7 +1158,7 @@
                 return position % s;
             }
 
-            function fixClearType (element) {
+            function fixClearType(element) {
                 if (screen.fontSmoothingEnabled && element.style) element.style.removeAttribute("filter"); // Fix cleartype
             }
 
@@ -1145,7 +1194,7 @@
 
             baseSlider.destroy = publicDestroy;
 
-            function publicInit(){
+            function publicInit() {
                 if (destroyed) {
                     initSudoSlider();
                 }
@@ -1153,11 +1202,11 @@
 
             baseSlider.init = publicInit;
 
-            baseSlider.getOption = function(a){
+            baseSlider.getOption = function (a) {
                 return options[a.toLowerCase()];
             };
 
-            baseSlider.setOption = function(a, val){
+            baseSlider.setOption = function (a, val) {
                 publicDestroy();
                 options[a.toLowerCase()] = val;
                 publicInit();
@@ -1170,7 +1219,7 @@
                 if (pos > s) pos = s;
                 html = '<li>' + html + '</li>';
                 if (!pos || pos == 0) ul.prepend(html);
-                else li.eq(pos -1).after(html);
+                else li.eq(pos - 1).after(html);
                 // Finally, we make it work again.
                 if (goToSlide) {
                     destroyT = goToSlide - 1;
@@ -1178,51 +1227,51 @@
                     destroyT++;
                 }
 
-                if (option[19]/*numerictext*/.length < pos){
+                if (option[19]/*numerictext*/.length < pos) {
                     option[19]/*numerictext*/.length = pos;
                 }
 
-                option[19]/*numerictext*/.splice(pos,0,numtext || parseInt10(pos)+1);
+                option[19]/*numerictext*/.splice(pos, 0, numtext || parseInt10(pos) + 1);
                 publicInit();
             };
 
-            baseSlider.removeSlide = function(pos){
+            baseSlider.removeSlide = function (pos) {
                 pos--; // 1 == the first.
                 publicDestroy();
 
                 li.eq(pos).remove();
-                option[19]/*numerictext*/.splice(pos,1);
-                if (pos < destroyT){
+                option[19]/*numerictext*/.splice(pos, 1);
+                if (pos < destroyT) {
                     destroyT--;
                 }
 
                 publicInit();
             };
 
-            baseSlider.goToSlide = function(a, speed){
+            baseSlider.goToSlide = function (a, speed) {
                 var parsedDirection = (a == parseInt10(a)) ? a - 1 : a;
                 enqueueAnimation(parsedDirection, TRUE, speed);
             };
 
-            baseSlider.block = function(){
+            baseSlider.block = function () {
                 clickable = FALSE;
             };
 
-            baseSlider.unblock = function(){
+            baseSlider.unblock = function () {
                 clickable = TRUE;
             };
 
-            baseSlider.startAuto = function(){
+            baseSlider.startAuto = function () {
                 option[13]/*auto*/ = TRUE;
                 startAuto(option[14]/*pause*/);
             };
 
-            baseSlider.stopAuto = function(){
+            baseSlider.stopAuto = function () {
                 option[13]/*auto*/ = FALSE;
                 stopAuto();
             };
 
-            baseSlider.adjust = function(){
+            baseSlider.adjust = function () {
                 var autoAdjustSpeed = mathMax(adjustTargetTime - getTimeInMillis(), 0);
                 autoadjust(t, autoAdjustSpeed);
                 if (!currentlyAnimating) {
@@ -1230,10 +1279,10 @@
                 }
             };
 
-            baseSlider.getValue = function(a){
+            baseSlider.getValue = function (a) {
                 return {
                     currentslide: t + 1,
-                    totalslides : s,
+                    totalslides: s,
                     clickable: clickable,
                     destroyed: destroyed,
                     autoanimation: autoOn
@@ -1301,12 +1350,12 @@
             "Vertical",
             foldRandom
         ],
-        slide : slide
+        slide: slide
     }
 
     // Generic effects needs to have a "dir" attribute as their last argument.
     var genericEffectsPrefixObject = {
-        blinds : [
+        blinds: [
             "1",
             "2",
             blinds
@@ -1332,8 +1381,7 @@
     }
 
 
-
-    function parsePrefixedEffects (resultObject, effectsObject, prefix, generic, argumentsStack) {
+    function parsePrefixedEffects(resultObject, effectsObject, prefix, generic, argumentsStack) {
         if (isFunction(effectsObject)) {
             if (generic) {
                 // Parsing the value 0, as a hack to make generic effects work, see the below else case.
@@ -1462,9 +1510,9 @@
         } else if (selectionAlgorithm == 2) {
             // Spiral
             // Algorithm borrowed from the Camera plugin by Pixedelic.com
-            var rows2 = boxRows/2, x, y, z, n = reverse ? totalBoxes : -1;
+            var rows2 = boxRows / 2, x, y, z, n = reverse ? totalBoxes : -1;
             var negative = reverse ? -1 : 1;
-            for (z = 0; z < rows2; z++){
+            for (z = 0; z < rows2; z++) {
                 y = z;
                 for (x = z; x < boxCols - z - 1; x++) {
                     boxesResult[n += negative] = boxes.eq(y * boxCols + x);
@@ -1500,68 +1548,66 @@
             for (var j = 0; j < boxLine.length; j++) {
                 var box = $(boxLine[j]);
                 (function (box, timeBuff) {
+                    var boxChildren = box.children();
                     var goToWidth = box.width();
                     var goToHeight = box.height();
+                    var orgLeft = parseNumber(box.css("left"));
+                    var orgTop = parseNumber(box.css("top"));
+                    var goToLeft = orgLeft;
+                    var goToTop = orgTop;
+
+                    var childOrgLeft = parseNumber(boxChildren.css("left"));
+                    var childOrgTop = parseNumber(boxChildren.css("top"));
+                    var childGoToLeft = childOrgLeft;
+                    var childGoToTop = childOrgTop;
 
                     if (flyIn) {
-                        var orgLeft = parseNumber(box.css("left"));
-                        var orgTop = parseNumber(box.css("top"));
-
                         var adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
-                        var adjustTop = reverse ? - goToHeight : goToHeight;
+                        var adjustTop = reverse ? -goToHeight : goToHeight;
 
                         if (reveal) {
-                            adjustLeft *= 1;
-                            orgLeft -= adjustLeft;
-
-                            adjustTop *= 1;
-                            orgTop -= adjustTop;
-                        }
-
-                        box.css({left: orgLeft + adjustLeft, top: orgTop + adjustTop});
-                    }
-
-                    // This part makes so that the boxGrow animations appears to originate from the center of the box, instead of the top-left corner.
-                    var goToMarginLeft = 0;
-                    var goToMarginTop = 0;
-                    var boxChildren = box.children();
-                    if (grow) {
-                        if (!reveal) {
-                            box.css({marginLeft: goToWidth / 2, marginTop: goToHeight / 2});
-                            boxChildren.css({marginLeft: -goToWidth / 2, marginTop: -goToHeight / 2});
+                            goToLeft -= adjustLeft;
+                            goToTop -= adjustTop;
                         } else {
-                            goToMarginLeft = goToWidth / 2;
-                            goToMarginTop = goToHeight / 2;
+                            box.css({left: orgLeft + adjustLeft, top: orgTop + adjustTop});
                         }
                     }
 
                     if (grow) {
                         if (reveal) {
+                            childGoToLeft -= goToWidth / 2;
+                            goToLeft += goToWidth / 2;
+                            childGoToTop -= goToHeight / 2;
+                            goToTop += goToHeight / 2;
+
                             goToHeight = goToWidth = 0;
                         } else {
+                            box.css({left: orgLeft + (goToWidth / 2), top: orgTop + (goToHeight / 2)});
+                            boxChildren.css({left: childOrgLeft - goToWidth / 2, top: childOrgTop - goToHeight / 2});
+
                             box.width(0).height(0);
                         }
                     }
+
+
                     if (reveal) {
                         box.css({opacity: 1});
                     }
                     count++;
                     setTimeout(function () {
-                        animate(boxChildren, {marginLeft: -goToMarginLeft, marginTop: -goToMarginTop}, speed, ease);
+                        animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, ease, FALSE, obj);
                         animate(box, {
                             opacity: reveal ? 0 : 1,
                             width: goToWidth,
                             height: goToHeight,
-                            left: orgLeft,
-                            top: orgTop,
-                            marginLeft: goToMarginLeft,
-                            marginTop: goToMarginTop
+                            left: goToLeft,
+                            top: goToTop
                         }, speed, ease, function () {
                             count--;
                             if (count == 0) {
                                 obj.callback();
                             }
-                        });
+                        }, obj);
                     }, timeBuff);
                 })(box, timeBuff);
             }
@@ -1712,7 +1758,6 @@
             }
 
 
-
             count++;
             setTimeout(function () {
                 animate(slice, {
@@ -1726,7 +1771,7 @@
                     if (count == 0) {
                         obj.callback();
                     }
-                });
+                }, obj);
             }, timeBuff);
         });
     }
@@ -1738,13 +1783,13 @@
         var options = obj.options;
         var ease = options.ease;
         var fromSlides = obj.fromSlides;
-        var clone = makeClone(obj, TRUE);
-        clone.prependTo(obj.slider);
-        var height = mathMax(clone.height(), fromSlides.height());
-        var width = mathMax(clone.width(), fromSlides.width());
+        var toSlides = makeClone(obj, TRUE);
+        toSlides.prependTo(obj.slider);
+        var height = mathMax(toSlides.height(), fromSlides.height());
+        var width = mathMax(toSlides.width(), fromSlides.width());
         var speed = options.speed;
-        clone.css(vertical ? {left: negative * width} : {top: negative * height});
-        animate(clone,{left: 0, top: 0}, speed, ease, obj.callback);
+        toSlides.css(vertical ? {left: negative * width} : {top: negative * height});
+        animate(toSlides, {left: 0, top: 0}, speed, ease, obj.callback, obj);
     }
 
     function revealTemplate(obj, dir) {
@@ -1761,18 +1806,18 @@
         if (vertical) {
             box.css({width: width});
             if (dir == 1) {
-                innerBox.css({top: - height});
+                innerBox.css({top: -height});
                 box.css({bottom: 0, top: "auto"});
             }
         } else {
             box.css({height: height});
             if (dir == 4) {
-                innerBox.css({left: - width});
+                innerBox.css({left: -width});
                 box.css({right: 0, left: "auto"});
             }
         }
-        animate(innerBox, {left: 0, top: 0}, speed, ease);
-        animate(box, {width: width, height: height}, speed, ease, obj.callback);
+        animate(innerBox, {left: 0, top: 0}, speed, ease, FALSE, obj);
+        animate(box, {width: width, height: height}, speed, ease, obj.callback, obj);
     }
 
     function slide(obj) {
@@ -1781,57 +1826,84 @@
         var ease = options.ease;
         var speed = options.speed;
         var target = obj.target;
+
         var left = target.left;
         var top = target.top;
 
-        animate(ul, {marginTop: top, marginLeft: left}, speed, ease, obj.callback);
+        if (obj.options.usecss && FALSE) {
+            ul.css({top: "0px", left: "0px"});
+
+            function resetTransform() {
+                ul.css({transform: "translate(0px, 0px)", top: 0, left: 0});
+            }
+
+            obj.stopCallbacks.push(resetTransform);
+
+            resetTransform();
+
+            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, ease, function () {
+                obj.callback();
+            }, obj);
+        } else {
+            animate(ul, {marginTop: "+=" + top, marginLeft: "+=" + left}, speed, ease, obj.callback, obj);
+        }
     }
 
-    // TODO: Optimizations
     var vendorPrefix = getCSSVendorPrefix();
-    // TODO: See why any animation going from the left is fucked up from time to time.
-    // TODO: Easing
-    // TODO: Stop Function
-    function animate(elem, properties, speed, ease, callback) {
-        var useCSS = TRUE;
-        if (vendorPrefix === FALSE || !useCSS) {
+    function animate(elem, properties, speed, ease, callback, obj) {
+        var usecss = !obj || obj.options.usecss;
+        if (vendorPrefix === FALSE || !usecss) {
             elem.animate(properties, speed, ease, callback);
             return;
         }
 
         var CSSObject = {};
-        CSSObject['-' + vendorPrefix + '-transition'] = Object.keys(properties).join(", ");
+        var transitionProperty = vendorPrefix + 'transition';
+        CSSObject[transitionProperty] = getKeys(properties).join(", ");
 
-        var transitionPrefix = '-' + vendorPrefix + '-transition-';
-
-        var transitionTiming = transitionPrefix + 'duration';
+        var transitionTiming = transitionProperty + '-duration';
         CSSObject[transitionTiming] = speed + "ms";
 
-        elem.css(CSSObject);
-        elem.css(properties);
+        var transitionEase = transitionProperty + '-timing-function';
+        CSSObject[transitionEase] = ease;
 
-        var bindOn = 'transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd';
-        elem.height();
-        elem.width();
-
-        /*
-         /*var suffix = " " + speed + "ms";
-         var CSSObject = {};
-         CSSObject['-' + vendorPrefix + '-transition'] = Object.keys(properties).join(suffix + ", ") + suffix;
-         console.log(CSSObject['-' + vendorPrefix + '-transition']);
-
-         elem.css(CSSObject);
-         elem.css(properties);*/
-
-        elem.bind(bindOn, function(){
-            console.log("Callback");
-            elem.unbind(bindOn);
-            var cssObject = {};
-            cssObject[transitionTiming] = "0s";
-            elem.css(cssObject);
-            if (callback) {
-                callback();
+        var allPropertiesAlreadyAnimated = TRUE;
+        for (var name in properties) {
+            if (elem.css(name) != properties[name]) {
+                allPropertiesAlreadyAnimated = FALSE;
             }
+        }
+
+        callAsync(function () {
+            if (speed == 0 || allPropertiesAlreadyAnimated) {
+                elem.css(properties);
+                if (callback) {
+                    callback();
+                }
+                return;
+            }
+            elem.css(CSSObject);
+
+            callAsync(function () {
+                elem.css(properties);
+
+                var eventsVendorPrefix = vendorPrefix.replace(/\-/g,""); // replaces all "-" with "";
+                var transitionEndSuffix = "ransitionend";
+                var eventsSuffix = (eventsVendorPrefix ? "T" : "t") + transitionEndSuffix;
+                var events = eventsVendorPrefix + eventsSuffix + " t" + transitionEndSuffix;
+
+                elem.bind(events, function () {
+                    elem.unbind(events);
+                    var cssObject = {};
+                    cssObject[transitionTiming] = "0s";
+                    cssObject[transitionEase] = "";
+                    cssObject[transitionProperty] = "";
+                    elem.css(cssObject);
+                    if (callback) {
+                        callback();
+                    }
+                });
+            });
         });
     }
 
@@ -1840,20 +1912,16 @@
         var fadeSpeed = options.speed;
         var ease = options.ease;
 
-        var fadeinspeed = parseInt(fadeSpeed*(3/5), 10);
+        var fadeinspeed = parseInt(fadeSpeed * (3 / 5), 10);
         var fadeoutspeed = fadeSpeed - fadeinspeed;
 
-        var orgCallback = obj.callback;
-        // TODO: Make the obj.stop an array, and push a function that resets the opacity of the fromSlides
-        obj.callback = function () {
+        obj.stopCallbacks.push(function () {
             obj.fromSlides.css({opacity: 1});
-            orgCallback();
-        };
+        });
 
         animate(obj.fromSlides, { opacity: 0.0001 }, fadeoutspeed, ease, function () {
-                finishFadeAnimation(obj, fadeSpeed);
-            }
-        );
+            finishFadeAnimation(obj, fadeSpeed);
+        }, obj);
     }
 
 
@@ -1893,33 +1961,24 @@
     function createBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
         var slider = obj.slider;
         var result = $();
-        var boxWidth, boxHeight, adjustedBoxWidth, adjustBoxHeight;
+        var boxWidth, boxHeight;
         var first = TRUE;
         for (var rows = 0; rows < numberOfRows; rows++) {
             for (var cols = 0; cols < numberOfCols; cols++) {
                 var innerBox = makeClone(obj, useToSlides);
 
                 if (first) {
-                    // TODO: Play with these
                     first = FALSE;
-                    boxWidth = innerBox.width() / numberOfCols;
-                    boxHeight = innerBox.height() / numberOfRows;
-                    adjustedBoxWidth = boxWidth + 1;
-                    adjustBoxHeight = boxHeight + 1;
+                    boxWidth = Math.ceil(innerBox.width() / numberOfCols);
+                    boxHeight = Math.ceil(innerBox.height() / numberOfRows);
                 }
 
-                var boxWidthToUse;
-                if (cols == numberOfCols - 1) {
-                    boxWidthToUse = (slider.width() - (boxWidth * cols));
-                } else {
-                    boxWidthToUse = adjustedBoxWidth;
-                }
                 var box = makeBox(
                     innerBox, // innerBox
                     boxHeight * rows, // top
                     boxWidth * cols, // left
-                    adjustBoxHeight, // height
-                    boxWidthToUse, // width
+                    boxHeight, // height
+                    boxWidth, // width
                     obj // for options.
                 );
                 slider.append(box);
@@ -1934,15 +1993,15 @@
             width: innerBox.width(),
             height: innerBox.height(),
             display: "block",
-            top: - top,
-            left: - left
+            top: -top,
+            left: -left
         });
         var box = $('<div>').css({
             left: left,
             top: top,
             width: width,
             height: height,
-            opacity:0,
+            opacity: 0,
             overflow: "hidden",
             position: ABSOLUTE_STRING,
             zIndex: obj.options.animationzindex
@@ -1953,22 +2012,22 @@
 
     // Makes a single box that contains clones of the toSlides. Positioned correctly relative to each other. And the returned box has the correct height and width.
     function makeClone(obj, useToSlides) {
-        var toSlides = useToSlides ? obj.toSlides : obj.fromSlides;
-        var firstSlidePosition = toSlides.eq(0).position();
+        var slides = useToSlides ? obj.toSlides : obj.fromSlides;
+        var firstSlidePosition = slides.eq(0).position();
         var orgLeft = firstSlidePosition.left;
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $("<div>").css({zIndex : obj.options.animationzindex, position : ABSOLUTE_STRING, top : 0, left : 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
-        toSlides.each(function () {
-            var that = $(this);
+        var result = $("<div>").css({zIndex: obj.options.animationzindex, position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
+        slides.each(function (index, elem) {
+            var that = $(elem);
             var cloneWidth = that.outerWidth(true);
             var cloneHeight = that.outerHeight(true);
             var clone = that.clone();
             var position = that.position();
             var left = position.left - orgLeft;
             var top = position.top - orgTop;
-            clone.css({position : ABSOLUTE_STRING, left: left, top: top, opacity: 1});
+            clone.css({position: ABSOLUTE_STRING, left: left, top: top, opacity: 1});
             height = mathMax(height, top + cloneHeight);
             width = mathMax(width, left + cloneWidth);
             result.append(clone);
@@ -1982,19 +2041,31 @@
      * Util scripts.
      */
     function getCSSVendorPrefix() {
-        var property = "Perspective";
-        var testElement = $("<div>")[0];
-        var possiblePrefixes = ["Webkit","Moz","O","ms","Khtml"];
-        var testProperties = (possiblePrefixes.join(property + ' ') + property.toLowerCase()).split(' ');
-
-        for (var n = 0; n < testProperties.length; n++) {
-            var resultingProperty = testProperties[n];
-            if (testElement.style[resultingProperty] === "") {
-                return resultingProperty.slice(0, resultingProperty.length - property.length);
+        var property = "transition";
+        var styleElement = $("<div>")[0].style;
+        for (var a in styleElement) {
+            if (endsWith(a.toLowerCase(), property)) {
+                var result = a.slice(0, a.length - property.length);
+                if (result.length != 0) {
+                    return "-" + result + "-";
+                }
+                return  result
             }
         }
 
         return false;
+    }
+
+    function endsWith(string, suffix) {
+        return string.indexOf(suffix, string.length - suffix.length) !== -1;
+    }
+
+    function getKeys(obj){
+        var keys = [];
+        for(var key in obj){
+            keys.push(key);
+        }
+        return keys;
     }
 
     // Puts the specified function in a setTimeout([function], 0);
@@ -2017,10 +2088,10 @@
     }
 
     function childrenNotAnimationClones(obj) {
-        return obj.children().not("."+ANIMATION_CLONE_MARKER_CLASS);
+        return obj.children().not("." + ANIMATION_CLONE_MARKER_CLASS);
     }
 
-    function objectToLowercase (obj) {
+    function objectToLowercase(obj) {
         var ret = {};
         for (var key in obj)
             ret[key.toLowerCase()] = obj[key];
@@ -2029,7 +2100,8 @@
 
     // Only mutates the given array, doesn't return anything.
     function shuffle(array) {
-        for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x){}
+        for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) {
+        }
     }
 
     function isFunction(func) {
@@ -2053,7 +2125,7 @@
     }
 
     function mathAbs(number) {
-        return number < 0 ? - number : number;
+        return number < 0 ? -number : number;
     }
 
     function mathMax(a, b) {
@@ -2102,7 +2174,7 @@
         var result;
         var count = 0;
         for (var prop in obj)
-            if (Math.random() < 1/++count)
+            if (Math.random() < 1 / ++count)
                 result = prop;
         return obj[result];
     }
