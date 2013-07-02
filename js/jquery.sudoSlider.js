@@ -24,6 +24,7 @@
     var ABSOLUTE_STRING = "absolute";
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
+    var CSSVendorPrefix = getCSSVendorPrefix();
 
     $.fn.sudoSlider = function(optionsOrg) {
         // default configuration properties
@@ -76,6 +77,9 @@
         var baseSlider = this;
 
         optionsOrg = $.extend(objectToLowercase(defaults), objectToLowercase(optionsOrg));
+        if (CSSVendorPrefix === FALSE) {
+            optionsOrg.usecss = FALSE;
+        }
 
         return this.each(function() {
             var init,
@@ -170,9 +174,6 @@
                 numericControls = [];
                 destroyed = FALSE;
 
-                if (option[12]/*ease*/ == "swing" && option[40]/*useCSS*/) {
-                    option[12]/*ease*/ = "cubic-bezier(.02,.01,.47,1)"; // Thanks to: http://stackoverflow.com/questions/9245030/looking-for-a-swing-like-easing-expressible-both-with-jquery-and-css3
-                }
 
                 // Set obj overflow to hidden (and position to relative <strike>, if fade is enabled. </strike>)
                 obj.css({overflow: "hidden"});
@@ -303,10 +304,6 @@
                 }
 
                 runOnImagesLoaded(initiallyVisibleSlides, TRUE, function () {
-                    if (option[13]/*auto*/) {
-                        startAuto(option[14]/*pause*/);
-                    }
-
                     if (destroyT !== FALSE) {
                         goToSlide(destroyT, FALSE);
                     } else if (option[27]/*history*/) {
@@ -479,7 +476,7 @@
                 var adjustObject = {opacity: fadeOpacity};
 
                 function callback() {
-                    if (!fadeOpacity) {
+                    if (!fadeOpacity && fadeElement.css("opacity") == 0) {
                         fadeElement.css({visibility: "hidden"});
                     }
                 }
@@ -663,10 +660,10 @@
                 speed = mathMax(speed, 0);
                 var adjustObject = {};
                 if (option[28]/*autoheight*/) {
-                    adjustObject["height"] = getSliderDimensions(i, TRUE);
+                    adjustObject["height"] = getSliderDimensions(i, TRUE) || 1; // Making it completely invisible gives trouble.
                 }
                 if (option[29]/*autowidth*/) {
-                    adjustObject["width"] = getSliderDimensions(i, FALSE);
+                    adjustObject["width"] = getSliderDimensions(i, FALSE) || 1;
                 }
 
                 if (option[40]/*useCSS*/) {
@@ -731,7 +728,7 @@
                     if (clicked) {
                         stopAuto();
                         if (option[15]/*resumepause*/) startAuto(option[15]/*resumepause*/);
-                    } else {
+                    } else if (!init) {
                         startAuto(option[14]/*pause*/);
                     }
                 }
@@ -853,7 +850,7 @@
                     success: function (data, textStatus, jqXHR) {
                         runWhenNotAnimating(function () {
                             var type = jqXHR.getResponseHeader('Content-Type');
-                            if (type.substr(0, 1) != "i") {
+                            if (type && type.substr(0, 1) != "i") {
                                 textloaded = TRUE;
                                 targetslide.html(data);
                                 ajaxAdjust(slide, FALSE);
@@ -871,7 +868,12 @@
                             runOnImagesLoaded(thatImage, true, function () {
                                 runWhenNotAnimating(function () {
                                     // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
-                                    thatImage.height("").width("");
+                                    // Other browsers (IE) tends to completely hide images that are errors. Therefore we set the height/width of those to 20.
+                                    var setHeightWidth = "";
+                                    if (!thatImage.height()) {
+                                        setHeightWidth = 20;
+                                    }
+                                    thatImage.height(setHeightWidth).width(setHeightWidth);
 
                                     targetslide.empty().append(image);
 
@@ -949,6 +951,9 @@
                 callQueuedAnimation();
                 if (option[11]/*responsive*/) {
                     $(win).resize();
+                }
+                if (option[13]/*auto*/) {
+                    startAuto(option[14]/*pause*/);
                 }
                 option[23]/*initCallback*/.call(baseSlider);
             }
@@ -1255,7 +1260,9 @@
 
             baseSlider.goToSlide = function (a, speed) {
                 var parsedDirection = (a == parseInt10(a)) ? a - 1 : a;
-                enqueueAnimation(parsedDirection, TRUE, speed);
+                callAsync(function () {
+                    enqueueAnimation(parsedDirection, TRUE, speed);
+                });
             };
 
             baseSlider.block = function () {
@@ -1844,40 +1851,33 @@
 
             resetTransform();
 
-            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, ease, function () {
-                obj.callback();
-            }, obj);
+            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, ease, obj.callback, obj);
         } else {
             animate(ul, {marginTop: "+=" + top, marginLeft: "+=" + left}, speed, ease, obj.callback, obj);
         }
     }
 
-    var vendorPrefix = getCSSVendorPrefix();
     function animate(elem, properties, speed, ease, callback, obj) {
         var usecss = !obj || obj.options.usecss;
-        if (vendorPrefix === FALSE || !usecss) {
+        if (CSSVendorPrefix === FALSE || !usecss) {
             elem.animate(properties, speed, ease, callback);
             return;
         }
 
         var CSSObject = {};
-        var transitionProperty = vendorPrefix + 'transition';
+        var transitionProperty = CSSVendorPrefix + 'transition';
         var keys = getKeys(properties);
         // Adding vendor prefix, because sometimes it's needed.
-        CSSObject[transitionProperty] = keys.join(" ") + " " + vendorPrefix + keys.join(" " + vendorPrefix);
+        CSSObject[transitionProperty] = keys.join(" ") + (CSSVendorPrefix == "" ? "" : " " + CSSVendorPrefix + keys.join(" " + CSSVendorPrefix));
 
         var transitionTiming = transitionProperty + '-duration';
         CSSObject[transitionTiming] = speed + "ms";
 
         var transitionEase = transitionProperty + '-timing-function';
-        CSSObject[transitionEase] = ease;
-
-        var allPropertiesAlreadyAnimated = TRUE;
-        for (var name in properties) {
-            if (elem.css(name) != properties[name]) {
-                allPropertiesAlreadyAnimated = FALSE;
-            }
+        if (ease == "swing") {
+            ease = "ease-in-out";
         }
+        CSSObject[transitionEase] = ease;
 
         function resetCSS() {
             var cssObject = {};
@@ -1892,7 +1892,7 @@
         }
 
         callAsync(function () {
-            if (speed == 0 || allPropertiesAlreadyAnimated) {
+            if (speed == 0) {
                 elem.css(properties);
                 if (callback) {
                     callback();
@@ -1904,17 +1904,24 @@
             callAsync(function () {
                 elem.css(properties);
 
-                var eventsVendorPrefix = vendorPrefix.replace(/\-/g,""); // replaces all "-" with "";
+                var eventsVendorPrefix = CSSVendorPrefix.replace(/\-/g,""); // replaces all "-" with "";
                 var eventsSuffix = (eventsVendorPrefix ? "T" : "t") + "ransitionend";
                 var events = eventsVendorPrefix + eventsSuffix + " t" + "ransitionend";
 
-                elem.bind(events, function () {
-                    elem.unbind(events);
-                    resetCSS();
-                    if (callback) {
-                        callback();
+                var called = FALSE;
+                var callbackFunction = function () {
+                    if (!called) {
+                        called = TRUE;
+                        elem.unbind(events);
+                        resetCSS();
+                        if (callback) {
+                            callback();
+                        }
                     }
-                });
+                };
+                elem.bind("transitionend", callbackFunction);
+                // If the animation doesn't do anything, the bind will never be triggered, so this is a fallback.
+                setTimeout(callbackFunction, speed + 100);
             });
         });
     }
@@ -2022,7 +2029,7 @@
         return box;
     }
 
-    // Makes a single box that contains clones of the toSlides. Positioned correctly relative to each other. And the returned box has the correct height and width.
+    // Makes a single box that contains clones of the toSlides/fromSlides. Positioned correctly relative to each other. And the returned box has the correct height and width.
     function makeClone(obj, useToSlides) {
         var slides = useToSlides ? obj.toSlides : obj.fromSlides;
         var firstSlidePosition = slides.eq(0).position();
