@@ -41,7 +41,7 @@
             moveCount:         1, /*     option[9]/*movecount*/
             startSlide:        1, /*     option[10]/*startslide*/
             responsive:        FALSE, /* option[11]/*responsive*/
-            ease:              'swing', /* option[12]/*ease*/
+            ease:              "swing", /* option[12]/*ease*/
             auto:              FALSE, /* option[13]/*auto*/
             pause:             2000, /*  option[14]/*pause*/
             resumePause:       FALSE, /* option[15]/*resumepause*/
@@ -62,7 +62,7 @@
             updateBefore:      FALSE, /* option[30]/*updateBefore*/
             ajax:              FALSE, /* option[31]/*ajax*/
             preloadAjax:       100, /*   option[32]/*preloadajax*/
-            loadingText:       '', /*    option[33]/*loadingtext*/
+            loadingText:       "", /*    option[33]/*loadingtext*/
             prevHtml:          '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
             nextHtml:          '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
             controlsAttr:      'id="controls"', /* option[36]/*controlsattr*/
@@ -1795,12 +1795,12 @@
         var options = obj.options;
         var ease = options.ease;
         var fromSlides = obj.fromSlides;
-        var toSlides = makeClone(obj, TRUE);
+        var toSlides = makeClone(obj, TRUE).hide();
         toSlides.prependTo(obj.slider);
         var height = mathMax(toSlides.height(), fromSlides.height());
         var width = mathMax(toSlides.width(), fromSlides.width());
         var speed = options.speed;
-        toSlides.css(vertical ? {left: negative * width} : {top: negative * height});
+        toSlides.css(vertical ? {left: negative * width} : {top: negative * height}).show();
         animate(toSlides, {left: 0, top: 0}, speed, ease, obj.callback, obj);
     }
 
@@ -1815,6 +1815,8 @@
         var box = makeBox(innerBox, 0, 0, 0, 0, obj)
             .css({opacity: 1})
             .appendTo(obj.slider);
+        var both = box.add(innerBox);
+        both.hide(); // FF css animation fix
         if (vertical) {
             box.css({width: width});
             if (dir == 1) {
@@ -1828,6 +1830,14 @@
                 box.css({right: 0, left: "auto"});
             }
         }
+        // <FF css animation fix>
+        both.show();
+        if (vertical) {
+            both.width(width);
+        } else {
+            both.height(height);
+        }
+        // </FF css animation fix>
         animate(innerBox, {left: 0, top: 0}, speed, ease, FALSE, obj);
         animate(box, {width: width, height: height}, speed, ease, obj.callback, obj);
     }
@@ -1860,20 +1870,23 @@
     function animate(elem, properties, speed, ease, callback, obj) {
         var usecss = !obj || obj.options.usecss;
         if (CSSVendorPrefix === FALSE || !usecss) {
+            console.log("Falling back");
             elem.animate(properties, speed, ease, callback);
             return;
         }
 
+        console.log("CSS");
+
         var CSSObject = {};
-        var transitionProperty = CSSVendorPrefix + 'transition';
+        var transitionProperty = CSSVendorPrefix + "transition";
         var keys = getKeys(properties);
         // Adding vendor prefix, because sometimes it's needed.
         CSSObject[transitionProperty] = keys.join(" ") + (CSSVendorPrefix == "" ? "" : " " + CSSVendorPrefix + keys.join(" " + CSSVendorPrefix));
 
-        var transitionTiming = transitionProperty + '-duration';
+        var transitionTiming = transitionProperty + "-duration";
         CSSObject[transitionTiming] = speed + "ms";
 
-        var transitionEase = transitionProperty + '-timing-function';
+        var transitionEase = transitionProperty + "-timing-function";
         if (ease == "swing") {
             ease = "ease-in-out";
         }
@@ -1919,7 +1932,7 @@
                         }
                     }
                 };
-                elem.bind("transitionend", callbackFunction);
+                elem.bind(events, callbackFunction);
                 // If the animation doesn't do anything, the bind will never be triggered, so this is a fallback.
                 setTimeout(callbackFunction, speed + 100);
             });
@@ -2015,7 +2028,7 @@
             top: -top,
             left: -left
         });
-        var box = $('<div>').css({
+        var box = $("<div>").css({
             left: left,
             top: top,
             width: width,
@@ -2059,20 +2072,23 @@
     /*
      * Util scripts.
      */
-    function getCSSVendorPrefix() {
-        var property = "transition";
-        var styleElement = $("<div>")[0].style;
-        for (var styleName in styleElement) {
-            if (endsWith(styleName.toLowerCase(), property)) {
-                var result = styleName.slice(0, styleName.length - property.length);
-                if (result.length != 0) {
-                    return "-" + result + "-";
-                }
-                return  result
+    function getVendorPrefixedProperty(property, searchElement) {
+        for (var name in searchElement) {
+            if (endsWith(name.toLowerCase(), property.toLowerCase())) {
+                return name;
             }
         }
-
         return false;
+    }
+
+    function getCSSVendorPrefix() {
+        var property = "transition";
+        var styleName = getVendorPrefixedProperty(property, $("<div>")[0].style);
+        var prefix = styleName.slice(0, styleName.length - property.length);
+        if (prefix.length != 0) {
+            return "-" + prefix + "-";
+        }
+        return "";
     }
 
     function endsWith(string, suffix) {
