@@ -16,7 +16,7 @@
                 // Diff is the number of slides we are moving, negative if we are moving to the left.
                 var overlay = $("<div class=\"sudo-box\" style=\"position:absolute;top:0;left:0;z-index:10000;opacity: 1 !important;\">THIS WILL BE REMOVED IN STOP FUNCTION!</div>");
                 obj.slider.prepend(overlay);
-                if (obj.diff > 0) {
+                if (obj.diff < 0) {
                     // Make sure that everything you make in order to perform the animation is marked with the class "sudo-box".
                     // Otherwise SudoSlider might count it as a slide.
                     // Things marked with the class sudo-box will also be automaticly removed by the default stop() function.
@@ -25,11 +25,16 @@
                         obj.callback();
                     });
                 } else {
-                    // GoToNext will make sure that the slider goes to the next slide immediately, you can then finish the effect.
+                    // goToNext will make sure that the slider goes to the next slide immediately, you can then finish the effect.
                     // When doing this you would usually have a clone of the content on top of the slider.
-                    obj.goToNext();
+                    obj.slider.fadeTo(500, 0.001, function () {
+                        obj.goToNext();
+                        obj.slider.fadeTo(500, 1, function () {
+                            obj.callback();
+                        });;
+                    });
 
-                    overlay.hide().fadeIn(400);
+                    overlay.hide().show(1000);
                 }
             }
             // When the slider needs to stop the animation, it will call this "sub-function".
