@@ -14,17 +14,22 @@
             var ownEffect = function (obj) {
                 callObject = obj;
                 // Diff is the number of slides we are moving, negative if we are moving to the left.
+                var overlay = $("<div class=\"sudo-box\" style=\"position:absolute;top:0;left:0;z-index:10000;opacity: 1 !important;\">THIS WILL BE REMOVED IN STOP FUNCTION!</div>");
+                obj.slider.prepend(overlay);
                 if (obj.diff > 0) {
                     // Make sure that everything you make in order to perform the animation is marked with the class "sudo-box".
                     // Otherwise SudoSlider might count it as a slide.
                     // Things marked with the class sudo-box will also be automaticly removed by the default stop() function.
-                    obj.slider.prepend("<div class=\"sudo-box\" style=\"position:absolute;top:0;left:0;z-index:10000;opacity: 1 !important;\">THIS WILL BE REMOVED IN STOP FUNCTION!</div>");
+
                     obj.slider.fadeTo(2000, 0.5, function () {
                         obj.callback();
                     });
                 } else {
-                    // All the predefined animations can be found in $.fn.sudoSlider.effects
-                    $.fn.sudoSlider.effects.slide(obj);
+                    // GoToNext will make sure that the slider goes to the next slide immediately, you can then finish the effect.
+                    // When doing this you would usually have a clone of the content on top of the slider.
+                    obj.goToNext();
+
+                    overlay.hide().fadeIn(400);
                 }
             }
             // When the slider needs to stop the animation, it will call this "sub-function".
