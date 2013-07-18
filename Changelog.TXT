@@ -342,8 +342,3 @@ Change in script: Added the loadStart and loadFinish options. They are callbacks
 Change in script: If history is enabled, the update of URL will now be performed in the beginning of the animation, instead of the end.
 Change in docs: Upgraded to jQuery 1.10.2
 Change in docs: Removed the "keep slider focused demo".
-
-TODO: Demos:
-Change in script: Using all CSS animations pr default, with JavaScript animations as a fallback. This means that the easing option (if used) should be adjusted to work with CSS transformations (or disable the CSS transformations). The default "swing" ease is automaticly converted to a "cubic-bezier"
-
-TODO: Change:
