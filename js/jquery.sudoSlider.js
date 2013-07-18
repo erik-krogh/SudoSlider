@@ -68,7 +68,7 @@
             controlsAttr:      'id="controls"', /* option[36]/*controlsattr*/
             numericAttr:       'class="controls"', /* option[37]/*numericattr*/
             animationZIndex:    10000, /* option[38]/*animationZIndex*/
-            interruptibleAnimations: FALSE, /* option[39]/*interruptibleAnimations*/
+            interruptible:      FALSE, /* option[39]/*interruptible*/
             useCSS:             TRUE, /* option[40]/*useCSS*/
             loadStart:          EMPTY_FUNCTION, /* option[41]/*loadStart*/
             loadFinish:         EMPTY_FUNCTION /* option[42]/*loadFinish*/
@@ -198,7 +198,7 @@
                 // Every animation is defined using effect.
                 // This if statement keeps backward compatibility.
                 if (!option[0]/*effect*/) {
-                    option[0]/*effect*/ = slide;
+                    option[0]/*effect*/ = "slide";
                 }
 
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
@@ -438,7 +438,7 @@
                         loadSlidesAndAnimate(direction, clicked, speed);
                     }
                 } else {
-                    if (option[39]/*interruptibleAnimations*/) {
+                    if (option[39]/*interruptible*/) {
                         stopAnimation();
                         enqueueAnimation(direction, clicked, speed);
                     } else {
@@ -660,10 +660,10 @@
                 speed = mathMax(speed, 0);
                 var adjustObject = {};
                 if (option[28]/*autoheight*/) {
-                    adjustObject["height"] = getSliderDimensions(i, TRUE) || 1; // Making it completely invisible gives trouble.
+                    adjustObject.height = getSliderDimensions(i, TRUE) || 1; // Making it completely invisible gives trouble.
                 }
                 if (option[29]/*autowidth*/) {
-                    adjustObject["width"] = getSliderDimensions(i, FALSE) || 1;
+                    adjustObject.width = getSliderDimensions(i, FALSE) || 1;
                 }
 
                 if (option[40]/*useCSS*/) {
@@ -721,7 +721,6 @@
                 if (!option[30]/*updateBefore*/) setCurrent(t);
                 adjustPositionTo(t);
                 clickable = TRUE;
-                if (option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[t];
 
                 if (option[13]/*auto*/) {
                     // Stopping auto if clicked. And also continuing after X seconds of inactivity.
@@ -973,7 +972,6 @@
                     return;
                 }
                 if (option[31]/*ajax*/) {
-                    var slideElements = getSlideElements(t);
                     var waitCounter = 0;
                     for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
                         if (option[31]/*ajax*/[loadSlide] || (startedAjaxLoads[loadSlide] && !finishedAjaxLoads[loadSlide])) {
@@ -982,7 +980,7 @@
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
                                 waitCounter--;
                                 if (waitCounter == 0) {
-                                    option[42]/*loadFinish*/.call(slideElements, t);
+                                    option[42]/*loadFinish*/.call(baseSlider, t);
                                     performAnimation(dir, speed, clicked);
                                 }
                             });
@@ -991,7 +989,7 @@
                     if (waitCounter == 0) {
                         performAnimation(dir, speed, clicked);
                     } else {
-                        option[41]/*loadStart*/.call(slideElements, t);
+                        option[41]/*loadStart*/.call(baseSlider, t);
                     }
                 } else {
                     performAnimation(dir, speed, clicked);
@@ -1000,6 +998,8 @@
 
             function performAnimation(dir, speed, clicked) {
                 if (option[30]/*updateBefore*/) setCurrent(dir);
+
+                if (option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[dir];
 
                 if (option[5]/*controlsfade*/) fadeControls(dir, option[4]/*controlsfadespeed*/);
 
@@ -1687,7 +1687,7 @@
             shuffle(slicesElement);
         }
         slicesElement.each(function (i) {
-            var timeBuff = ((speed / slides) * i);
+            var timeout = ((speed / slides) * i);
             var slice = $(this);
             var orgWidth = slice.width();
             var orgHeight = slice.height();
@@ -1784,7 +1784,7 @@
                         obj.callback();
                     }
                 }, obj);
-            }, timeBuff);
+            }, timeout);
         });
     }
 
@@ -1870,12 +1870,9 @@
     function animate(elem, properties, speed, ease, callback, obj) {
         var usecss = !obj || obj.options.usecss;
         if (CSSVendorPrefix === FALSE || !usecss) {
-            console.log("Falling back");
             elem.animate(properties, speed, ease, callback);
             return;
         }
-
-        console.log("CSS");
 
         var CSSObject = {};
         var transitionProperty = CSSVendorPrefix + "transition";
@@ -1904,12 +1901,26 @@
             obj.stopCallbacks.push(resetCSS);
         }
 
-        callAsync(function () {
-            if (speed == 0) {
-                elem.css(properties);
+        var eventsVendorPrefix = CSSVendorPrefix.replace(/\-/g,""); // replaces all "-" with "";
+        var eventsSuffix = (eventsVendorPrefix ? "T" : "t") + "ransitionend";
+        var events = eventsVendorPrefix + eventsSuffix + " t" + "ransitionend";
+
+        var called = FALSE;
+        var callbackFunction = function () {
+            if (!called) {
+                called = TRUE;
+                elem.unbind(events);
+                resetCSS();
                 if (callback) {
                     callback();
                 }
+            }
+        };
+
+        callAsync(function () {
+            if (speed < 20) { // If instant animation
+                elem.css(properties);
+                callbackFunction();
                 return;
             }
             elem.css(CSSObject);
@@ -1917,26 +1928,12 @@
             callAsync(function () {
                 elem.css(properties);
 
-                var eventsVendorPrefix = CSSVendorPrefix.replace(/\-/g,""); // replaces all "-" with "";
-                var eventsSuffix = (eventsVendorPrefix ? "T" : "t") + "ransitionend";
-                var events = eventsVendorPrefix + eventsSuffix + " t" + "ransitionend";
-
-                var called = FALSE;
-                var callbackFunction = function () {
-                    if (!called) {
-                        called = TRUE;
-                        elem.unbind(events);
-                        resetCSS();
-                        if (callback) {
-                            callback();
-                        }
-                    }
-                };
                 elem.bind(events, callbackFunction);
                 // If the animation doesn't do anything, the bind will never be triggered, so this is a fallback.
                 setTimeout(callbackFunction, speed + 100);
             });
         });
+        return callbackFunction
     }
 
     function fadeOutIn(obj) {
@@ -1948,7 +1945,7 @@
         var fadeoutspeed = fadeSpeed - fadeinspeed;
 
         obj.stopCallbacks.push(function () {
-            obj.fromSlides.css({opacity: 1});
+            obj.fromSlides.stop().css({opacity: 1});
         });
 
         animate(obj.fromSlides, { opacity: 0.0001 }, fadeoutspeed, ease, function () {
@@ -2084,6 +2081,9 @@
     function getCSSVendorPrefix() {
         var property = "transition";
         var styleName = getVendorPrefixedProperty(property, $("<div>")[0].style);
+        if (styleName === FALSE) {
+            return FALSE;
+        }
         var prefix = styleName.slice(0, styleName.length - property.length);
         if (prefix.length != 0) {
             return "-" + prefix + "-";
