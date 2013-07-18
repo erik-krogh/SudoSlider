@@ -4,25 +4,28 @@
     <title>Sudo Slider | Videos in the slider</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <link rel="STYLESHEET" type="text/css" href="../css/style.css" />
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script>
         $(document).ready(function(){
-            // The video on slide 3.
             var videos = [];
             videos[1] = loadVideo('video1', 'Oiuzt2E4NYc');
             videos[2] = loadVideo('video2', 'gsyMiTx_CF8');
             videos[3] = loadVideo('video3', 'hDlif8Km4S4');
 
-            var oldSlide = 0;
+            var oldSlide = 1;
             var sudoSlider = $("#frontPageSlider").sudoSlider({
                 effect: "slide",
                 numeric:true,
                 prevNext: false,
                 beforeanimation: function (slide) {
-                    var video = videos[oldSlide];
-                    if (video) {
-                        video.pauseVideo();
+                    try {
+                        var video = videos[oldSlide];
+                        if (video && video.pauseVideo) {
+                            video.pauseVideo();
+                        }
+                    } catch(ignored) {
+
                     }
                     oldSlide = slide;
                 }
@@ -88,21 +91,15 @@
     <h2>Remember that only the default slide animation works with flash content. </h2>
     <div style="position: relative;">
         <div id="frontPageSlider">
-            <ul>
-                <li>
-                    <div id="video1"></div>
-                </li>
-
-
-                <li>
-                    <div id="video2"></div>
-                </li>
-
-
-                <li>
-                    <div id="video3"></div>
-                </li>
-            </ul>
+            <div>
+                <div id="video1"></div>
+            </div>
+            <div>
+                <div id="video2"></div>
+            </div>
+            <div>
+                <div id="video3"></div>
+            </div>
         </div>
         <h2>You can always just insert a flash video into a slide <br/>
             You only need to do these sorts of tricks if you want to pause the video when its not visible</h2>

@@ -47,7 +47,7 @@ Change in script: Merged imgAjaxFunc and docAjaxFunc to ajaxLoadFunction.
 Change in script: Deleted the old "actions". Now there are new "methods" instead. (Also added 2 demos demonstrating the use of methods). 
 Change in script: You can no longer "destroy" the slider using customLinks (use "methods" instead).
 Change in script: Rewrote a lot of it (to make things like methods work), no change in how it behaves (except for the things metioned here in the changelog). 
-Change in script: Fixed a bug with vertical, where the script got the height all wrong. (Bug introduced somewhere betwen 1.0.9 and 2.0.0)
+Change in script: Fixed a bug with vertical, where the script got the height all wrong. (Bug introduced somewhere between 1.0.9 and 2.0.0)
 Change in script: Removed the options controlsBefore and controlsAfter.
 Change in script: Changed the way "loadingtext" works. Now 'Loading Content...' is default instead of a random funny text, but you can still change it to what you want. 
 
@@ -324,10 +324,9 @@ Change in script: Added a goToNext() method when making your own effects. By cal
 Change in script: Removed the boxes and boxesGrow effects.
 Change in script: Changed the remaining box effects, so that when they grow (in/out) the movement originates from the center.
 Change in script: Added a whole bunch of new effect. And renamed some of the existing effects. (Now there is 105 effects).
-Change in docs: Upgraded to jQuery 1.10.1
 Change in docs: Changed the explorer effects, to show the effects in a nicer way. The old explorer effects is now "all effects".
 Change in script: If you specify the attribute "data-effectout" on a slide, that will specify the effect when leaving that slide. The data-effectout takes precedence over data-effect.
-Change in script: Added interruptibleAnimations option, by setting it to true, the current animation will be interrupted if the slider is told to go to another slide.
+Change in script: Added interruptible option, by setting it to true, the current animation will be interrupted if the slider is told to go to another slide. (This is a reintroduction of the option that was previously called clickableAni).
 Change in script: If you set an effect like "box" it will result in a random effect that chooses between all effects starting with "box". This work for all strings that doesn't hit a specific effect.
 Change in script: Fixed that the slider sometimes tried to animate to the next slide, before it had finished the first one. (If you clicked while the slider was animating).
 Change in script: Fixed that the slider would flicker in some browsers when using startSlide > 1 and AJAX.
@@ -340,3 +339,6 @@ Change in script: Using all CSS animations pr default, with JavaScript animation
 Change in script: Added the useCSS option, which can be used to turn off CSS animations.
 Change in script: When the next/prev controls are hidden, it is done using visibility:hidden instead of display:none.
 Change in script: Added the loadStart and loadFinish options. They are callbacks that run when the sliders waits with an animation because a slide (or more) isn't loaded. (Note: Not at init).
+Change in script: If history is enabled, the update of URL will now be performed in the beginning of the animation, instead of the end.
+Change in docs: Upgraded to jQuery 1.10.2
+Change in docs: Removed the "keep slider focused demo".

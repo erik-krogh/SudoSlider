@@ -4,20 +4,17 @@
 	<title>Sudo Slider | Tabs demo</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-		    var oldt = 0;
+		    var speed = 800;
 		    var sudoSlider = $("#slider").sudoSlider({
-                speed: 800,
+                speed: speed,
 		        beforeAnimation: function(t){ 
 		            var substract = $('#slidemenu ul').offset();
 					var posi = $('#slidemenu ul li').eq(t-1).offset();
 					var left =  posi.left - substract.left;
-					var diff = Math.sqrt(Math.abs(oldt-t));
-					var speed = parseInt(diff*800);
-					var text = $('#slidemenu ul li').eq(t-1).text();
 					var width = $('#slidemenu ul li').eq(t-1).width();
 					$('#slidemenu ul li.currentone').animate({
 						left: left

@@ -4,19 +4,11 @@
 	<title>Sudo Slider | Multiple "slides" pr. slide demo</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
 			var sudoSlider = $("#slider").sudoSlider({
-				ajax: [
-					'../images/01.jpg', 
-					'../images/02.jpg', 
-					'../images/03.jpg', 
-					'../images/04.jpg', 
-					'../images/05.jpg'
-				],
-				autowidth:false,
 				slideCount:2,
 				numeric:'pages',
 				moveCount:2
@@ -41,20 +33,25 @@
 	<a href="http://webbies.dk/SudoSlider/help/#Settings-slideCount">slideCount in docs</a>
 	<div style="position:relative;">
 		<div id="slider">
-
+            <ul>
+                <li><img src="../images/01.jpg" width="348" alt="image description"/></li>
+                <li><img src="../images/02.jpg" width="348" alt="image description"/></li>
+                <li><img src="../images/03.jpg" width="348" alt="image description"/></li>
+                <li><img src="../images/04.jpg" width="348" alt="image description"/></li>
+                <li><img src="../images/05.jpg" width="348" alt="image description"/></li>
+            </ul>
 		</div>
 	</div>
 	<h3>Usage</h3>
 	<h4>Include the javascripts</h4>
 	<pre>
-&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
 	<h4>The Javascript to start it.</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
     $(document).ready(function(){	
         var sudoSlider = $("#slider").sudoSlider({
-            autowidth:false,
             slideCount:2,
             numeric:'pages',
             moveCount:2

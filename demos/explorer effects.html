@@ -4,8 +4,8 @@
     <title>Sudo Slider | Explorer the effects</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <link rel="STYLESHEET" type="text/css" href="../css/style.css">
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         /****************************************
          * Warning: The below code is to dynamically make the effect map based on the list of effects in $.fn.sudoSlider.effects.
@@ -26,7 +26,7 @@
                     continuous: true,
                     numeric: true,
                     vertical: true,
-                    interruptibleAnimations: true
+                    interruptible: true
                 });
 
 
@@ -170,7 +170,9 @@
                     function setEffectAndSlide(name) {
                         sudoSlider.setOption("effect", name);
                         $("#selectedEffectContainer").text(name);
-                        sudoSlider.goToSlide("next");
+                        setTimeout(function () {
+                            sudoSlider.goToSlide("next");
+                        }, 0);
                     }
                 }
             });
@@ -251,7 +253,7 @@
         })();
     </script>
     <style>
-        #slider li img {width: 450px;}
+        #slider img {width: 450px;}
         .nextBtn {left: 450px;}
         .prevBtn, .nextBtn {top: 30px;}
     </style>
@@ -267,13 +269,11 @@
     <div style="position:relative;width:450px;display:block;float:left;">
         <h2>Selected effect: <span id="selectedEffectContainer"></span></h2>
         <div id="slider">
-            <ul>
-                <li><img src="../images/01.jpg" alt="image description"/></li>
-                <li><img src="../images/02.jpg" alt="image description"/></li>
-                <li><img src="../images/03.jpg" alt="image description"/></li>
-                <li><img src="../images/04.jpg" alt="image description"/></li>
-                <li><img src="../images/05.jpg" alt="image description"/></li>
-            </ul>
+            <img src="../images/01.jpg" alt="image description"/>
+            <img src="../images/02.jpg" alt="image description"/>
+            <img src="../images/03.jpg" alt="image description"/>
+            <img src="../images/04.jpg" alt="image description"/>
+            <img src="../images/05.jpg" alt="image description"/>
         </div>
     </div>
 </div>
