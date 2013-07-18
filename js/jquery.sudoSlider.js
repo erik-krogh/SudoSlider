@@ -980,7 +980,7 @@
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
                                 waitCounter--;
                                 if (waitCounter == 0) {
-                                    option[42]/*loadFinish*/.call(baseSlider, t);
+                                    option[42]/*loadFinish*/.call(baseSlider, dir + 1);
                                     performAnimation(dir, speed, clicked);
                                 }
                             });
@@ -989,7 +989,7 @@
                     if (waitCounter == 0) {
                         performAnimation(dir, speed, clicked);
                     } else {
-                        option[41]/*loadStart*/.call(baseSlider, t);
+                        option[41]/*loadStart*/.call(baseSlider, dir + 1);
                     }
                 } else {
                     performAnimation(dir, speed, clicked);
