@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.1.0 - jQuery plugin
+ *  Sudo Slider verion 3.1.1 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -438,7 +438,7 @@
                         loadSlidesAndAnimate(direction, clicked, speed);
                     }
                 } else {
-                    if (option[39]/*interruptible*/) {
+                    if (option[39]/*interruptible*/ && currentlyAnimating) {
                         stopAnimation();
                         enqueueAnimation(direction, clicked, speed);
                     } else {
@@ -1719,7 +1719,6 @@
 
             if (reveal) {
                 var negative = upDownEffect == 1 ? -1 : 1;
-                obj.goToNext();
                 slice.css({
                     top: goToTop,
                     left: goToLeft,
@@ -1786,6 +1785,9 @@
                 }, obj);
             }, timeout);
         });
+        if (reveal) {
+            obj.goToNext();
+        }
     }
 
     // 1: up, 2: right, 3: down, 4, left:
@@ -2173,6 +2175,7 @@
         } else if (isFunction(inputEffect)) {
             return inputEffect
         } else /* if (typeof inputEffect === "string") */{
+            inputEffect = inputEffect.trim()
             if (inputEffect.indexOf(",") != -1) {
                 var array = inputEffect.split(",");
                 return makeRandomEffect(array);
