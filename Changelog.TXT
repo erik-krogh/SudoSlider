@@ -342,3 +342,8 @@ Change in script: Added the loadStart and loadFinish options. They are callbacks
 Change in script: If history is enabled, the update of URL will now be performed in the beginning of the animation, instead of the end.
 Change in docs: Upgraded to jQuery 1.10.2
 Change in docs: Removed the "keep slider focused demo".
+
+3.1.1
+Change in script: Fixed an theoretical infinite loop.
+Change in script: There can now be spaces between effects when effects are specified in a comma-separated array.
+Change in docs: Added demo to showcase random effects.
