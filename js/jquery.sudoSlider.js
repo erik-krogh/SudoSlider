@@ -69,7 +69,7 @@
             numericAttr:       'class="controls"', /* option[37]/*numericattr*/
             animationZIndex:    10000, /* option[38]/*animationZIndex*/
             interruptible:      FALSE, /* option[39]/*interruptible*/
-            useCSS:             TRUE, /* option[40]/*useCSS*/
+            useCSS:             FALSE, /* option[40]/*useCSS*/
             loadStart:          EMPTY_FUNCTION, /* option[41]/*loadStart*/
             loadFinish:         EMPTY_FUNCTION /* option[42]/*loadFinish*/
         };
