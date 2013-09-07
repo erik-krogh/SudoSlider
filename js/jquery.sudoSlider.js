@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.1.1 - jQuery plugin
+ *  Sudo Slider verion 3.1.2 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -2080,6 +2080,10 @@
         return false;
     }
 
+    function stringTrim(str) {
+        return str.replace(/^\s+|\s+$/g, '');
+    }
+
     function getCSSVendorPrefix() {
         var property = "transition";
         var styleName = getVendorPrefixedProperty(property, $("<div>")[0].style);
@@ -2169,13 +2173,14 @@
         return a > b ? a : b;
     }
 
+    var fallbackEffect = getEffectMethod("slide");
     function getEffectMethod(inputEffect) {
         if (isArray(inputEffect)) {
             return makeRandomEffect(inputEffect);
         } else if (isFunction(inputEffect)) {
             return inputEffect
         } else /* if (typeof inputEffect === "string") */{
-            inputEffect = inputEffect.trim()
+            inputEffect = stringTrim(inputEffect);
             if (inputEffect.indexOf(",") != -1) {
                 var array = inputEffect.split(",");
                 return makeRandomEffect(array);
@@ -2193,7 +2198,7 @@
                         }
                     }
                     if (!array.length) {
-                        return getEffectMethod("slide");
+                        return fallbackEffect;
                     }
                     return makeRandomEffect(array);
                 }

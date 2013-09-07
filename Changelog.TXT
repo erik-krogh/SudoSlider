@@ -348,3 +348,6 @@ Change in script: Fixed an theoretical infinite loop.
 Change in script: There can now be spaces between effects when effects are specified in a comma-separated array.
 Change in docs: Added demo to showcase random effects.
 Change in script: Changed the default value of useCSS to false
+
+3.1.2
+Change in script: Fixed that the script crashed in IE6, IE7 and IE8
