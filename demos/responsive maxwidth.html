@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<title>Sudo Slider | Responsive demo</title>
+	<title>Sudo Slider | Responsive demo with maxwidth</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -14,17 +14,48 @@
 				numeric:true,
 				continuous:true
 			});
+			$(window).on("resize focus", function () {
+				var width = $("#slider").width();
+
+				var orgSlideCount = sudoSlider.getOption("slideCount");
+				var slideCount;
+				if (width >= 1200) {
+					slideCount = 3;
+				} else if (width > 900) {
+					slideCount = 2;
+				} else {
+					slideCount = 1;
+				}
+				if (slideCount != orgSlideCount) {
+					sudoSlider.setOption("slideCount", slideCount);
+				}
+			}).resize();
 		});
 	</script>
+	<!-- IE6 fix to make max-width work. -->
+	<!--[if lte IE 6]>
+	<script type="text/javascript">
+		// If you don't want any max-width stuff. Comment out the two lines containing "maxWidth".
+		var maxWidth = 1200;
+		$(document).ready(function(){
+			$(window).on("resize focus", function () {
+				// $("#container, #slider").width(10);
+				var width = $(window).width();
+				width = Math.min(width, maxWidth)
+				$("#container, #slider").width(width);
+			}).resize();
+		});
+	</script>
+	<![endif]-->
 	<style>
-		#container, #slider {width: auto;}
+		#container, #slider {width: auto; max-width: 1200px;}
 		#slider, #slider img {width: 100%;}
 	</style>
 
 </head>
 <body>
 <div id="container">
-	<h1>Sudo Slider jQuery Plugin - Responsive demo</h1>
+	<h1>Sudo Slider jQuery Plugin - Responsive demo with maxwidth</h1>
 	<h2>Try to resize the window, and see how the slider adjusts to its container. </h2>
 	<div style="position:relative;">
 		<div id="slider">
