@@ -69,7 +69,7 @@
             numericAttr:       'class="controls"', /* option[37]/*numericattr*/
             animationZIndex:    10000, /* option[38]/*animationZIndex*/
             interruptible:      FALSE, /* option[39]/*interruptible*/
-            useCSS:             FALSE, /* option[40]/*useCSS*/
+            useCSS:             TRUE, /* option[40]/*useCSS*/
             loadStart:          EMPTY_FUNCTION, /* option[41]/*loadStart*/
             loadFinish:         EMPTY_FUNCTION /* option[42]/*loadFinish*/
         };
@@ -77,7 +77,7 @@
         var baseSlider = this;
 
         optionsOrg = $.extend(objectToLowercase(defaults), objectToLowercase(optionsOrg));
-        if (CSSVendorPrefix === FALSE) {
+        if (CSSVendorPrefix === FALSE || !minJQueryVersion([1,8,0])) {
             optionsOrg.usecss = FALSE;
         }
 
@@ -2071,6 +2071,20 @@
     /*
      * Util scripts.
      */
+
+    // The minVersion is specified in an array, like [1, 8, 0] for 1.8.0
+    // Partially copy-pasted from: https://gist.github.com/dshaw/652870
+    function minJQueryVersion(minVersion) {
+        var version = $.fn.jquery.split(".");
+        var length = version.length
+        for (var a = 0; a < length; a++) {
+            if (minVersion[a] && +version[a] < +minVersion[a]) {
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
+
     function getVendorPrefixedProperty(property, searchElement) {
         for (var name in searchElement) {
             if (endsWith(name.toLowerCase(), property.toLowerCase())) {
