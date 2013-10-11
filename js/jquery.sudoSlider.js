@@ -842,43 +842,49 @@
                 var target = option[31]/*ajax*/[slide];
                 var targetslide = li.eq(slide);
 
-                var textloaded = FALSE;
+                var succesRan = FALSE;
+
+                // Loads the url as an image, either if it is an image, or if everything else failed.
+                function loadImage() {
+                    var image = new Image();
+                    image.src = target;
+                    var thatImage = $(image);
+                    runOnImagesLoaded(thatImage, true, function () {
+                        runWhenNotAnimating(function () {
+                            // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
+                            // Other browsers (IE) tends to completely hide images that are errors. Therefore we set the height/width of those to 20.
+                            var setHeightWidth = "";
+                            if (!thatImage.height()) {
+                                setHeightWidth = 20;
+                            }
+                            thatImage.height(setHeightWidth).width(setHeightWidth);
+
+                            targetslide.empty().append(image);
+
+                            ajaxAdjust(slide, TRUE);
+                        });
+                    });
+                }
 
                 $.ajax({
                     url: target,
                     success: function (data, textStatus, jqXHR) {
+                        succesRan = TRUE;
                         runWhenNotAnimating(function () {
                             var type = jqXHR.getResponseHeader('Content-Type');
                             if (type && type.substr(0, 1) != "i") {
-                                textloaded = TRUE;
                                 targetslide.html(data);
                                 ajaxAdjust(slide, FALSE);
+                            } else {
+                                loadImage();
                             }
                         });
                     },
                     complete: function () {
                         // Some browsers wont load images this way, so i treat an error as an image.
                         // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
-                        if (!textloaded) {
-                            // Load the image.
-                            var image = new Image();
-                            image.src = target;
-                            var thatImage = $(image);
-                            runOnImagesLoaded(thatImage, true, function () {
-                                runWhenNotAnimating(function () {
-                                    // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
-                                    // Other browsers (IE) tends to completely hide images that are errors. Therefore we set the height/width of those to 20.
-                                    var setHeightWidth = "";
-                                    if (!thatImage.height()) {
-                                        setHeightWidth = 20;
-                                    }
-                                    thatImage.height(setHeightWidth).width(setHeightWidth);
-
-                                    targetslide.empty().append(image);
-
-                                    ajaxAdjust(slide, TRUE);
-                                });
-                            });
+                        if (!succesRan) {
+                            loadImage();
                         }
                     }
                 });

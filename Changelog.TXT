@@ -355,3 +355,4 @@ Change in script: Fixed that the script crashed in IE6, IE7 and IE8
 3.1.3
 Change in demos: The responsive demo is now always 100% width, and the new responsive maxwidth demo is limited to 1200px.
 Change in script: useCSS is enabled by default again, but deactivated if the jQuery version is > 1.8.0.
+Change in script: Fixed that AJAX loading of non-image things didn't work all the time.
