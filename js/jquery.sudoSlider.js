@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.1.3 - jQuery plugin
+ *  Sudo Slider verion 3.1.4 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -564,7 +564,7 @@
                 }
                 function loadFunction(that) {
                     $(that).off('load error');
-                    //$(that).unbind('load').unbind('error');
+
                     // Webkit/Chrome (not sure) fix.
                     if (that.naturalHeight && !that.clientHeight) {
                         $(that).height(that.naturalHeight).width(that.naturalWidth);
@@ -953,6 +953,7 @@
 
             function performInitCallback() {
                 autoadjust(t, 0);
+                adjustPositionTo(t);
                 callQueuedAnimation();
                 if (option[11]/*responsive*/) {
                     $(win).resize();
@@ -961,6 +962,14 @@
                     startAuto(option[14]/*pause*/);
                 }
                 option[23]/*initCallback*/.call(baseSlider);
+
+                // Fixing once and for all that the wrong slide is shown on init.
+                runOnImagesLoaded(allSlides, false, function () {
+                    runWhenNotAnimating(function () {
+                        autoadjust(t, 0);
+                        adjustPositionTo(t);
+                    })
+                });
             }
 
             function performCallbacks(callbacks) {
