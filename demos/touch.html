@@ -8,7 +8,6 @@
     <script type="text/javascript" src="../js/lib/jquery.touchSwipe.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
-	
 		var power = 1;
 
 		jQuery.easing['jswing'] = jQuery.easing['swing'];
@@ -21,11 +20,24 @@
 
 		$(document).ready(function(){	
 			var ulMarginLeft = 0;
-			var sudoSlider = $("#slider").sudoSlider({
+            var effectAfterSlide = false; // Sets to true when swipe ends, back to false after the finishing animation.
+            function myEffect(obj) {
+                if (effectAfterSlide) {
+                    return $.fn.sudoSlider.effects.slide(obj);
+                } else {
+                    return $.fn.sudoSlider.effects.fade(obj);
+                }
+            }
+            var sudoSlider = $("#slider").sudoSlider({
 				continuous: true,
-				prevNext: false,
+				prevNext: true,
+                numeric: true,
 				ease: "kineticOut",
-                useCSS: false // My custom easing doesn't work with css animations. // TODO: Use CSS timing-function instead.
+                effect: myEffect,
+                afterAnimation: function() {
+                    effectAfterSlide = false;
+                },
+                useCSS: false // My custom easing doesn't work with css animations.
 			});
 			$("#slider").swipe({
 				swipeStatus:swipeStatus,
@@ -100,6 +112,7 @@
 						// TODO: Find direction. 
 						
 						power = Math.sqrt(((maxSpeed - speed) / maxSpeed)) * 1.3 + 0.2
+                        effectAfterSlide = true;
 						sudoSlider.goToSlide((direction == "left") ? 'next' : 'prev', duration);
 					}
 				}
