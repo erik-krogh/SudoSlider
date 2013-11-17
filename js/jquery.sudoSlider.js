@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.1.4 - jQuery plugin
+ *  Sudo Slider verion 3.1.5 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -112,7 +112,7 @@
                 currentAnimation,
                 currentAnimationCallback,
                 currentAnimationObject,
-                awaitingAjaxLoads = [],
+                runAfterAnimationCallbacks = [],
                 awaitingAjaxCallbacks = [],
                 startedAjaxLoads = [],
                 finishedAjaxLoads = [],
@@ -898,7 +898,7 @@
             // Otherwise waits for the animation to complete in a FIFO queue.
             function runWhenNotAnimating(completeFunction) {
                 if (currentlyAnimating) {
-                    awaitingAjaxLoads.push(completeFunction);
+                    runAfterAnimationCallbacks.push(completeFunction);
                 } else {
                     callAsync(completeFunction);
                 }
@@ -981,6 +981,7 @@
 
             function loadSlidesAndAnimate(i, clicked, speed) {
                 var dir = filterDir(i);
+                var prevNext = i == NEXT_STRING || i == PREV_STRING;
 
                 var targetSlide = getRealPos(dir);
                 if (targetSlide == t) {
@@ -996,22 +997,22 @@
                                 waitCounter--;
                                 if (waitCounter == 0) {
                                     option[42]/*loadFinish*/.call(baseSlider, dir + 1);
-                                    performAnimation(dir, speed, clicked);
+                                    performAnimation(dir, speed, clicked, prevNext);
                                 }
                             });
                         }
                     }
                     if (waitCounter == 0) {
-                        performAnimation(dir, speed, clicked);
+                        performAnimation(dir, speed, clicked, prevNext);
                     } else {
                         option[41]/*loadStart*/.call(baseSlider, dir + 1);
                     }
                 } else {
-                    performAnimation(dir, speed, clicked);
+                    performAnimation(dir, speed, clicked, prevNext);
                 }
             }
 
-            function performAnimation(dir, speed, clicked) {
+            function performAnimation(dir, speed, clicked, prevNext) {
                 if (option[30]/*updateBefore*/) setCurrent(dir);
 
                 if (option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[dir];
@@ -1031,17 +1032,17 @@
                 // Finding a "shortcut", used for calculating the offsets.
                 var diff = -(t - dir);
                 var targetSlide;
-                if (option[16]/*continuous*/) {
+                if (option[16]/*continuous*/ && !prevNext) {
                     var diffAbs = mathAbs(diff);
                     targetSlide = dir;
                     // Finding the shortest path from where we are to where we are going.
-                    var newDiff = -(t - dir - s) /* t - (realTarget + s) */;
+                    var newDiff = t - (dir + s);
                     if (dir < option[8]/*slidecount*/ - numberOfVisibleSlides + 1 && mathAbs(newDiff) < diffAbs) {
                         targetSlide = dir + s;
                         diff = newDiff;
                         diffAbs = mathAbs(diff);
                     }
-                    newDiff = -(t - dir + s)/* t - (realTarget - s) */;
+                    newDiff = t - (dir - s);
                     if (dir > ts - option[8]/*slidecount*/ && mathAbs(newDiff) < diffAbs) {
                         targetSlide = dir - s;
                         diff = newDiff;
@@ -1089,7 +1090,7 @@
                     // afteranimation
                     aniCall(dir, TRUE);
 
-                    performCallbacks(awaitingAjaxLoads);
+                    performCallbacks(runAfterAnimationCallbacks);
                 };
                 currentAnimationObject = {
                     fromSlides: fromSlides,
@@ -1236,6 +1237,8 @@
                 options[a.toLowerCase()] = val;
                 publicInit();
             };
+
+            baseSlider.runWhenNotAnimating = runWhenNotAnimating;
 
             baseSlider.insertSlide = function (html, pos, numtext, goToSlide) {
                 publicDestroy();

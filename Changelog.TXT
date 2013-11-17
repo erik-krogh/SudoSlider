@@ -360,3 +360,7 @@ Change in script: Fixed that AJAX loading of non-image things didn't work all th
 3.1.4
 Change in demos: The touch demo now fades when a button is pressed, and slides when swiped.
 Change in script: Fixed that the wrong slide was sometimes shown on init.
+
+3.1.5
+Change in script: When sliding to the next or previous, the slider will no longer go the other way, even if that path is shorter. (Thanks sjaakmans https://github.com/webbiesdk/SudoSlider/issues/4 )
+Change in script: exposed runWhenNotAnimating as a public method.

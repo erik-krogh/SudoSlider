@@ -7,42 +7,10 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){	
-			var oldt = 1;
-            var speed = 800;
+		$(document).ready(function(){
 			var sudoSlider = $("#slider").sudoSlider({
-                speed: speed,
-                useCSS: false, // CSS Animations break the animation of the $("#slider");
-				beforeAnimation: function(t){
-					var width = $(this).width();
-					
-					$('.nextBtn').animate(
-						{ left: width-((width-696)/2) },
-						{
-							queue:false,
-							duration:speed
-						}
-					);
-					$('.prevBtn').animate(
-						{ left: -((width-696)/2)-31 },
-						{
-							queue:false,
-							duration:speed
-						}
-					);
-	
-					oldt = t;
-					
-					$('#slider').animate(
-						{ left: -((width-696)/2) },
-						{
-							queue:false,
-							duration:speed
-						}
-					);
-				
-				}
-			});
+                speed: 800
+            });
 		});	
 	</script>
 	
@@ -54,8 +22,8 @@
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Autowidth centered demo</h1> 
 	<a href="http://webbies.dk/SudoSlider/help/#Settings-Autowidth">Autowidth in docs</a>
-	<div style="position:relative;">
-		<div id="slider" style="position:relative;">
+	<div style="text-align:center;position:relative;">
+		<div id="slider" style="margin: 0 auto;">
 			<ul>				
 				<li><img src="../images/08.jpg" alt="image description"/></li>
 				<li style="width:500px;"><img src="../images/02.jpg" width="500px;" alt="image description"/></li>
@@ -63,7 +31,31 @@
 			</ul>
 		</div>
 	</div>
-	<h3>Usage: See source code</h3>
+	<h3>Usage</h3>
+    <h4>Include the javascripts</h4>
+	<pre>
+&lt;script type="Text/Javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
+    <h4>The Javascript to start it. (This script has to be below the CSS on your site)</h4>
+	<pre>
+&lt;script type="text/javascript" &gt;
+    $(document).ready(function(){
+        var sudoSlider = $("#slider").sudoSlider({
+           speed: 800
+        });
+    });
+&lt;/script&gt;</pre>
+    <h4>The HTML</h4>
+	<pre>
+&lt;div id="slider" style="text-align:center;position:relative;"&gt;
+&lt;div id="slider" style="margin: 0 auto;" &gt;
+   &lt;div&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/div&gt;
+   &lt;div&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/div&gt;
+   &lt;div&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/div&gt;
+   &lt;div&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/div&gt;
+   &lt;div&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;</pre>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">
