@@ -10,6 +10,7 @@
 		$(document).ready(function(){	
 		    var sudoSlider = $("#slider").sudoSlider({
                 effect: "fade",
+                pause: 3000,
 				auto:true,
 				prevNext:false
 		   });
@@ -27,11 +28,11 @@
 	<div style="position:relative;">
 		<div id="slider">
 			<ul>				
-				<li><img src="../images/01.jpg" alt="image description"/></li>
+				<li data-pause="1000"><img src="../images/01.jpg" alt="image description"/></li>
 				<li><img src="../images/02.jpg" alt="image description"/></li>
 				<li><img src="../images/03.jpg" alt="image description"/></li>
-				<li><img src="../images/04.jpg" alt="image description"/></li>
-				<li><img src="../images/05.jpg" alt="image description"/></li>			
+				<li data-pause="5000"><img src="../images/04.jpg" alt="image description"/></li>
+				<li><img src="../images/05.jpg" alt="image description"/></li>
 			</ul>
 		</div>
 	</div>
@@ -55,10 +56,10 @@
 	<pre>
 &lt;div id="slider" &gt;
     &lt;ul&gt;
-        &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li data-pause="1000"&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
         &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
         &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li data-pause="5000"&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
         &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;	
     &lt;/ul&gt;
 &lt;/div&gt;</pre>

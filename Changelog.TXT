@@ -364,3 +364,6 @@ Change in script: Fixed that the wrong slide was sometimes shown on init.
 3.1.5
 Change in script: When sliding to the next or previous, the slider will no longer go the other way, even if that path is shorter. (Thanks sjaakmans https://github.com/webbiesdk/SudoSlider/issues/4 )
 Change in script: exposed runWhenNotAnimating as a public method.
+
+3.1.6
+Change in script: You can now specify the pause between slides pr. slide. Just set the "data-pause" attribute on the slide. See the auto.html demo.

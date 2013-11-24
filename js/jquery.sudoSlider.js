@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.1.5 - jQuery plugin
+ *  Sudo Slider verion 3.1.6 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -287,7 +287,7 @@
                                 stopAuto();
                             }
                             else if (target == "start") {
-                                startAuto(option[14]/*pause*/);
+                                startAuto();
                                 option[13]/*auto*/ = TRUE;
                             }
                             else if (target == 'block') clickable = FALSE;
@@ -396,6 +396,14 @@
             }
 
             function startAuto(pause) {
+                if (pause === undefined) {
+                    var dataPause = li.eq(t).attr("data-pause");
+                    if (dataPause !== undefined) {
+                        pause = parseInt10(dataPause);
+                    } else {
+                        pause = option[14]/*pause*/;
+                    }
+                }
                 stopAuto();
                 autoOn = TRUE;
                 autoTimeout = setTimeout(function () {
@@ -728,7 +736,7 @@
                         stopAuto();
                         if (option[15]/*resumepause*/) startAuto(option[15]/*resumepause*/);
                     } else if (!init) {
-                        startAuto(option[14]/*pause*/);
+                        startAuto();
                     }
                 }
 
@@ -959,7 +967,7 @@
                     $(win).resize();
                 }
                 if (option[13]/*auto*/) {
-                    startAuto(option[14]/*pause*/);
+                    startAuto();
                 }
                 option[23]/*initCallback*/.call(baseSlider);
 
@@ -1293,7 +1301,7 @@
 
             baseSlider.startAuto = function () {
                 option[13]/*auto*/ = TRUE;
-                startAuto(option[14]/*pause*/);
+                startAuto();
             };
 
             baseSlider.stopAuto = function () {
