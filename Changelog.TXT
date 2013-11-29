@@ -367,3 +367,4 @@ Change in script: exposed runWhenNotAnimating as a public method.
 
 3.1.6
 Change in script: You can now specify the pause between slides pr. slide. Just set the "data-pause" attribute on the slide. See the auto.html demo.
+Change in script: Fixed that the insertSlide didn't work well when the slide container wasn't an "<ul>".
