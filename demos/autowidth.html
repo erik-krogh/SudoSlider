@@ -11,24 +11,7 @@
 			var oldt = 1;
 			var sudoSlider = $("#slider").sudoSlider({
                 speed: 800,
-                continuous: true,
-				beforeAnimation: function(t){
-					var width = $(this).width();
-
-					var diff = Math.sqrt(Math.abs(oldt-t));
-					var speed = parseInt(diff*800);
-
-					$('.nextBtn').animate(
-						{ left: width },
-						{
-							queue:false,
-							duration:speed
-						}
-					);
-	
-					oldt = t;
-				
-				}
+                continuous: true
 			});
 		});	
 	</script>
@@ -62,21 +45,7 @@
         var oldt = 0;
         var sudoSlider = $("#slider").sudoSlider({
             speed: 800,
-            continuous: true,
-            beforeAnimation: function(t){
-                var width = $(this).width();
-                var diff = Math.sqrt(Math.abs(oldt-t));
-                var speed = parseInt(diff*800);
-
-                $('.nextBtn').animate(
-                    { left: width },
-                    {
-                        queue:false,
-                        duration:speed
-                    }
-                );
-                oldt = t;
-             }
+            continuous: true
         });
     });	
 &lt;/script&gt;</pre>

@@ -13,7 +13,8 @@
 			
 			var nestedSliderSettings = {
 				prevNext: false,
-				vertical:true
+				vertical:true,
+                useCSS: false
 			};
 			
 			// Launching the nested sliders first, so the main slider doens't read an incorrect height. 
@@ -23,6 +24,7 @@
 			nestedSlider[2] = $("#nested3").sudoSlider(nestedSliderSettings);
 			
 			var sudoSlider = $("#mainSlider").sudoSlider({
+                useCSS: false
 			});
 			
 			$(document).on('click', 'a.custom', function() {
