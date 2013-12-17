@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.1.6 - jQuery plugin
+ *  Sudo Slider verion 3.1.7 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -22,8 +22,7 @@
     var LAST_STRING = "last";
     var FIRST_STRING = "first";
     var ABSOLUTE_STRING = "absolute";
-    var EMPTY_FUNCTION = function () {
-    };
+    var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
     var CSSVendorPrefix = getCSSVendorPrefix();
 
@@ -84,6 +83,7 @@
 
         return this.each(function () {
             var init,
+                isSlideContainerUl,
                 slidesContainer,
                 slides,
                 allSlides,
@@ -143,7 +143,8 @@
                 var newUl = $("<div></div>");
                 if (!ulLength) {
                     obj.append(slidesContainer = newUl);
-                } else if (!slidesContainer.is("ul") && !slideContainerCreated) {
+                    isSlideContainerUl = FALSE;
+                } else if (!(isSlideContainerUl = slidesContainer.is("ul")) && !slideContainerCreated) {
                     newUl.append(slidesContainer);
                     obj.append(slidesContainer = newUl);
                 }
@@ -160,7 +161,13 @@
                     // Do we have enough list elements to fill out all the ajax documents.
                     if (option[31]/*ajax*/.length > totalSlides) {
                         for (var a = 1; a <= option[31]/*ajax*/.length - totalSlides; a++) {
-                            slidesContainer.append("<div>" + option[33]/*loadingtext*/ + "</div>");
+                            var tag;
+                            if (isSlideContainerUl) {
+                                tag = "div";
+                            } else {
+                                tag = "li";
+                            }
+                            slidesContainer.append("<" + tag + ">" + option[33]/*loadingtext*/ + "</" + tag + ">");
                         }
                         slides = childrenNotAnimationClones(slidesContainer);
                         totalSlides = slides.length;
@@ -230,6 +237,10 @@
                 }
 
                 option[5]/*controlsfade*/ = option[5]/*controlsfade*/ && !option[16]/*continuous*/;
+
+                if (option[11]/*responsive*/) {
+                    adjustResponsiveLayout();
+                }
 
                 // Making sure that i have enough room in the <ul> (Through testing, i found out that the max supported size (height or width) in Firefox is 17895697px, Chrome supports up to 134217726px, and i didn't find any limits in IE (6/7/8/9)).
                 slidesContainer[option[7]/*vertical*/ ? 'height' : 'width'](9000000); // That gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in FireFox on OSX.
@@ -343,18 +354,22 @@
 
             // Adjusts the slider when a change in layout has happened.
             function adjustResponsiveLayout() {
-                if (cantDoAdjustments()) {
-                    return;
-                }
-                var oldWidth = allSlides.width();
-                var newWidth = getResponsiveWidth();
-                allSlides.width(newWidth);
+                function doTheAdjustment() {
+                    if (cantDoAdjustments()) {
+                        return;
+                    }
+                    var oldWidth = allSlides.width();
+                    var newWidth = getResponsiveWidth();
+                    allSlides.width(newWidth);
 
-                if (oldWidth != newWidth) {
-                    stopAnimation();
-                    adjustPositionTo(currentSlide);
-                    autoadjust(currentSlide, 0);
+                    if (oldWidth != newWidth) {
+                        stopAnimation();
+                        adjustPositionTo(currentSlide);
+                        autoadjust(currentSlide, 0);
+                    }
                 }
+                doTheAdjustment();
+                callAsync(doTheAdjustment);
             }
 
             // Returns the width of a single <li> if the page layout is responsive.
@@ -969,7 +984,7 @@
                 adjustPositionTo(currentSlide);
                 callQueuedAnimation();
                 if (option[11]/*responsive*/) {
-                    $(win).resize();
+                    adjustResponsiveLayout();
                 }
                 if (option[13]/*auto*/) {
                     startAuto();
@@ -1262,7 +1277,7 @@
                 }
 
                 html = $(html || "<div>");
-                if (slidesContainer.is("ul")) {
+                if (isSlideContainerUl) {
                     html = $("<li>").prepend(html);
                 } else {
                     if (html.length != 1) {
