@@ -375,3 +375,7 @@ Change in script: Fixed weird Firefox bug. (If you have a responsive slider, the
 Change in script: Decreased the time it takes to initialize a responsive slider in some browsers.
 Change in script: Fixed that a responsive slider sometimes adjusted as if there were a scrollbar, while there isn't a scrollbar.
 Change in demos: Added the responsive height/width demo, that shrinks in both width and height.
+
+3.2.0
+Change in script: Before when using continuous, i would clone some of the slides, to make sure that even if you scrolled further than the last slide, then there were still something to show.
+                  Now i instead reorder the slides before an animation.

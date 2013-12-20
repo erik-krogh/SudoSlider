@@ -8,47 +8,57 @@
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			var anispeed = 800; // miliseconds.
+			var speed = 800; // miliseconds.
 			var ease = 'swing';
 			$('.blackLeft, .blackRight').fadeTo(0,0.8);
 			runOnImagesLoaded($("#slider img"), true, function () {
 				$("#loading").fadeTo(400,0,function (){
 					$(this).remove();
 				});
-			});
-			var sudoSlider = $("#slider").sudoSlider({ 
-				prevNext:false,
-				continuous:true,
-				autowidth:false,
-				autoheight:false,
-				clickableAni:false,
-				slideCount:4,
-				ease:ease,
-				speed:anispeed,
-				beforeAnimation: function(t){ 
-					var width = $(this).width();
-					var parentWidth = $("#slider").parent().width();
-					var marginleft = (parentWidth - width) / 2;
-					$("#slider").stop().animate({marginLeft:marginleft},{duration:anispeed,easing:ease});
-					$('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:anispeed,easing:ease});
-				},
-				initcallback: adjust
-			});
-            $(window).on("resize focus", adjust);
-            function adjust() {
-                var width = sudoSlider.getSlide(sudoSlider.getValue("currentSlide")).width();
-                var parentWidth = $("#slider").parent().width();
-                var marginleft = (parentWidth - width) / 2;
-                $("#slider").stop().animate({marginLeft:marginleft},{duration:0});
-                $('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:0});
-            }
-			$('.blackRight, #slider').click(function(){
-				sudoSlider.goToSlide('next');
-			});
-			$('.blackLeft').click(function(){
-				sudoSlider.goToSlide('prev');
-			});
 
+                var slides = [];
+
+                $("#slider li").each(function (index, elem) {
+                    slides.push($(this));
+                    $(this).detach();
+                });
+
+                for (var i = 0; slides.length * 2 > i; i++) {
+                    $("#slider ul").append(slides[i % slides.length].clone());
+                }
+
+                var sudoSlider = $("#slider").sudoSlider({
+                    prevNext:false,
+                    continuous:true,
+                    autowidth:false,
+                    autoheight:false,
+                    ease:ease,
+                    speed:speed,
+                    beforeAnimation: function(t){
+                        var width = $(this).width();
+                        var parentWidth = $("#slider").parent().width();
+                        var marginleft = (parentWidth - width) / 2;
+                        $("#slider").stop().animate({marginLeft:marginleft},{duration:speed,easing:ease});
+                        $('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:speed,easing:ease});
+                    },
+                    initcallback: adjust
+                });
+                $(window).on("resize focus", adjust);
+                function adjust() {
+                    var width = sudoSlider.getSlide(sudoSlider.getValue("currentSlide")).width();
+                    var parentWidth = $("#slider").parent().width();
+                    var marginleft = (parentWidth - width) / 2;
+                    $("#slider").stop().animate({marginLeft:marginleft},{duration:0});
+                    $('.blackLeft, .blackRight').stop().animate({width:marginleft+0.5},{duration:0});
+                }
+                $('.blackRight, #slider').click(function(){
+                    sudoSlider.goToSlide('next');
+                });
+                $('.blackLeft').click(function(){
+                    sudoSlider.goToSlide('prev');
+                });
+
+			});
 		});
 		// This function is a direct copy of a function inside SudoSlider.
 		function runOnImagesLoaded (target, allSlides, callback) {
@@ -134,7 +144,7 @@
             <li><img src="../images/07.jpg" height="241" alt="image description"/></li>
             <li><img src="../images/08.jpg" height="241" alt="image description"/></li>
             <li><img src="../images/04.jpg" height="241" alt="image description"/></li>
-            <li><img src="../images/05.jpg" height="241" alt="image description"/></li>			
+            <li><img src="../images/05.jpg" height="241" alt="image description"/></li>
         </ul>			
     </div>
     <div style="margin: 0 auto;color: white;width: 250px;">
