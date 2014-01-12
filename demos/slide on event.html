@@ -5,12 +5,13 @@
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			var sudoSlider = $("#slider").sudoSlider({ 
+			var sudoSlider = $("#slider").sudoSlider({
 				prevNext: false,
-				customLink:'a.eventclass'
+				customLink:'a.eventclass',
+                numeric: true
 			});
 			$('button.clickbuttonclass').click(function() {
 				// Here i do some check, to see if the content is valid.
@@ -18,8 +19,11 @@
 				$('input#someID').each(function() {
 					value = $(this).val();
 				});
-				if(value) sudoSlider.goToSlide(2);
-				else alert('ERROR!!!');
+				if(value) {
+                    sudoSlider.goToSlide(2);
+                } else {
+                    alert('ERROR!!!');
+                }
 			});
 		});
 	</script>
@@ -43,7 +47,7 @@
 				<li style="width: 696px;">
 					<p>Because you could enter somethings into the form, i got you a picture of a goat. 
 					<img src="../images/05.jpg">
-</p>
+</p>                <a class="eventclass" data-target="prev">Go back</a> (Remember that this link is inside the ajax-loaded content.)
 				</li>
 			</ul>
 		</div>

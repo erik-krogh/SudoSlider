@@ -220,7 +220,7 @@
                 option[5]/*controlsfade*/ = option[5]/*controlsfade*/ && !option[16]/*continuous*/;
 
                 if (option[11]/*responsive*/) {
-                    adjustResponsiveLayout();
+                    adjustResponsiveLayout(TRUE);
                 }
 
                 // Making sure that i have enough room in the <ul> (Through testing, i found out that the max supported size (height or width) in Firefox is 17895697px, Chrome supports up to 134217726px, and i didn't find any limits in IE (6/7/8/9)).
@@ -246,7 +246,7 @@
                             numericControls[a] = $("<li rel='" + (a + 1) + "'><a href='#'><span>" + option[19]/*numerictext*/[a] + "</span></a></li>")
                                 .appendTo(numericContainer)
                                 .click(function () {
-                                    enqueueAnimation(getRelAttribute(this) - 1, TRUE);
+                                    enqueueAnimation(getTargetAttribute(this) - 1, TRUE);
                                     return FALSE;
                                 });
                         }
@@ -267,7 +267,7 @@
                 if (option[2]/*customlink*/) {
                     $(document).on("click", option[2]/*customlink*/, function () {
                         var target;
-                        if (target = getRelAttribute(this)) {
+                        if (target = getTargetAttribute(this)) {
                             if (target == 'stop') {
                                 option[13]/*auto*/ = FALSE;
                                 stopAuto();
@@ -327,9 +327,9 @@
              */
 
             // Adjusts the slider when a change in layout has happened.
-            function adjustResponsiveLayout() {
+            function adjustResponsiveLayout(forced) {
                 function doTheAdjustment() {
-                    if (cantDoAdjustments()) {
+                    if (cantDoAdjustments() || forced) {
                         return;
                     }
                     var slide = slides[currentSlide];
@@ -354,9 +354,10 @@
                 return obj.width() / numberOfVisibleSlides;
             }
 
-            // Simply returns the value of the rel attribute for the given element.
-            function getRelAttribute(that) {
-                return $(that).attr("rel");
+            // For backwards compability, the rel attribute is used as a fallback.
+            function getTargetAttribute(that) {
+                that = $(that);
+                return that.attr("data-target") || that.attr("rel");
             }
 
             // Triggered when the URL changes.
@@ -473,8 +474,10 @@
                 }
 
                 if (option[2]/*customlink*/) {
-                    var customLink = $(option[2]/*customlink*/).filter("[rel='" + (nextcontrol ? NEXT_STRING : PREV_STRING) + "']");
-                    fadeElement = fadeElement.add(customLink);
+                    var customLink = $(option[2]/*customlink*/);
+                    var filterString = "=\"" + (nextcontrol ? NEXT_STRING : PREV_STRING) + "\"]";
+                    var filtered = customLink.filter("[rel" + filterString + ", [data-target" + filterString + "");
+                    fadeElement = fadeElement.add(filtered);
                 }
 
                 var adjustObject = {opacity: fadeOpacity};
@@ -533,7 +536,7 @@
 
                     element
                         .filter(function () {
-                            var elementTarget = getRelAttribute(this);
+                            var elementTarget = getTargetAttribute(this);
                             if (option[18]/*numeric*/ == PAGES_MARKER_STRING) {
                                 for (var a = numberOfVisibleSlides - 1; a >= 0; a--) {
                                     if (elementTarget == i - a) {
@@ -1003,6 +1006,7 @@
                 }
             }
 
+            // TODO: Maybe call this after animation instead of before. Try touch.html
             function centerTargetSlide(targetSlide) {
                 var startSlide = mathMin(targetSlide, currentSlide);
                 // Magic that tries to get the visible slide to the center.
@@ -1890,6 +1894,7 @@
     }
 
     function slide(obj) {
+        // TODO: See how others do this.
         var ul = childrenNotAnimationClones(obj.slider);
         var options = obj.options;
         var ease = options.ease;
@@ -1975,7 +1980,9 @@
             callAsync(function () {
                 elem.css(properties);
 
-                elem.bind(events, callbackFunction);
+                elem.bind(events, function () {
+                    callbackFunction();
+                });
                 // If the animation doesn't do anything, the bind will never be triggered, so this is a fallback.
                 setTimeout(callbackFunction, speed + 100);
             });

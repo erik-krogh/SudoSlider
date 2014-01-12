@@ -379,3 +379,5 @@ Change in demos: Added the responsive height/width demo, that shrinks in both wi
 3.2.0
 Change in script: Before when using continuous, i would clone some of the slides, to make sure that even if you scrolled further than the last slide, then there were still something to show.
                   Now i instead reorder the slides before an animation.
+Change in demos: Removed the "responsive fixed width slides" demo.
+Change in script: When using customLinks, the script now looks after a "data-target" to see what the customLink is supposed to do. "rel" attribute still works for backwards comparability.
