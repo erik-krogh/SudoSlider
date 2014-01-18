@@ -23,6 +23,8 @@
 			    'A goat in norway'
 	        ];
 
+            var totalSlides = ajaximages.length;
+
 	        $(document).ready(function () {
 	            // Initializing. 
 	            var mainSlider = $("#slider").sudoSlider({
@@ -41,11 +43,27 @@
 
 	                    // Thumbnails fade to which is current.
                         var allSlides = controlsSlider.children().children();
-                        allSlides.not(controlsSlider.getSlide(t)).fadeTo(400, 0.5);
-	                    controlsSlider.getSlide(t).fadeTo(400, 1);
+                        var currentThumbnail = controlsSlider.getSlide(t).add(controlsSlider.getSlide(t + totalSlides)).add(controlsSlider.getSlide(t + 2 * totalSlides));
+                        allSlides.not(currentThumbnail).fadeTo(400, 0.5);
+	                    currentThumbnail.fadeTo(400, 1);
 
-                        // Thumbnails slide to make sure current is visible.
-                        controlsSlider.goToSlide(t - 1);
+                        var dir = (t - 1) + totalSlides;
+                        var currentSlide = controlsSlider.getValue("currentSlide");
+                        var diff = -currentSlide + dir;
+                        var targetSlide = dir;
+
+                        var newDiff = -currentSlide + dir + totalSlides;
+                        if (Math.abs(newDiff) < Math.abs(diff)) {
+                            targetSlide = dir + totalSlides;
+                            diff = newDiff;
+                        }
+
+                        newDiff = -currentSlide + dir - totalSlides;
+                        if (Math.abs(newDiff) < Math.abs(diff)) {
+                            targetSlide = dir - totalSlides;
+                        }
+
+                        controlsSlider.goToSlide(targetSlide);
 	                },
 	                afterAnimation: function (t) {
 	                    // Caption.
@@ -54,10 +72,11 @@
 	            });
                 // The controls slider
                 var controlsSlider = $("#sliderControls").sudoSlider({
-                    ajax: ajaximages.concat(ajaximages), // TODO: Make the thumbnails behave nicer.
+                    ajax: ajaximages.concat(ajaximages).concat(ajaximages),
                     prevNext: false,
                     slideCount: 4,
                     moveCount: 2,
+                    startSlide: totalSlides,
                     continuous: true,
                     customLink: "#sliderControlsContainer .controls a",
                     ajaxLoad: function (t) {
@@ -77,8 +96,15 @@
                         $img.addClass("loaded");
 
                         // Making sure all thumbnails are faded except the current one.
-                        if (t != mainSlider.getValue("currentSlide")) {
+                        if (t % totalSlides != mainSlider.getValue("currentSlide")) {
                             controlsSlider.getSlide(t).fadeTo(0, 0.5);
+                        }
+                    },
+                    afterAnimation: function (t) {
+                        if (t <= totalSlides) {
+                            controlsSlider.goToSlide(t+totalSlides, 0);
+                        } else if (t > 2 * totalSlides) {
+                            controlsSlider.goToSlide(t-totalSlides, 0);
                         }
                     }
                 });
@@ -86,7 +112,7 @@
 	            // Making the thumbnails do something.
 	            $("#sliderControls").on("click", "img", function () {
 	                var slide = $(this).attr("data-target");
-	                mainSlider.goToSlide(slide);
+	                mainSlider.goToSlide(Number(slide) % totalSlides);
 	            });
 	        });
 	    });
