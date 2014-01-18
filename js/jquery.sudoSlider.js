@@ -196,7 +196,7 @@
                 // Float items to the left, and make sure that all elements are shown.
                 slidesJquery.css({"float": "left", listStyle: "none"});
                 // The last CSS to make it work.
-                slidesContainer.add(slidesJquery).css({display: "block", position: "relative"});
+                slidesContainer.add(slidesJquery).css({display: "block", position: "relative", margin: "0"});
 
                 option[8]/*slidecount*/ = parseInt10(option[8]/*slidecount*/);
 
@@ -329,7 +329,7 @@
             // Adjusts the slider when a change in layout has happened.
             function adjustResponsiveLayout(forced) {
                 function doTheAdjustment() {
-                    if (cantDoAdjustments() || forced) {
+                    if (cantDoAdjustments() && !forced) {
                         return;
                     }
                     var slide = slides[currentSlide];
@@ -341,6 +341,7 @@
 
                     if (oldWidth != newWidth) {
                         stopAnimation();
+                        ensureSliderContainerCSSDurationReset();
                         adjustPositionTo(currentSlide);
                         autoadjust(currentSlide, 0);
                     }
@@ -694,18 +695,21 @@
             }
 
             function adjustPositionTo(slide) {
-                setUlMargins(0, 0);
-                setUlMargins(
-                    getSlidePosition(slide, FALSE),
-                    getSlidePosition(slide, TRUE)
-                )
-            }
+                var left = getSlidePosition(slide, FALSE);
+                var top = getSlidePosition(slide, TRUE);
 
-            function setUlMargins(left, top) {
-                slidesContainer.css({
-                    marginLeft: left,
-                    marginTop: top
-                });
+                if (option[40]/*useCSS*/) {
+                    slidesContainer.css({transform: "translate(" + left + "px, " + top + "px)"});
+                } else {
+                    function setMargins(left, top) {
+                        slidesContainer.css({
+                            marginLeft: left,
+                            marginTop: top
+                        });
+                    }
+                    setMargins(0, 0);
+                    setMargins(left, top);
+                }
             }
 
             function getSlidePosition(slide, vertical) {
@@ -936,7 +940,7 @@
 
             function performInitCallback() {
                 if (option[16]/*continuous*/) {
-                    centerTargetSlide(currentSlide);
+                    centerTargetSlideAfter(currentSlide);
                 }
 
                 autoadjust(currentSlide, 0);
@@ -999,20 +1003,32 @@
                 }
             }
 
+            var reorderedSlidesToStartFromSlide = -1;
+
+            function ensureSliderContainerCSSDurationReset() {
+                if (option[40]/*useCSS*/) {
+                    slidesContainer.css(CSSVendorPrefix + "transition-duration", "");
+                }
+            }
+
             function reorderSlides(startSlide) {
+                if (getRealPos(startSlide) == reorderedSlidesToStartFromSlide) {
+                    return;
+                }
+                reorderedSlidesToStartFromSlide = startSlide;
+                ensureSliderContainerCSSDurationReset();
                 for (var i = 0; i < totalSlides; i++) {
                     var slideToInsert = slides[getRealPos((startSlide + i))];
                     slidesContainer.append(slideToInsert);
                 }
+                adjustPositionTo(currentSlide);
             }
 
-            // TODO: Maybe call this after animation instead of before. Try touch.html
-            function centerTargetSlide(targetSlide) {
-                var startSlide = mathMin(targetSlide, currentSlide);
+            function centerTargetSlideAfter(targetSlide) {
                 // Magic that tries to get the visible slide to the center.
-                var offset = mathMax(parseInt10((totalSlides - mathAbs(targetSlide - currentSlide) - numberOfVisibleSlides) / 2), 0);
-                startSlide = mod(startSlide - offset, totalSlides);
-                reorderSlides(startSlide);
+                var offset = mathMax(parseInt10((totalSlides - numberOfVisibleSlides) / 2), 0);
+                targetSlide = mod(targetSlide - offset, totalSlides);
+                reorderSlides(targetSlide);
             }
 
             function performAnimation(dir, speed, clicked, prevNext) {
@@ -1055,15 +1071,8 @@
                     targetSlide = dir;
                 }
 
-                if (option[16]/*continuous*/) {
-                    centerTargetSlide(targetSlide);
-                }
-
-                adjustPositionTo(currentSlide);
-
-
-                var leftTarget = getSlidePosition(targetSlide, FALSE) - parseNumber(slidesContainer.css("marginLeft"));
-                var topTarget = getSlidePosition(targetSlide, TRUE) - parseNumber(slidesContainer.css("marginTop"));
+                var leftTarget = getSlidePosition(targetSlide, FALSE);
+                var topTarget = getSlidePosition(targetSlide, TRUE);
 
                 var targetLi = slides[getRealPos(dir)];
                 var callOptions = $.extend(TRUE, {}, options); // Making a copy, to enforce read-only.
@@ -1096,8 +1105,13 @@
                 currentAnimationCallback = function () {
                     currentlyAnimating = FALSE;
                     callbackHasYetToRun = FALSE;
+
                     goToSlide(dir, clicked);
                     fixClearType(toSlides);
+
+                    if (option[16]/*continuous*/) {
+                        centerTargetSlideAfter(targetSlide);
+                    }
 
                     // afteranimation
                     aniCall(dir, TRUE);
@@ -1218,6 +1232,8 @@
                 if (option[11]/*responsive*/) {
                     $(win).off("resize focus", adjustResponsiveLayout);
                 }
+
+                ensureSliderContainerCSSDurationReset();
 
                 if (controls) {
                     controls.remove();
@@ -1894,7 +1910,6 @@
     }
 
     function slide(obj) {
-        // TODO: See how others do this.
         var ul = childrenNotAnimationClones(obj.slider);
         var options = obj.options;
         var ease = options.ease;
@@ -1905,21 +1920,13 @@
         var top = target.top;
 
         if (obj.options.usecss) {
-            function resetTransform() {
-                ul.css({transform: "translate(0px, 0px)"});
-            }
-
-            obj.stopCallbacks.push(resetTransform);
-
-            resetTransform();
-
-            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, ease, obj.callback, obj);
+            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, ease, obj.callback, obj, TRUE);
         } else {
-            animate(ul, {marginTop: "+=" + top, marginLeft: "+=" + left}, speed, ease, obj.callback, obj);
+            animate(ul, {marginTop: top, marginLeft: left}, speed, ease, obj.callback, obj);
         }
     }
 
-    function animate(elem, properties, speed, ease, callback, obj) {
+    function animate(elem, properties, speed, ease, callback, obj, doNotResetCss) {
         var usecss = !obj || obj.options.usecss;
         if (CSSVendorPrefix === FALSE || !usecss) {
             elem.animate(properties, speed, ease, callback);
@@ -1942,11 +1949,13 @@
         CSSObject[transitionEase] = ease;
 
         function resetCSS() {
-            var cssObject = {};
-            cssObject[transitionTiming] = "0s";
-            cssObject[transitionEase] = "";
-            cssObject[transitionProperty] = "";
-            elem.css(cssObject);
+            if (!doNotResetCss) {
+                var cssObject = {};
+                cssObject[transitionTiming] = "0s";
+                cssObject[transitionEase] = "";
+                cssObject[transitionProperty] = "";
+                elem.css(cssObject);
+            }
         }
 
         if (obj) {
@@ -1980,8 +1989,10 @@
             callAsync(function () {
                 elem.css(properties);
 
-                elem.bind(events, function () {
-                    callbackFunction();
+                elem.on(events, function (event) {
+                    if (elem.is(event.target)) {
+                        callbackFunction();
+                    }
                 });
                 // If the animation doesn't do anything, the bind will never be triggered, so this is a fallback.
                 setTimeout(callbackFunction, speed + 100);
@@ -1995,7 +2006,7 @@
         var fadeSpeed = options.speed;
         var ease = options.ease;
 
-        var fadeinspeed = parseInt(fadeSpeed * (3 / 5), 10);
+        var fadeinspeed = parseInt10(fadeSpeed * (3 / 5));
         var fadeoutspeed = fadeSpeed - fadeinspeed;
 
         obj.stopCallbacks.push(function () {
