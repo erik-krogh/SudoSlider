@@ -4,7 +4,7 @@
 	<title>Sudo Slider | Thumbnails 2</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0-rc1.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 	    $(document).ready(function () {
@@ -54,7 +54,7 @@
 	            });
                 // The controls slider
                 var controlsSlider = $("#sliderControls").sudoSlider({
-                    ajax: ajaximages,
+                    ajax: ajaximages.concat(ajaximages), // TODO: Make the thumbnails behave nicer.
                     prevNext: false,
                     slideCount: 4,
                     moveCount: 2,
@@ -72,7 +72,7 @@
 
                         $img.width(thumbNailWidth).height(thumbNailHeight);
                         controlsSlider.adjust();
-                        $img.attr("rel", t);
+                        $img.attr("data-target", t);
                         // I got some CSS that makes sure that the image is only shown, when the class loaded is added.
                         $img.addClass("loaded");
 
@@ -83,9 +83,9 @@
                     }
                 });
 
-	            // Making the thumbnails do something. 
+	            // Making the thumbnails do something.
 	            $("#sliderControls").on("click", "img", function () {
-	                var slide = $(this).attr("rel");
+	                var slide = $(this).attr("data-target");
 	                mainSlider.goToSlide(slide);
 	            });
 	        });
