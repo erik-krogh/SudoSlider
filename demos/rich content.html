@@ -8,7 +8,9 @@
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){	
-			var sudoSlider = $("#slider").sudoSlider();
+			var sudoSlider = $("#slider").sudoSlider({
+                continuous: true
+            });
 		});	
 	</script>
 	
@@ -44,7 +46,9 @@
 	<pre>
 &lt;script type="text/javascript" &gt;
     $(document).ready(function(){	
-        var sudoSlider = $("#slider").sudoSlider();
+        var sudoSlider = $("#slider").sudoSlider({
+           continuous: true
+        });
     });
 &lt;/script&gt;</pre>
 	<h4>The HTML</h4>

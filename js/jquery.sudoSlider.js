@@ -1024,12 +1024,23 @@
                 adjustPositionTo(currentSlide);
             }
 
-            function centerTargetSlideAfter(targetSlide) {
-                // Magic that tries to get the visible slide to the center.
-                var offset = mathMax(parseInt10((totalSlides - numberOfVisibleSlides) / 2), 0);
+            function centerTargetSlideAdjusted(targetSlide, extraSpace) {
+                var offset = mathMax(parseInt10((totalSlides - extraSpace - numberOfVisibleSlides) / 2), 0);
                 targetSlide = mod(targetSlide - offset, totalSlides);
                 reorderSlides(targetSlide);
             }
+
+            function centerTargetSlideAfter(targetSlide) {
+                centerTargetSlideAdjusted(targetSlide, 0);
+            }
+
+            function centerTargetSlideBefore(targetSlide) {
+                var startSlide = mathMin(targetSlide, currentSlide);
+                var adjustment = mathAbs(targetSlide - currentSlide);
+
+                centerTargetSlideAdjusted(startSlide, adjustment);
+            }
+
 
             function performAnimation(dir, speed, clicked, prevNext) {
                 if (option[30]/*updateBefore*/) setCurrent(dir);
@@ -1069,6 +1080,10 @@
                     }
                 } else {
                     targetSlide = dir;
+                }
+
+                if (option[16]/*continuous*/) {
+                    centerTargetSlideBefore(targetSlide);
                 }
 
                 var leftTarget = getSlidePosition(targetSlide, FALSE);
