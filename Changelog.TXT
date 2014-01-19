@@ -381,3 +381,4 @@ Change in script: Before when using continuous, i would clone some of the slides
                   Now i instead reorder the slides before an animation.
 Change in demos: Removed the "responsive fixed width slides" demo.
 Change in script: When using customLinks, the script now looks after a "data-target" to see what the customLink is supposed to do. "rel" attribute still works for backwards comparability.
+And other small fixes
