@@ -540,7 +540,12 @@
                     i = totalSlides;
                 }
 
-                if (option[18]/*numeric*/) for (var control in numericControls) setCurrentElement(numericControls[control], i);
+                if (option[18]/*numeric*/){
+                    for (var control = 0; control < numericControls.length; ++control) {
+                        var element = numericControls[control];
+                        setCurrentElement(element, i)
+                    }
+                }
                 if (option[2]/*customlink*/) setCurrentElement($(option[2]/*customlink*/), i);
             }
 
