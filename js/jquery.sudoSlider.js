@@ -86,6 +86,7 @@
                 isSlideContainerUl,
                 slidesContainer,
                 slides,
+                imagesInSlidesLoaded,
                 totalSlides,
                 currentSlide,
                 previousSlide,
@@ -109,10 +110,10 @@
                 currentAnimation,
                 currentAnimationCallback,
                 currentAnimationObject,
-                runAfterAnimationCallbacks = [],
-                awaitingAjaxCallbacks = [],
-                startedAjaxLoads = [],
-                finishedAjaxLoads = [],
+                runAfterAnimationCallbacks,
+                awaitingAjaxCallbacks,
+                startedAjaxLoads,
+                finishedAjaxLoads,
                 animateToAfterCompletion = FALSE,
                 animateToAfterCompletionClicked,
                 animateToAfterCompletionSpeed,
@@ -131,6 +132,12 @@
                 }
 
                 init = TRUE;
+
+                imagesInSlidesLoaded = [];
+                runAfterAnimationCallbacks = [];
+                awaitingAjaxCallbacks = [];
+                startedAjaxLoads = [];
+                finishedAjaxLoads = [];
 
                 // Fix for nested list items
                 slidesContainer = childrenNotAnimationClones(obj);
@@ -152,16 +159,17 @@
 
                 totalSlides = slidesJquery.length;
 
-                for (var i = 0; i < totalSlides; i++) {
-                    slides[i] = slidesJquery.eq(i);
-                }
+                slidesJquery.each(function (index, elem) {
+                    slides[index] = $(elem);
+                });
 
                 // Now we are going to fix the document, if it's 'broken'. (No <li>).
                 // I assume that it's can only be broken, if ajax is enabled. If it's broken without Ajax being enabled, the script doesn't have anything to fill the holes.
                 if (option[31]/*ajax*/) {
                     // Do we have enough list elements to fill out all the ajax documents.
-                    if (option[31]/*ajax*/.length > totalSlides) {
-                        for (var a = 1; a <= option[31]/*ajax*/.length - totalSlides; a++) {
+                    var numerOfAjaxUrls = option[31]/*ajax*/.length;
+                    if (numerOfAjaxUrls > totalSlides) {
+                        for (var a = 1; a <= numerOfAjaxUrls - totalSlides; a++) {
                             var tag;
                             if (isSlideContainerUl) {
                                 tag = "div";
@@ -173,9 +181,16 @@
                             slides[totalSlides + (a - 1)] = slide;
                         }
                         slidesJquery = childrenNotAnimationClones(slidesContainer);
-                        totalSlides = slidesJquery.length;
+                        totalSlides = numerOfAjaxUrls;
                     }
                 }
+
+                slidesJquery.each(function (index, elem) {
+                    imagesInSlidesLoaded[index] = FALSE;
+                    runOnImagesLoaded($(elem), TRUE, function () {
+                        imagesInSlidesLoaded[index] = TRUE;
+                    });
+                });
 
                 if (slideNumberBeforeDestroy === FALSE) {
                     currentSlide = 0;
@@ -828,7 +843,9 @@
 
                 if (finishedAjaxLoads[slide]) {
                     if (ajaxCallBack) {
-                        callAsync(ajaxCallBack);
+                        runOnImagesLoaded(slide, TRUE, function () {
+                            callAsync(ajaxCallBack);
+                        });
                     }
                     return;
                 }
@@ -849,7 +866,7 @@
                     var image = new Image();
                     image.src = target;
                     var thatImage = $(image);
-                    runOnImagesLoaded(thatImage, true, function () {
+                    runOnImagesLoaded(thatImage, TRUE, function () {
                         runWhenNotAnimating(function () {
                             // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
                             // Other browsers (IE) tends to completely hide images that are errors. Therefore we set the height/width of those to 20.
@@ -955,7 +972,7 @@
                 option[23]/*initCallback*/.call(baseSlider);
 
                 // Fixing once and for all that the wrong slide is shown on init.
-                runOnImagesLoaded(getSlides(currentSlide, totalSlides), false, function () {
+                runOnImagesLoaded(getSlides(currentSlide, totalSlides), FALSE, function () {
                     runWhenNotAnimating(function () {
                         autoadjust(currentSlide, 0);
                         adjustPositionTo(currentSlide);
@@ -970,6 +987,17 @@
                 }
             }
 
+            function isContentInSlideReady(slide) {
+                if (!imagesInSlidesLoaded[slide]) {
+                    return FALSE;
+                }
+                if (!option[31]/*ajax*/) {
+                    return TRUE;
+                } else {
+                    return option[31]/*ajax*/[slide] || (startedAjaxLoads[slide] && !finishedAjaxLoads[slide]);
+                }
+            }
+
             function loadSlidesAndAnimate(i, clicked, speed) {
                 var dir = filterDir(i);
                 var prevNext = i == NEXT_STRING || i == PREV_STRING;
@@ -978,10 +1006,11 @@
                 if (targetSlide == currentSlide) {
                     return;
                 }
+                clickable = FALSE;
                 if (option[31]/*ajax*/) {
                     var waitCounter = 0;
                     for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
-                        if (option[31]/*ajax*/[loadSlide] || (startedAjaxLoads[loadSlide] && !finishedAjaxLoads[loadSlide])) {
+                        if (isContentInSlideReady(loadSlide)) {
                             waitCounter++;
                             ajaxLoad(getRealPos(loadSlide), function () {
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
@@ -1003,7 +1032,7 @@
                 }
             }
 
-            var reorderedSlidesToStartFromSlide = -1;
+            var reorderedSlidesToStartFromSlide = 0;
 
             function ensureSliderContainerCSSDurationReset() {
                 if (option[40]/*useCSS*/) {
@@ -1011,14 +1040,19 @@
                 }
             }
 
-            function reorderSlides(startSlide) {
-                if (getRealPos(startSlide) == reorderedSlidesToStartFromSlide) {
+            function reorderSlides(slide) {
+                if (getRealPos(slide) == reorderedSlidesToStartFromSlide) {
                     return;
                 }
-                reorderedSlidesToStartFromSlide = startSlide;
+                for (var i = 0; i < totalSlides; i++) {
+                    if (!isContentInSlideReady(i)) {
+                        return; // Nope.
+                    }
+                }
+                reorderedSlidesToStartFromSlide = slide;
                 ensureSliderContainerCSSDurationReset();
                 for (var i = 0; i < totalSlides; i++) {
-                    var slideToInsert = slides[getRealPos((startSlide + i))];
+                    var slideToInsert = slides[getRealPos((slide + i))];
                     slidesContainer.append(slideToInsert);
                 }
                 adjustPositionTo(currentSlide);
@@ -1048,8 +1082,6 @@
                 if (option[27]/*history*/ && clicked) win.location.hash = option[19]/*numerictext*/[dir];
 
                 if (option[5]/*controlsfade*/) fadeControls(dir, option[4]/*controlsfadespeed*/);
-
-                clickable = FALSE;
 
                 var fromSlides = $();
                 var toSlides = $();
@@ -2130,8 +2162,8 @@
         var result = $("<div>").css({zIndex: obj.options.animationzindex, position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
         slides.each(function (index, elem) {
             var that = $(elem);
-            var cloneWidth = that.outerWidth(true);
-            var cloneHeight = that.outerHeight(true);
+            var cloneWidth = that.outerWidth(TRUE);
+            var cloneHeight = that.outerHeight(TRUE);
             var clone = that.clone();
             var position = that.position();
             var left = position.left - orgLeft;
@@ -2169,7 +2201,7 @@
                 return name;
             }
         }
-        return false;
+        return FALSE;
     }
 
     function stringTrim(str) {
