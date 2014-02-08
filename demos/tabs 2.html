@@ -10,6 +10,8 @@
 		$(document).ready(function(){
 			var oldt = 0;
 		    var sudoSlider = $("#slider").sudoSlider({
+                effect: "stackDown",
+                speed: 800,
 				ajax: [
 					'../images/01.jpg',
 					'../images/02.jpg',
@@ -23,8 +25,7 @@
 					if (scroll == 1) scroll = 0;
 					if (scroll < -2) scroll = -2;
 					var scroll = scroll * $('.custom').eq(0).outerHeight(true);
-					var diff = Math.sqrt(Math.abs(oldt-t));
-					var speed = parseInt(diff*800);
+                    var speed = 800;
 					$('#slidemenu ul').animate(
 						{ marginTop: scroll },
 						{
@@ -33,10 +34,10 @@
 						}
 					);
 					var substract = $('#slidemenu ul').offset();
-					var posi = $('#slidemenu ul li').eq(t-1).offset();
-					var topvari =  posi.top - substract.top;
-					$('#slidemenu ul li.currentone').animate(
-						{ marginTop: topvari },
+                    var position = $('#slidemenu ul li').eq(t-1).offset();
+                    var marginTop =  position.top - substract.top;
+                    $('#slidemenu ul li.currentone').animate(
+                        { marginTop: marginTop },
 						{
 							queue:false,
 							duration:speed
@@ -102,9 +103,11 @@
 	<h4>The Javascript to start it.</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
-      $(document).ready(function(){
+   $(document).ready(function(){
       var oldt = 0;
-       var sudoSlider = $("#slider").sudoSlider({
+      var sudoSlider = $("#slider").sudoSlider({
+         effect: "stackDown",
+         speed: 800,
          ajax: [
             '../images/01.jpg',
             '../images/02.jpg',
@@ -118,8 +121,7 @@
             if (scroll == 1) scroll = 0;
             if (scroll < -2) scroll = -2;
             var scroll = scroll * $('.custom').eq(0).outerHeight(true);
-            var diff = Math.sqrt(Math.abs(oldt-t));
-            var speed = parseInt(diff*800);
+            var speed = 800;
             $('#slidemenu ul').animate(
                { marginTop: scroll },
                {
@@ -128,14 +130,19 @@
                }
             );
             var substract = $('#slidemenu ul').offset();
-            var posi = $('#slidemenu ul li').eq(t-1).offset();
-            var topvari =  posi.top - substract.top;
-            $('#slidemenu ul li.currentone').animate({
-               marginTop: topvari
-               }, speed);
-            oldt = t;
-           },
-           customLink: '.custom'
+            var position = $('#slidemenu ul li').eq(t-1).offset();
+            var marginTop =  position.top - substract.top;
+            $('#slidemenu ul li.currentone').animate(
+               { marginTop: marginTop },
+               {
+                  queue:false,
+                  duration:speed
+               }
+            );
+         },
+         customLink: '.custom',
+         continuous:true,
+         preloadAjax:true
       });
    });
 &lt;/script&gt;</pre>

@@ -552,7 +552,7 @@
             }
 
             function setCurrentElement(element, i) {
-                if (element.filter) {
+                if (element && element.filter) {
                     element
                         .filter(".current")
                         .removeClass("current");
@@ -891,8 +891,6 @@
                 }
 
                 var succesRan = FALSE;
-
-                console.log("Loading: " + slide);
 
                 $.ajax({
                     url: target,
@@ -1923,7 +1921,7 @@
             }, timeout);
         });
         if (reveal) {
-            obj.goToNext();
+            callAsync(obj.goToNext);
         }
     }
 
