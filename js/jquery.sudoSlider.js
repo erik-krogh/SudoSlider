@@ -280,25 +280,7 @@
                 }
 
                 if (option[2]/*customlink*/) {
-                    $(document).on("click", option[2]/*customlink*/, function () {
-                        var target;
-                        if (target = getTargetAttribute(this)) {
-                            if (target == 'stop') {
-                                option[13]/*auto*/ = FALSE;
-                                stopAuto();
-                            } else if (target == "start") {
-                                startAuto();
-                                option[13]/*auto*/ = TRUE;
-                            } else if (target == 'block') {
-                                clickable = FALSE;
-                            } else if (target == 'unblock') {
-                                clickable = TRUE;
-                            } else {
-                                enqueueAnimation((target == parseInt10(target)) ? target - 1 : target, TRUE);
-                            }
-                        }
-                        return FALSE;
-                    });
+                    $(document).on("click", option[2]/*customlink*/, customLinkClickHandler);
                 }
 
                 runOnImagesLoaded(getSlides(option[10]/*startslide*/, option[8]/*slidecount*/), TRUE, function () {
@@ -340,6 +322,26 @@
             /*
              * The functions do the magic.
              */
+
+            function customLinkClickHandler() {
+                var target;
+                if (target = getTargetAttribute(this)) {
+                    if (target == 'stop') {
+                        option[13]/*auto*/ = FALSE;
+                        stopAuto();
+                    } else if (target == "start") {
+                        startAuto();
+                        option[13]/*auto*/ = TRUE;
+                    } else if (target == 'block') {
+                        clickable = FALSE;
+                    } else if (target == 'unblock') {
+                        clickable = TRUE;
+                    } else {
+                        enqueueAnimation((target == parseInt10(target)) ? target - 1 : target, TRUE);
+                    }
+                }
+                return FALSE;
+            };
 
             // Adjusts the slider when a change in layout has happened.
             function adjustResponsiveLayout(forced) {
@@ -890,6 +892,8 @@
 
                 var succesRan = FALSE;
 
+                console.log("Loading: " + slide);
+
                 $.ajax({
                     url: target,
                     success: function (data, textStatus, jqXHR) {
@@ -1291,7 +1295,7 @@
                     controls.remove();
                 }
 
-                $(option[2]/*customlink*/).off("click");
+                $(document).off("click", option[2]/*customlink*/, customLinkClickHandler);
 
                 reorderSlides(0);
 
@@ -1477,7 +1481,18 @@
             "Vertical",
             foldRandom
         ],
-        slide: slide
+        slide: slide,
+        stack: [
+            "Up",
+            "Right",
+            "Down",
+            "Left",
+            [
+                "",
+                "Reverse",
+                stackTemplate
+            ]
+        ]
     }
 
     // Generic effects needs to have a "dir" attribute as their last argument.
@@ -1488,7 +1503,12 @@
             blinds
         ],
         fold: fold,
-        push: pushTemplate,
+        push:
+            [
+                "Out",
+                "In",
+                pushTemplate
+            ],
         reveal: revealTemplate,
         slice: {
             "": [
@@ -1907,20 +1927,42 @@
         }
     }
 
+    function stackTemplate(obj, dir, reverse) {
+        var pushIn = obj.diff > 0;
+        if (reverse) {
+            pushIn = !pushIn;
+        }
+
+        pushTemplate(obj, pushIn, ++dir);
+    }
+
     // 1: up, 2: right, 3: down, 4, left:
-    function pushTemplate(obj, dir) {
+    function pushTemplate(obj, pushIn, dir) {
         var vertical = dir == 2 || dir == 4;
-        var negative = (dir == 2 || dir == 3) ? -1 : 1;
+        var negative = (dir == 2 || dir == 3) ? 1 : -1;
         var options = obj.options;
         var ease = options.ease;
-        var fromSlides = obj.fromSlides;
-        var toSlides = makeClone(obj, TRUE).hide();
-        toSlides.prependTo(obj.slider);
-        var height = mathMax(toSlides.height(), fromSlides.height());
-        var width = mathMax(toSlides.width(), fromSlides.width());
         var speed = options.speed;
-        toSlides.css(vertical ? {left: negative * width} : {top: negative * height}).show();
-        animate(toSlides, {left: 0, top: 0}, speed, ease, obj.callback, obj);
+        if (pushIn) {
+            var fromSlides = obj.fromSlides;
+            var toSlides = makeClone(obj, TRUE).hide();
+            toSlides.prependTo(obj.slider);
+            var height = mathMax(toSlides.height(), fromSlides.height());
+            var width = mathMax(toSlides.width(), fromSlides.width());
+            toSlides.css(vertical ? {left: negative * width} : {top: negative * height}).show();
+            animate(toSlides, {left: 0, top: 0}, speed, ease, obj.callback, obj);
+        } else {
+            var fromSlides = makeClone(obj, FALSE);
+            fromSlides.prependTo(obj.slider);
+            obj.goToNext();
+            var toSlides = obj.toSlides;
+
+            var measurementSlides = negative == -1 ? fromSlides : toSlides;
+            var height = measurementSlides.height();
+            var width = measurementSlides.width();
+
+            animate(fromSlides, vertical ? {left: negative * width} : {top: negative * height}, speed, ease, obj.callback, obj);
+        }
     }
 
     function revealTemplate(obj, dir) {
@@ -2083,6 +2125,7 @@
         boxTemplate(obj);
     }
 
+    // 1: up, 2: right, 3: down, 4, left:
     function getDirFromAnimationObject(obj) {
         var vertical = obj.options.vertical;
         var diff = obj.diff;

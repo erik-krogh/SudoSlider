@@ -382,4 +382,5 @@ Change in script: Before when using continuous, i would clone some of the slides
 Change in demos: Removed the "responsive fixed width slides" demo.
 Change in script: When using customLinks, the script now looks after a "data-target" to see what the customLink is supposed to do. "rel" attribute still works for backwards comparability.
 Change in script: Fixed that when using ticker mode (auto with pause 0 and continuous), the slider would sometimes start by animating frot the last to the first slide, then jump to the second.
+Change in script: Renamed the push effects to pushOut. And introduced the pushIn and stack effects. Now there's 118 effects.
 And other small fixes
