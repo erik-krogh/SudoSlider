@@ -9,11 +9,6 @@
  *	 http://jquery.com
  *
  */
-// TODO: Ctrl+f "clones" and "rel" in docs.
-// TODO: Save docs, then check ALL links.
-// TODO: Kopier default value options over de relevante options.
-// TODO: Change Explorer effects, so that there's no doubt about it being a prefix.
-// TODO: Camelcase options in docs
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
