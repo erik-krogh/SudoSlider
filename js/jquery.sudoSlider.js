@@ -1193,7 +1193,9 @@
                     },
                     goToNext: function () {
                         if (callbackHasYetToRun) {
-                            adjustPositionTo(dir);
+                            setTimeout(function () {
+                                adjustPositionTo(dir);
+                            }, 20);
                         }
                     }
                 };
@@ -1921,7 +1923,7 @@
             }, timeout);
         });
         if (reveal) {
-            callAsync(obj.goToNext);
+            obj.goToNext();
         }
     }
 
