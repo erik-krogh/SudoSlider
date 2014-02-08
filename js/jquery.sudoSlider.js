@@ -275,8 +275,8 @@
 
                 // Lets make those fast/normal/fast into some numbers we can make calculations with.
                 var optionsToConvert = [4/*controlsfadespeed*/, 1/*speed*/, 14/*pause*/];
-                for (var a in optionsToConvert) {
-                    option[optionsToConvert[a]] = textSpeedToNumber(option[optionsToConvert[a]]);
+                for (var i = 0; i < optionsToConvert.length; i++) {
+                    option[optionsToConvert[i]] = textSpeedToNumber(option[optionsToConvert[i]]);
                 }
 
                 if (option[2]/*customlink*/) {
@@ -392,12 +392,12 @@
                 if (option[32]/*preloadajax*/ !== FALSE) {
                     var preloadAjaxTime = parseInt10(option[32]/*preloadajax*/);
                     if (option[31]/*ajax*/) {
-                        for (var ajaxIndex in option[31]/*ajax*/) {
-                            if (option[31]/*ajax*/[ajaxIndex]) {
+                        for (var i = 0; i < option[31]/*ajax*/.length; i++) {
+                            if (option[31]/*ajax*/[i]) {
                                 clearTimeout(asyncDelayedSlideLoadTimeout);
                                 asyncDelayedSlideLoadTimeout = setTimeout(function () {
-                                    if (option[31]/*ajax*/[ajaxIndex]) {
-                                        ajaxLoad(parseInt10(ajaxIndex));
+                                    if (option[31]/*ajax*/[i]) {
+                                        ajaxLoad(parseInt10(i));
                                     } else {
                                         startAsyncDelayedLoad();
                                     }
@@ -577,7 +577,7 @@
 
             function getUrlHashTarget() {
                 var hashString = location.hash.substr(1)
-                for (var i in option[19]/*numerictext*/) {
+                for (var i = 0; i < option[19]/*numerictext*/.length; i++) {
                     if (option[19]/*numerictext*/[i] == hashString) {
                         return i;
                     }
