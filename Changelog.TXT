@@ -384,3 +384,6 @@ Change in script: When using customLinks, the script now looks after a "data-tar
 Change in script: Fixed that when using ticker mode (auto with pause 0 and continuous), the slider would sometimes start by animating frot the last to the first slide, then jump to the second.
 Change in script: Renamed the push effects to pushOut. And introduced the pushIn and stack effects. Now there's 118 effects.
 And other small fixes
+
+3.2.1
+Change in script: Fixed flicker in some effects in 3.2.0
