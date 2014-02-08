@@ -9,6 +9,11 @@
  *	 http://jquery.com
  *
  */
+// TODO: Ctrl+f "clones" and "rel" in docs.
+// TODO: Save docs, then check ALL links.
+// TODO: Kopier default value options over de relevante options.
+// TODO: Change Explorer effects, so that there's no doubt about it being a prefix.
+// TODO: Camelcase options in docs
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -258,7 +263,7 @@
                         var usePages = option[18]/*numeric*/ == PAGES_MARKER_STRING;
                         var distanceBetweenPages = usePages ? numberOfVisibleSlides : 1;
                         for (var a = 0; a < totalSlides - ((option[16]/*continuous*/ || usePages) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
-                            numericControls[a] = $("<li rel='" + (a + 1) + "'><a href='#'><span>" + option[19]/*numerictext*/[a] + "</span></a></li>")
+                            numericControls[a] = $("<li data-target='" + (a + 1) + "'><a href='#'><span>" + option[19]/*numerictext*/[a] + "</span></a></li>")
                                 .appendTo(numericContainer)
                                 .click(function () {
                                     enqueueAnimation(getTargetAttribute(this) - 1, TRUE);
