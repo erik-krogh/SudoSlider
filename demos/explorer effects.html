@@ -173,9 +173,34 @@
                         setTimeout(function () {
                             sudoSlider.goToSlide("next");
                         }, 0);
+
+                        if (!$.fn.sudoSlider.effects[name]) {
+                            var allNames = getKeyArray($.fn.sudoSlider.effects);
+                            var text = "This is a prefix, it selects randomly between: ";
+                            var first = true;
+                            for (var i = 0; i < allNames.length; i++) {
+                                if (startsWith(allNames[i], name)) {
+                                    if (first) {
+                                        first = false;
+                                    } else {
+                                        text += ", ";
+                                    }
+                                    text += allNames[i];
+                                }
+                            }
+
+                            text += ".";
+                            $("#prefixWarning").text(text);
+                        } else {
+                            $("#prefixWarning").text("");
+                        }
                     }
                 }
             });
+
+            function startsWith(string, prefix) {
+                return string.indexOf(prefix) == 0;
+            }
 
             function getKeyArray(object) {
                 var keys = [];
@@ -187,9 +212,9 @@
 
             function objectLength(object) {
                 var length = 0;
-                $.each(object, function(name, value) {
+                $.each(object, function (name, value) {
                     length++;
-                })
+                });
                 return length;
             }
             function findFirstEffectFromEffectMap(map) {
@@ -267,7 +292,7 @@
         <div id="effectLinksHolder"></div>
     </div>
     <div style="position:relative;width:450px;display:block;float:left;">
-        <h2>Selected effect: <span id="selectedEffectContainer"></span></h2>
+        <h2>Selected effect: "<span id="selectedEffectContainer"></span>"</h2>
         <div id="slider">
             <img src="../images/01.jpg" alt="image description"/>
             <img src="../images/02.jpg" alt="image description"/>
@@ -275,6 +300,7 @@
             <img src="../images/04.jpg" alt="image description"/>
             <img src="../images/05.jpg" alt="image description"/>
         </div>
+        <h3 id="prefixWarning"></h3>
     </div>
 </div>
 
