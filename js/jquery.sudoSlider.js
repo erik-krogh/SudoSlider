@@ -172,9 +172,9 @@
                         for (var a = 1; a <= numerOfAjaxUrls - totalSlides; a++) {
                             var tag;
                             if (isSlideContainerUl) {
-                                tag = "div";
-                            } else {
                                 tag = "li";
+                            } else {
+                                tag = "div";
                             }
                             var slide = $("<" + tag + ">" + option[33]/*loadingtext*/ + "</" + tag + ">");
                             slidesContainer.append(slide);
