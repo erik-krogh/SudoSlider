@@ -387,3 +387,9 @@ And other small fixes
 
 3.2.1
 Change in script: Fixed flicker in some effects in 3.2.0
+
+3.2.2
+Change in script: Made the dirty fix in 3.2.1 into a clean one.
+Change in script: Fixed that ajaxLoaded slides were wrapped in an <li> when they should be wrapped in a <div> (and the other way).
+Change in script: Numeric controls now also use data-target instead of rel attribute.
+Change in docs: The explorer effects demo shows, when you select a prefix, what effects that prefix hits.
