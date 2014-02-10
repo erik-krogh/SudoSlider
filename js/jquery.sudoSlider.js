@@ -1193,9 +1193,10 @@
                     },
                     goToNext: function () {
                         if (callbackHasYetToRun) {
-                            setTimeout(function () {
+                            // Only moving after there is content ready to replace the previous.
+                            runOnImagesLoaded($("." + ANIMATION_CLONE_MARKER_CLASS, obj), TRUE, function () {
                                 adjustPositionTo(dir);
-                            }, 20);
+                            });
                         }
                     }
                 };
