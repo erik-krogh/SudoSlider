@@ -1,5 +1,5 @@
 /*
- *  Sudo Slider verion 3.2.2 - jQuery plugin
+ *  Sudo Slider verion 3.2.3 - jQuery plugin
  *  Written by Erik Krogh Kristensen info@webbies.dk.
  *
  *	 Dual licensed under the MIT
@@ -346,7 +346,7 @@
             // Adjusts the slider when a change in layout has happened.
             function adjustResponsiveLayout(forced) {
                 function doTheAdjustment() {
-                    if (cantDoAdjustments() && !forced) {
+                    if ((cantDoAdjustments() && !forced) || totalSlides == 0) {
                         return;
                     }
                     var slide = slides[currentSlide];
@@ -586,6 +586,10 @@
             }
 
             function runOnImagesLoaded(target, waitForAllImages, callback) {
+                if (!target) {
+                    callback();
+                    return;
+                }
                 var elems = target.add(target.find("img")).filter("img");
                 var len = elems.length;
                 if (!len) {
@@ -594,12 +598,16 @@
                     return;
                 }
                 function loadFunction(that) {
-                    $(that).off('load error');
+                    that.off('load error');
 
+                    // TODO: This
                     // Webkit/Chrome (not sure) fix.
-                    if (that.naturalHeight && !that.clientHeight) {
-                        $(that).height(that.naturalHeight).width(that.naturalWidth);
+                    var thatElement = that[0];
+                    var naturalHeight = thatElement.naturalHeight;
+                    if (naturalHeight && !thatElement.clientHeight) {
+                        that.height(naturalHeight).width(thatElement.naturalWidth);
                     }
+
                     if (waitForAllImages) {
                         len--;
                         if (len == 0) {
@@ -612,14 +620,15 @@
 
                 elems.each(function () {
                     var that = this;
-                    $(that).on('load error', function () {
-                        loadFunction(that);
+                    var jQueryThat = $(that);
+                    jQueryThat.on('load error', function () {
+                        loadFunction(jQueryThat);
                     });
                     /*
                      * Start ugly working IE fix.
                      */
                     if (that.readyState == "complete") {
-                        $(that).trigger("load");
+                        jQueryThat.trigger("load");
                     } else if (that.readyState) {
                         // Sometimes IE doesn't fire the readystatechange, even though the readystate has been changed to complete. AARRGHH!! I HATE IE, I HATE IT, I HATE IE!
                         that.src = that.src; // Do not ask me why this works, ask the IE team!
@@ -628,7 +637,7 @@
                      * End ugly working IE fix.
                      */
                     else if (that.complete) {
-                        $(that).trigger("load");
+                        jQueryThat.trigger("load");
                     }
                     else if (that.complete === undefined) {
                         var src = that.src;
@@ -736,7 +745,7 @@
 
             function getSlidePosition(slide, vertical) {
                 var targetSlide = slides[getRealPos(slide)];
-                return targetSlide.length ? -targetSlide.position()[vertical ? "top" : "left"] : 0;
+                return (targetSlide && targetSlide.length) ? -targetSlide.position()[vertical ? "top" : "left"] : 0;
             }
 
             function callQueuedAnimation() {
@@ -875,6 +884,7 @@
                     var thatImage = $(image);
                     runOnImagesLoaded(thatImage, TRUE, function () {
                         runWhenNotAnimating(function () {
+                            // TODO: This.
                             // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
                             // Other browsers (IE) tends to completely hide images that are errors. Therefore we set the height/width of those to 20.
                             var setHeightWidth = "";
@@ -1147,9 +1157,13 @@
                 if (slideSpecificEffect) {
                     effect = getEffectMethod(slideSpecificEffect);
                 }
-                var slideOutSpecificEffect = slides[currentSlide].attr(specificEffectAttrName + "out");
-                if (slideOutSpecificEffect) {
-                    effect = getEffectMethod(slideOutSpecificEffect);
+
+                var slideOutSlide = slides[currentSlide];
+                if (slideOutSlide) {
+                    var slideOutSpecificEffect = slides[currentSlide].attr(specificEffectAttrName + "out")
+                    if (slideOutSpecificEffect) {
+                        effect = getEffectMethod(slideOutSpecificEffect);
+                    }
                 }
 
                 currentlyAnimating = TRUE;
