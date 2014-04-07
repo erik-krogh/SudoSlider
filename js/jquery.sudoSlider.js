@@ -9,6 +9,7 @@
  *	 http://jquery.com
  *
  */
+// TODO: More test empty sliders.
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -103,7 +104,7 @@
                 numberOfVisibleSlides,
                 asyncDelayedSlideLoadTimeout,
                 obj = $(this),
-                finishedAdjustingTo = FALSE, // This variable teels if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff.
+                finishedAdjustingTo = FALSE, // This variable tells if the slider is currently adjusted (height and width) to any specific slide. This is usefull when ajax-loading stuff.
                 adjustingTo, // This one tells what slide we are adjusting to, to make sure that we do not adjust to something we shouldn't.
                 adjustTargetTime = 0, // This one holds the time that the autoadjust animation should complete.
                 currentlyAnimating = FALSE,
@@ -119,8 +120,7 @@
                 animateToAfterCompletionSpeed,
                 slideContainerCreated = FALSE,
                 option = [],
-                options = {};
-            $.extend(TRUE, options, optionsOrg);
+                options = $.extend({}, optionsOrg);
 
             // The call to the init function is after the definition of all the functions.
             function initSudoSlider() {
@@ -197,6 +197,8 @@
                 } else {
                     currentSlide = slideNumberBeforeDestroy;
                 }
+                currentSlide = currentSlide || 0;
+
                 previousSlide = currentSlide;
 
                 clickable = TRUE;
@@ -600,14 +602,6 @@
                 function loadFunction(that) {
                     that.off('load error');
 
-                    // TODO: This
-                    // Webkit/Chrome (not sure) fix.
-                    var thatElement = that[0];
-                    var naturalHeight = thatElement.naturalHeight;
-                    if (naturalHeight && !thatElement.clientHeight) {
-                        that.height(naturalHeight).width(thatElement.naturalWidth);
-                    }
-
                     if (waitForAllImages) {
                         len--;
                         if (len == 0) {
@@ -681,11 +675,13 @@
                 var pixels = 0;
                 for (var slide = fromSlide; slide < fromSlide + numberOfVisibleSlides; slide++) {
                     var targetSlide = slides[getRealPos(slide)];
-                    var targetPixels = targetSlide['outer' + (axis ? "Height" : "Width")](TRUE);
-                    if (axis == option[7]/*vertical*/) {
-                        pixels += targetPixels;
-                    } else {
-                        pixels = mathMax(targetPixels, pixels);
+                    if (targetSlide) {
+                        var targetPixels = targetSlide['outer' + (axis ? "Height" : "Width")](TRUE);
+                        if (axis == option[7]/*vertical*/) {
+                            pixels += targetPixels;
+                        } else {
+                            pixels = mathMax(targetPixels, pixels);
+                        }
                     }
                 }
                 return pixels;
@@ -884,15 +880,6 @@
                     var thatImage = $(image);
                     runOnImagesLoaded(thatImage, TRUE, function () {
                         runWhenNotAnimating(function () {
-                            // TODO: This.
-                            // Some browsers (FireFox) forces the loaded image to its original dimensions. Thereby overwriting any CSS rule. This fixes it.
-                            // Other browsers (IE) tends to completely hide images that are errors. Therefore we set the height/width of those to 20.
-                            var setHeightWidth = "";
-                            if (!thatImage.height()) {
-                                setHeightWidth = 20;
-                            }
-                            thatImage.height(setHeightWidth).width(setHeightWidth);
-
                             targetslide.empty().append(image);
 
                             ajaxAdjust(slide, TRUE);
@@ -1282,8 +1269,9 @@
             }
 
             // Actual modulo, not remainder. From here: http://stackoverflow.com/questions/4467539/javascript-modulo-not-behaving
+            // Added a or zero, to ensure it returns a number.
             function mod(a, n) {
-                return ((a % n) + n) % n;
+                return (((a % n) + n) % n) || 0;
             }
 
             function fixClearType(element) {
@@ -1384,7 +1372,7 @@
                 pos--; // 1 == the first.
                 publicDestroy();
 
-                slides[pos].remove();
+                slides[mathMin(pos, totalSlides - 1)].remove();
                 option[19]/*numerictext*/.splice(pos, 1);
                 if (pos < slideNumberBeforeDestroy) {
                     slideNumberBeforeDestroy--;
@@ -2365,8 +2353,6 @@
         return a < b ? a : b;
     }
 
-    var fallbackEffect = getEffectMethod("slide");
-
     function getEffectMethod(inputEffect) {
         if (isArray(inputEffect)) {
             return makeRandomEffect(inputEffect);
@@ -2391,7 +2377,7 @@
                         }
                     }
                     if (!array.length) {
-                        return fallbackEffect;
+                        return slide;
                     }
                     return makeRandomEffect(array);
                 }

@@ -393,3 +393,6 @@ Change in script: Made the dirty fix in 3.2.1 into a clean one.
 Change in script: Fixed that ajaxLoaded slides were wrapped in an <li> when they should be wrapped in a <div> (and the other way).
 Change in script: Numeric controls now also use data-target instead of rel attribute.
 Change in docs: The explorer effects demo shows, when you select a prefix, what effects that prefix hits.
+
+3.2.3
+Change in script: Fixed that an empty slider disn't work, and that ajaxloaded images would load wrong in some situations.
