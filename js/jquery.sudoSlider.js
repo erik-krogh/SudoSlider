@@ -27,6 +27,14 @@
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
     var CSSVendorPrefix = getCSSVendorPrefix();
 
+    var TOUCHSTART = "touchstart";
+    var TOUCHMOVE = "touchmove";
+    var TOUCHCANCEL = "touchcancel";
+    var TOUCHEND = "touchend";
+    var MOUSEDOWN = "mousedown";
+    var MOUSEMOVE = "mousemove";
+    var MOUSEUP = "mouseup";
+
     $.fn.sudoSlider = function (optionsOrg) {
         // default configuration properties
         var defaults = {
@@ -999,9 +1007,12 @@
             }
 
             function setUpTouch() {
-
+                if (!isFunction(obj.swipe)) {
+                    return;
+                }
                 var easingFactor = 1;
                 var touchEasingName = "SudoSliderTouchEase";
+                var runningTouchEffect = FALSE;
 
                 if (!option[40]/*useCSS*/) {
                     $.easing[touchEasingName] = function (x) {
@@ -1009,30 +1020,27 @@
                     }
                 }
 
+                var prevEffect = option[0]/*effect*/;
+
                 option[0]/*effect*/ = function (obj) {
-                    var easing;
-                    if (option[40]/*useCSS*/) {
-                        easingFactor *= 0.6;
-                        // TODO: This could be better, test on an actual touch device.
-                        easing = "cubic-bezier(" + (easingFactor).toFixed(2) + "," + (1- (easingFactor/ 2)).toFixed(2) + ",0.64,1)";
+                    if (runningTouchEffect) {
+                        runningTouchEffect = FALSE;
+                        var easing;
+                        if (option[40]/*useCSS*/) {
+                            easingFactor *= 0.6;
+                            easing = "cubic-bezier(" + (easingFactor).toFixed(2) + "," + (1- (easingFactor/ 2)).toFixed(2) + ",0.64,1)";
+                        } else {
+                            easing = touchEasingName;
+                            easingFactor = Math.sqrt(easingFactor) * 1.3 + 0.4
+                        }
+                        obj.options.ease = easing;
+                        return slide(obj);
                     } else {
-                        easing = touchEasingName;
-                        easingFactor = easingFactor * 1.3 + 0.4
+                        return prevEffect(obj);
                     }
-                    obj.options.easing = easing;
-                    return slide(obj);
                 }
-                // TODO: initialOffset
                 var initialOffsetLeft = 0;
                 var initialOffsetTop = 0;
-                var initialMouseX = 0;
-                var initialMouseY = 0;
-
-                obj.swipe({
-                    swipeStatus: swipeStatus,
-                    threshold: 0,
-                    allowPageScroll: option[7]/*vertical*/ ? "horizontal" : "vertical"
-                });
 
                 var starttime;
                 var lasttime;
@@ -1050,129 +1058,164 @@
                 var bufferSize = 4;
                 var positionsBuffer = [];
                 var timeBuffer = [];
-                function swipeStatus(event, phase, direction, distance) {
-                    if (clickable) {
-                        if (phase == "move") {
-                            positionsBuffer = positionsBuffer.slice(1, bufferSize);
-                            timeBuffer = timeBuffer.slice(1, bufferSize);
-                            positionsBuffer.push(Number(distance) - lastDistance);
-                            timeBuffer.push(getTimeInMillis() - lasttime);
 
-                            lasttime = getTimeInMillis();
-                            lastDistance = Number(distance);
-                            if (direction == "left" || direction == "up") {
-                                moveSlides(-lastDistance, -lastDistance);
-                            } else {
-                                moveSlides(lastDistance, lastDistance);
-                            }
-                        } else if (phase == "start") {
-                            ensureSliderContainerCSSDurationReset();
-                            initialOffsetTop = currentSliderPositionTop;
-                            initialOffsetLeft = currentSliderPositionLeft;
+                function touchStart() {
+                    ensureSliderContainerCSSDurationReset();
+                    initialOffsetTop = currentSliderPositionTop;
+                    initialOffsetLeft = currentSliderPositionLeft;
 
-                            initialMouseX = event.pageX;
-                            initialMouseY = event.pageY;
+                    for (var i = 0; i < bufferSize; i++) {
+                        positionsBuffer[i] = 0;
+                        timeBuffer[i] = 0;
+                    }
+                    lastDistance = 0;
+                    lasttime = getTimeInMillis();
+                    starttime = getTimeInMillis();
+                }
 
-                            for (var i = 0; i < bufferSize; i++) {
-                                positionsBuffer[i] = 0;
-                                timeBuffer[i] = 0;
-                            }
-                            lastDistance = 0;
-                            lasttime = getTimeInMillis();
-                            starttime = getTimeInMillis();
-                        } else if (phase == "end" || phase == "cancel") {
-                            var maxSpeed = 5;
-                            var time = 0;
-                            var bufferDistance = 0;
-                            var slideDimensions;
-                            if (option[7]/*vertical*/) {
-                                slideDimensions = obj.height();
-                            } else {
-                                slideDimensions = obj.width();
-                            }
-                            for (var i = 0; i < bufferSize; i++) {
-                                bufferDistance += positionsBuffer[i];
-                                time += timeBuffer[i];
-                            }
-                            // This is in pixels pr. ms.
-                            var speed = mathMin(mathAbs(bufferDistance) / time, maxSpeed);
+                function touchMove(x, y) {
+                    var distance;
+                    if (option[7]/*vertical*/) {
+                        distance = mathAbs(y);
+                    } else {
+                        distance = mathAbs(x);
+                    }
+                    positionsBuffer = positionsBuffer.slice(1, bufferSize);
+                    timeBuffer = timeBuffer.slice(1, bufferSize);
+                    positionsBuffer.push(Number(distance) - lastDistance);
+                    timeBuffer.push(getTimeInMillis() - lasttime);
 
-                            easingFactor = Math.sqrt(((maxSpeed - speed) / maxSpeed));
+                    lasttime = getTimeInMillis();
+                    lastDistance = distance;
 
-                            var goToAnotherSlide = mathAbs(bufferDistance) >= 10 || distance >= slideDimensions / 2;
+                    moveSlides(x, y);
+                }
 
-                            if (option[7]/*vertical*/) {
-                                if (direction != "down" && direction != "up") {
-                                    goToAnotherSlide = FALSE;
-                                }
-                            } else {
-                                if (direction != "left" && direction != "right") {
-                                    goToAnotherSlide = FALSE;
-                                }
-                            }
+                function touchEnd(x, y) {
+                    var distance;
+                    if (option[7]/*vertical*/) {
+                        distance = y;
+                    } else {
+                        distance = x;
+                    }
+                    var distanceAbs = mathAbs(distance);
+                    var maxSpeed = 5;
+                    var time = 0;
+                    var bufferDistance = 0;
+                    var slideDimensions;
+                    if (option[7]/*vertical*/) {
+                        slideDimensions = obj.height();
+                    } else {
+                        slideDimensions = obj.width();
+                    }
+                    for (var i = 0; i < bufferSize; i++) {
+                        bufferDistance += positionsBuffer[i];
+                        time += timeBuffer[i];
+                    }
+                    // This is in pixels pr. ms.
+                    var speed = mathMin(mathAbs(bufferDistance) / time, maxSpeed);
+
+                    easingFactor = ((maxSpeed - speed) / maxSpeed);
+
+                    var goToAnotherSlide = mathAbs(bufferDistance) >= 5 || distanceAbs >= slideDimensions / 2;
+
+                    if ((bufferDistance > 0 && distanceAbs < 0) || (bufferDistance < 0 && distanceAbs > 0)) {
+                        goToAnotherSlide = false;
+                    }
 
 
-                            direction = (direction == "left" || direction == "up") ? NEXT_STRING : PREV_STRING;
+                    var direction = distance < 0 ? NEXT_STRING : PREV_STRING;
 
-                            if (bufferDistance < 0) {
-                                direction = direction == NEXT_STRING ? PREV_STRING : NEXT_STRING;
+                    if (!option[16]/*continuous*/) {
+                        if (currentSlide + 1 == totalSlides) {
+                            if (direction == NEXT_STRING) {
                                 goToAnotherSlide = FALSE;
                             }
-
-                            if (!option[16]/*continuous*/) {
-                                if (currentSlide + 1 == totalSlides) {
-                                    if (direction == NEXT_STRING) {
-                                        goToAnotherSlide = FALSE;
-                                    }
-                                } else if (currentSlide == 0) {
-                                    if (direction == PREV_STRING) {
-                                        goToAnotherSlide = FALSE;
-                                    }
-                                }
-                            }
-
-                            clickable = FALSE;
-                            if (goToAnotherSlide) {
-                                // TODO: SlideCount and moveCount.
-                                var duration = mathMin(((getTimeInMillis() - starttime) / (lastDistance * speed)) * (slideDimensions - lastDistance), 1000);
-                                performAnimation(filterDir(direction), duration, TRUE, TRUE);
-                            } else {
-                                // Same as above, just replaced "lastDistance" with "(slideDimensions - lastDistance)"
-                                var duration = mathMin(((getTimeInMillis() - starttime) / ((slideDimensions - lastDistance) * speed)) * (slideDimensions - (slideDimensions - lastDistance)), 1000);
-                                performAnimation(currentSlide, duration, TRUE, TRUE);
+                        } else if (currentSlide == 0) {
+                            if (direction == PREV_STRING) {
+                                goToAnotherSlide = FALSE;
                             }
                         }
                     }
+
+                    clickable = FALSE;
+                    runningTouchEffect = TRUE;
+                    if (goToAnotherSlide) {
+                        var duration = mathMin(((getTimeInMillis() - starttime) / (lastDistance * speed)) * (slideDimensions - lastDistance), 1000);
+                        performAnimation(filterDir(direction), duration, TRUE, TRUE);
+                    } else {
+                        // Same as above, just replaced "lastDistance" with "(slideDimensions - lastDistance)"
+                        var duration = mathMin(((getTimeInMillis() - starttime) / ((slideDimensions - lastDistance) * speed)) * (slideDimensions - (slideDimensions - lastDistance)), 1000);
+                        performAnimation(currentSlide, duration, TRUE, TRUE);
+                    }
                 }
 
+                (function () {
+                    var doingTouch = false;
+                    var startX = 0;
+                    var startY = 0;
+                    var prevX = 0;
+                    var prevY = 0;
+
+                    var dragFunction = function (event) {
+                        var type = event.type;
+                        var startEvent;
+                        var endEvent1;
+                        var endEvent2;
+                        var mouseEvent = type.substr(0, 1) == "m";
+                        if (mouseEvent) {
+                            startEvent = MOUSEDOWN;
+                            endEvent1 = MOUSEUP;
+                            endEvent2 = "";
+                        } else {
+                            startEvent = TOUCHSTART;
+                            endEvent1 = TOUCHEND;
+                            endEvent2 = TOUCHCANCEL;
+                        }
 
 
+                        if (!doingTouch) {
+                            var isTarget = mouseEvent || $(event.target).parents().filter(obj).length; // If mouseEvent, we know the target to be right
+                            if (!isTarget) {
+                                return;
+                            } else if (type == startEvent && isTarget) {
+                                doingTouch = true;
+                            } else {
+                                return;
+                            }
+                        }
 
+                        if (type != endEvent1 && type != endEvent2) {
+                            var x;
+                            var y;
+                            if (mouseEvent) {
+                                x = event.pageX;
+                                y = event.pageY;
+                            } else {
+                                var touch = event.touches[0];
+                                x = touch.pageX;
+                                y = touch.pageY;
+                            }
 
+                            if (type == startEvent) {
+                                startX = x;
+                                startY = y;
+                                touchStart()
+                            } else {
+                                touchMove(x - startX, y - startY);
+                            }
+                            prevX = x - startX;
+                            prevY = y - startY;
+                        } else {
+                            touchEnd(prevX, prevY);
+                            doingTouch = false;
+                        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                        event.preventDefault();
+                    };
+                    addListeners(document, dragFunction, TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL);
+                    addListeners(obj[0], dragFunction, MOUSEDOWN, MOUSEMOVE, MOUSEUP);
+                })();
             }
 
             function performCallbacks(callbacks) {
@@ -2423,6 +2466,13 @@
     /*
      * Util scripts.
      */
+
+    function addListeners(element, func) {
+        var args = arguments;
+        for (var i=2; i < args.length; i++) {
+            element.addEventListener(args[i], func, false);
+        }
+    }
 
     // The minVersion is specified in an array, like [1, 8, 0] for 1.8.0
     // Partially copy-pasted from: https://gist.github.com/dshaw/652870
