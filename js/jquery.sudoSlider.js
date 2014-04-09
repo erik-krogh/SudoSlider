@@ -1006,12 +1006,10 @@
                 });
             }
 
+            // TODO: Test with iOS.
             function setUpTouch() {
-                if (!isFunction(obj.swipe)) {
-                    return;
-                }
                 var easingFactor = 1;
-                var touchEasingName = "SudoSliderTouchEase";
+                var touchEasingName = "SudoSliderTouch";
                 var runningTouchEffect = FALSE;
 
                 if (!option[40]/*useCSS*/) {
@@ -1027,6 +1025,7 @@
                         runningTouchEffect = FALSE;
                         var easing;
                         if (option[40]/*useCSS*/) {
+                            // TODO: Test this more.
                             easingFactor *= 0.6;
                             easing = "cubic-bezier(" + (easingFactor).toFixed(2) + "," + (1- (easingFactor/ 2)).toFixed(2) + ",0.64,1)";
                         } else {
@@ -1039,38 +1038,25 @@
                         return prevEffect(obj);
                     }
                 }
-                var initialOffsetLeft = 0;
-                var initialOffsetTop = 0;
+                var initialOffsetLeft;
+                var initialOffsetTop;
 
-                var starttime;
-                var lasttime;
+                var startTime;
+                var lastTime;
                 var lastDistance;
 
-                function moveSlides(offsetLeft, offsetTop) {
-                    if (option[7]/*vertical*/) {
-                        offsetLeft = 0;
-                    } else {
-                        offsetTop = 0;
-                    }
-                    adjustPositionToPosition(initialOffsetLeft + offsetLeft, initialOffsetTop + offsetTop);
-                }
-
-                var bufferSize = 4;
-                var positionsBuffer = [];
-                var timeBuffer = [];
+                var bufferSize = 7;
+                var positionsBuffer = createCircularBuffer(bufferSize);
+                var timeBuffer = createCircularBuffer(bufferSize);
 
                 function touchStart() {
                     ensureSliderContainerCSSDurationReset();
                     initialOffsetTop = currentSliderPositionTop;
                     initialOffsetLeft = currentSliderPositionLeft;
 
-                    for (var i = 0; i < bufferSize; i++) {
-                        positionsBuffer[i] = 0;
-                        timeBuffer[i] = 0;
-                    }
                     lastDistance = 0;
-                    lasttime = getTimeInMillis();
-                    starttime = getTimeInMillis();
+                    startTime = getTimeInMillis();
+                    lastTime = startTime;
                 }
 
                 function touchMove(x, y) {
@@ -1080,15 +1066,19 @@
                     } else {
                         distance = mathAbs(x);
                     }
-                    positionsBuffer = positionsBuffer.slice(1, bufferSize);
-                    timeBuffer = timeBuffer.slice(1, bufferSize);
                     positionsBuffer.push(Number(distance) - lastDistance);
-                    timeBuffer.push(getTimeInMillis() - lasttime);
+                    var newTime = getTimeInMillis();
+                    timeBuffer.push(newTime - lastTime);
 
-                    lasttime = getTimeInMillis();
+                    lastTime = newTime;
                     lastDistance = distance;
 
-                    moveSlides(x, y);
+                    if (option[7]/*vertical*/) {
+                        x = 0;
+                    } else {
+                        y = 0;
+                    }
+                    adjustPositionToPosition(initialOffsetLeft + x, initialOffsetTop + y);
                 }
 
                 function touchEnd(x, y) {
@@ -1100,17 +1090,13 @@
                     }
                     var distanceAbs = mathAbs(distance);
                     var maxSpeed = 5;
-                    var time = 0;
-                    var bufferDistance = 0;
+                    var time = timeBuffer.sum();
+                    var bufferDistance = positionsBuffer.sum();
                     var slideDimensions;
                     if (option[7]/*vertical*/) {
                         slideDimensions = obj.height();
                     } else {
                         slideDimensions = obj.width();
-                    }
-                    for (var i = 0; i < bufferSize; i++) {
-                        bufferDistance += positionsBuffer[i];
-                        time += timeBuffer[i];
                     }
                     // This is in pixels pr. ms.
                     var speed = mathMin(mathAbs(bufferDistance) / time, maxSpeed);
@@ -1120,7 +1106,7 @@
                     var goToAnotherSlide = mathAbs(bufferDistance) >= 5 || distanceAbs >= slideDimensions / 2;
 
                     if ((bufferDistance > 0 && distanceAbs < 0) || (bufferDistance < 0 && distanceAbs > 0)) {
-                        goToAnotherSlide = false;
+                        goToAnotherSlide = FALSE;
                     }
 
 
@@ -1141,23 +1127,26 @@
                     clickable = FALSE;
                     runningTouchEffect = TRUE;
                     if (goToAnotherSlide) {
-                        var duration = mathMin(((getTimeInMillis() - starttime) / (lastDistance * speed)) * (slideDimensions - lastDistance), 1000);
+                        var duration = mathMin(((getTimeInMillis() - startTime) / (lastDistance * speed)) * (slideDimensions - lastDistance), 1000);
                         performAnimation(filterDir(direction), duration, TRUE, TRUE);
                     } else {
                         // Same as above, just replaced "lastDistance" with "(slideDimensions - lastDistance)"
-                        var duration = mathMin(((getTimeInMillis() - starttime) / ((slideDimensions - lastDistance) * speed)) * (slideDimensions - (slideDimensions - lastDistance)), 1000);
+                        var duration = mathMin(((getTimeInMillis() - startTime) / ((slideDimensions - lastDistance) * speed)) * (slideDimensions - (slideDimensions - lastDistance)), 1000);
                         performAnimation(currentSlide, duration, TRUE, TRUE);
                     }
                 }
 
-                (function () {
-                    var doingTouch = false;
+                {
+                    var startedTouch = FALSE;
                     var startX = 0;
                     var startY = 0;
                     var prevX = 0;
                     var prevY = 0;
 
                     var dragFunction = function (event) {
+                        if (!clickable) {
+                            return;
+                        }
                         var type = event.type;
                         var startEvent;
                         var endEvent1;
@@ -1174,12 +1163,12 @@
                         }
 
 
-                        if (!doingTouch) {
+                        if (!startedTouch) {
                             var isTarget = mouseEvent || $(event.target).parents().filter(obj).length; // If mouseEvent, we know the target to be right
                             if (!isTarget) {
                                 return;
                             } else if (type == startEvent && isTarget) {
-                                doingTouch = true;
+                                startedTouch = TRUE;
                             } else {
                                 return;
                             }
@@ -1208,14 +1197,14 @@
                             prevY = y - startY;
                         } else {
                             touchEnd(prevX, prevY);
-                            doingTouch = false;
+                            startedTouch = FALSE;
                         }
 
                         event.preventDefault();
                     };
                     addListeners(document, dragFunction, TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL);
                     addListeners(obj[0], dragFunction, MOUSEDOWN, MOUSEMOVE, MOUSEUP);
-                })();
+                }
             }
 
             function performCallbacks(callbacks) {
@@ -1352,6 +1341,7 @@
                     targetSlide = dir;
                 }
 
+                // TODO: Only skip if touch is enabled AND we're doing a touch animation?
                 if (option[16]/*continuous*/ && !option[43]/*touch*/) {
                     centerTargetSlideBefore(targetSlide);
                 }
@@ -2470,9 +2460,28 @@
     function addListeners(element, func) {
         var args = arguments;
         for (var i=2; i < args.length; i++) {
-            element.addEventListener(args[i], func, false);
+            element.addEventListener(args[i], func, FALSE);
         }
     }
+
+    function createCircularBuffer(l){
+        var pointer = 0;
+        var buffer = [];
+
+        return {
+            sum  : function(){
+                var s = 0;
+                for (var i = 0; i < l; i++) {
+                    s += buffer[i] || 0;
+                }
+                return s;
+            },
+            push : function(item){
+                buffer[pointer] = item;
+                pointer = (l + pointer +1) % l;
+            }
+        };
+    };
 
     // The minVersion is specified in an array, like [1, 8, 0] for 1.8.0
     // Partially copy-pasted from: https://gist.github.com/dshaw/652870
