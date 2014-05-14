@@ -643,9 +643,7 @@
                 elems.each(function () {
                     var that = this;
                     var jQueryThat = $(that);
-                    jQueryThat.on('load error', function () {
-                        loadFunction(jQueryThat);
-                    });
+                    jQueryThat.on('load error', callback(loadFunction, [jQueryThat]));
                     /*
                      * Start ugly working IE fix.
                      */
@@ -692,9 +690,7 @@
             function autoHeightWidth(i) {
                 obj.ready(function () {
                     adjustHeightWidth(i);
-                    runOnImagesLoaded(slides[i], FALSE, function () {
-                        adjustHeightWidth(i);
-                    });
+                    runOnImagesLoaded(slides[i], FALSE, makeCallback(adjustHeightWidth, [i]));
                 });
             }
 
@@ -783,9 +779,7 @@
                 if (animateToAfterCompletion !== FALSE) {
                     var animateTo = animateToAfterCompletion;
                     animateToAfterCompletion = FALSE;
-                    callAsync(function () {
-                        enqueueAnimation(animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed);
-                    });
+                    callAsync(makeCallback(enqueueAnimation, [animateTo, animateToAfterCompletionClicked, animateToAfterCompletionSpeed]));
                 }
             }
 
@@ -816,9 +810,7 @@
             function aniCall(i, after, synchronous) {
                 i = getRealPos(i);
                 // Wierd fix to let IE accept the existance of the sudoSlider object.
-                var func = function () {
-                    (after ? afterAniCall : beforeAniCall)(slides[i], i + 1);
-                };
+                var func = makeCallback(after ? afterAniCall : beforeAniCall, [slides[i], i + 1]);
                 if (synchronous) {
                     func();
                 } else {
@@ -892,9 +884,7 @@
 
                 if (finishedAjaxLoads[slide]) {
                     if (ajaxCallBack) {
-                        runOnImagesLoaded(slides[slide], TRUE, function () {
-                            callAsync(ajaxCallBack);
-                        });
+                        runOnImagesLoaded(slides[slide], TRUE, makeCallback(callAsync, [ajaxCallBack]));
                     }
                     return;
                 }
@@ -915,13 +905,11 @@
                     var image = new Image();
                     image.src = target;
                     var thatImage = $(image);
-                    runOnImagesLoaded(thatImage, TRUE, function () {
-                        runWhenNotAnimating(function () {
-                            targetslide.empty().append(image);
+                    runOnImagesLoaded(thatImage, TRUE, makeCallback(runWhenNotAnimating, [function () {
+                        targetslide.empty().append(image);
 
-                            ajaxAdjust(slide, TRUE);
-                        });
-                    });
+                        ajaxAdjust(slide, TRUE);
+                    }]));
                 }
 
                 var succesRan = FALSE;
@@ -970,8 +958,8 @@
                 adjustPositionTo(currentSlide);
                 autoadjust(currentSlide, 0);
 
-                runOnImagesLoaded(target, TRUE, function () {
-                    runWhenNotAnimating(function () {
+                runOnImagesLoaded(target, TRUE, makeCallback(runWhenNotAnimating, [
+                    function () {
                         adjustPositionTo(currentSlide);
                         autoadjust(currentSlide, 0);
 
@@ -992,8 +980,8 @@
                             init = FALSE;
                             callAsync(performInitCallback);
                         }
-                    });
-                });
+                    }
+                ]));
             }
 
             function performInitCallback() {
@@ -1017,12 +1005,12 @@
                 }
 
                 // Fixing once and for all that the wrong slide is shown on init.
-                runOnImagesLoaded(getSlides(currentSlide, totalSlides), FALSE, function () {
-                    runWhenNotAnimating(function () {
+                runOnImagesLoaded(getSlides(currentSlide, totalSlides), FALSE, makeCallback(runWhenNotAnimating, [
+                    function () {
                         autoadjust(currentSlide, 0);
                         adjustPositionTo(currentSlide);
-                    })
-                });
+                    }
+                ]));
             }
 
             function setUpTouch() {
@@ -1464,9 +1452,7 @@
                     goToNext: function () {
                         if (callbackHasYetToRun) {
                             // Only moving after there is content ready to replace the previous.
-                            runOnImagesLoaded($("." + ANIMATION_CLONE_MARKER_CLASS, obj), TRUE, function () {
-                                adjustPositionTo(dir);
-                            });
+                            runOnImagesLoaded($("." + ANIMATION_CLONE_MARKER_CLASS, obj), TRUE, makeCallback(adjustPositionTo, [dir]));
                         }
                     }
                 };
@@ -1501,9 +1487,7 @@
 
             function bindAndRegisterOff(element, events, handler, selector) {
                 element.on(events, selector, handler);
-                unBindCallbacks.push(function () {
-                    element.off(events, selector, handler);
-                });
+                unBindCallbacks.push(makeCallback(element.off, [events, selector, handler]));
             }
 
 
@@ -1671,9 +1655,7 @@
 
             baseSlider.goToSlide = function (a, speed) {
                 var parsedDirection = (a == parseInt10(a)) ? a - 1 : a;
-                callAsync(function () {
-                    enqueueAnimation(parsedDirection, TRUE, speed);
-                });
+                callAsync(makeCallback(enqueueAnimation, [parsedDirection, TRUE, speed]));
             };
 
             baseSlider.block = function () {
@@ -2198,8 +2180,8 @@
 
 
             count++;
-            setTimeout(function () {
-                animate(slice, {
+            setTimeout(makeCallback(animate, [
+                slice, {
                     width: orgWidth,
                     height: orgHeight,
                     opacity: reveal ? 0 : 1,
@@ -2210,8 +2192,8 @@
                     if (count == 0) {
                         obj.callback();
                     }
-                }, obj);
-            }, timeout);
+                }, obj])
+            , timeout);
         });
         if (reveal) {
             obj.goToNext();
@@ -2398,9 +2380,7 @@
             obj.fromSlides.stop().css({opacity: 1});
         });
 
-        animate(obj.fromSlides, { opacity: 0.0001 }, fadeoutspeed, ease, function () {
-            finishFadeAnimation(obj, fadeSpeed);
-        }, obj);
+        animate(obj.fromSlides, { opacity: 0.0001 }, fadeoutspeed, ease, makeCallback(finishFadeAnimation, [obj, fadeSpeed]), obj);
     }
 
 
@@ -2520,6 +2500,12 @@
     /*
      * Util scripts.
      */
+
+    function makeCallback2(func, args) {
+        return function () {
+            func.apply(undefined, args);
+        }
+    }
 
     // The minVersion is specified in an array, like [1, 8, 0] for 1.8.0
     // Partially copy-pasted from: https://gist.github.com/dshaw/652870
