@@ -398,6 +398,10 @@ Change in docs: The explorer effects demo shows, when you select a prefix, what 
 Change in script: Fixed that an empty slider didn't work, and that ajaxloaded images would load wrong in some situations.
 Change in script: Added a new option: "touch". When enabled you can swipe the slider back and forwards using mouse of touch input.
 Change in script: Changed the touch demo from using touchSwipe to using the new option. Also removed touchSwipe script from the js/lib/ folder.
-Change in script: Added the touchHandle option. So you can specify what the user can drag.
+Change in script: Added the touchHandle option. So you can specify what the user can drag. Even something that isn't within the slider.
+Change in docs: Added touchHandle demo.
 Change in script: Fixed that continuous with ajax content bugged.
 Change in script: InsertSlide now accepts negative number for positions. -1 equals inserting a slide in the far right of the slider, -2 one left of that etc.
+Change in script: The setOption method now also accepts an object, that represents option names and option values to be changed.
+Change in docs: Removed the "Responsive height/width" demo.
+Change in script: The controls container now has class="controls" instead of id="controls". And the container for the numeric controls has class="numericControls" instead of class="controls". These are just new default option values, they can easily be changed through options.

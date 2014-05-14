@@ -1,14 +1,19 @@
 /*
- *  Sudo Slider verion 3.3.0 - jQuery plugin
- *  Written by Erik Krogh Kristensen info@webbies.dk.
+ * Sudo Slider verion 3.3.0 - jQuery plugin
+ * Written by Erik Krogh Kristensen erik@webbies.dk.
+ * http://webbies.dk/SudoSlider/
  *
- *	 Dual licensed under the MIT
- *	 and GPL licenses.
+ * Dual licensed under the MIT and GPL licenses.
  *
- *	 Built for jQuery library
- *	 http://jquery.com
+ * Based on EasySlider http://cssglobe.com/easy-slider-17-numeric-navigation-jquery-slider/
+ * But bear little resemblance at this point.
+ *
+ * Built for jQuery library
+ * http://jquery.com
  *
  */
+// TODO: https://github.com/webbiesdk/SudoSlider/issues/8
+// TODO: Test in many browsers!
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -22,6 +27,7 @@
     var LAST_STRING = "last";
     var FIRST_STRING = "first";
     var ABSOLUTE_STRING = "absolute";
+    var RELATIVE_STRING = "relative";
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
     var CSSVendorPrefix = getCSSVendorPrefix();
@@ -74,8 +80,8 @@
             loadingText: "", /*    option[33]/*loadingtext*/
             prevHtml: '<a href="#" class="prevBtn"> previous </a>', /* option[34]/*prevhtml*/
             nextHtml: '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
-            controlsAttr: 'id="controls"', /* option[36]/*controlsattr*/
-            numericAttr: 'class="controls"', /* option[37]/*numericattr*/
+            controlsAttr: 'class="controls"', /* option[36]/*controlsattr*/
+            numericAttr: 'class="numericControls"', /* option[37]/*numericattr*/
             animationZIndex: 10000, /* option[38]/*animationZIndex*/
             interruptible: FALSE, /* option[39]/*interruptible*/
             useCSS: TRUE, /* option[40]/*useCSS*/
@@ -132,10 +138,13 @@
                 option = [],
                 options = $.extend({}, optionsOrg),
                 currentSliderPositionTop,
-                currentSliderPositionLeft;
+                currentSliderPositionLeft,
+                unBindCallbacks = [];
 
             // The call to the init function is after the definition of all the functions.
             function initSudoSlider() {
+                option[31]/*ajax*/ = $.makeArray(option[31]/*ajax*/);
+
                 // Storing the public options in an array.
                 var optionIndex = 0;
                 for (var key in options) {
@@ -172,7 +181,9 @@
                 totalSlides = slidesJquery.length;
 
                 slidesJquery.each(function (index, elem) {
-                    slides[index] = $(elem);
+                    var that = $(elem);
+                    slides[index] = that;
+                    that.css({position: RELATIVE_STRING});
                 });
 
                 // Now we are going to fix the document, if it's 'broken'. (No <li>).
@@ -220,12 +231,12 @@
 
                 // Set obj overflow to hidden (and position to relative <strike>, if fade is enabled. </strike>)
                 obj.css({overflow: "hidden"});
-                if (obj.css("position") == "static") obj.css({position: "relative"}); // Fixed a lot of IE6 + IE7 bugs.
+                if (obj.css("position") == "static") obj.css({position: RELATIVE_STRING}); // Fixed a lot of IE6 + IE7 bugs.
 
                 // Float items to the left, and make sure that all elements are shown.
                 slidesJquery.css({"float": "left", listStyle: "none"});
                 // The last CSS to make it work.
-                slidesContainer.add(slidesJquery).css({display: "block", position: "relative", margin: "0"});
+                slidesContainer.add(slidesJquery).css({display: "block", position: RELATIVE_STRING, margin: "0"});
 
                 option[8]/*slidecount*/ = parseInt10(option[8]/*slidecount*/);
 
@@ -259,7 +270,7 @@
                 option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
 
                 if (option[11]/*responsive*/) {
-                    jWin.on("resize focus", adjustResponsiveLayout);
+                    bindAndRegisterOff(jWin, "resize focus", adjustResponsiveLayout, "");
                 }
 
                 if (option[3]/*controlsShow*/) {
@@ -294,7 +305,7 @@
                 }
 
                 if (option[2]/*customlink*/) {
-                    $(document).on("click", option[2]/*customlink*/, customLinkClickHandler);
+                    bindAndRegisterOff($(document), "click", customLinkClickHandler, option[2]/*customlink*/);
                 }
 
                 runOnImagesLoaded(getSlides(option[10]/*startslide*/, option[8]/*slidecount*/), TRUE, function () {
@@ -974,7 +985,7 @@
                         startAsyncDelayedLoad();
 
                         callAsync(function () {
-                            option[24]/*ajaxload*/.call(slides[i], parseInt10(i) + 1, img);
+                            option[24]/*ajaxload*/.call(slides[i], i + 1, img);
                         });
 
                         if (init) {
@@ -1028,7 +1039,7 @@
                     } else {
                         return prevEffect(obj);
                     }
-                }
+                };
                 var initialOffsetLeft;
                 var initialOffsetTop;
 
@@ -1189,20 +1200,21 @@
                             startEvent = TOUCHSTART;
                             endEvent1 = TOUCHEND;
                             endEvent2 = TOUCHCANCEL;
+                            event = event.originalEvent;
                         }
 
 
                         if (!startedTouch) {
-                            var isTarget = mouseEvent || $(event.target).parents().filter(obj).length; // If mouseEvent, we know the target to be right
-                            if (option[44]/*touchHandle*/) {
-                                isTarget &= $(event.target).is(option[44]/*touchHandle*/);
+                            if (type != startEvent) {
+                                return;
                             }
+                            var filter = option[44]/*touchHandle*/ || obj;
+                            var eventTarget = event.target;
+                            var isTarget = $(eventTarget).parents().add(eventTarget).filter(filter).length; // If mouseEvent, we know the target to be right
                             if (!isTarget) {
                                 return;
-                            } else if (type == startEvent && isTarget) {
-                                startedTouch = TRUE;
                             } else {
-                                return;
+                                startedTouch = TRUE;
                             }
                         }
 
@@ -1234,8 +1246,7 @@
 
                         event.preventDefault();
                     };
-                    addListeners(document, dragFunction, TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL);
-                    addListeners(obj[0], dragFunction, MOUSEDOWN, MOUSEMOVE, MOUSEUP);
+                    bindMultiple(document, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL, MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
                 }
             }
 
@@ -1488,6 +1499,20 @@
                 }
             }
 
+            function bindAndRegisterOff(element, events, handler, selector) {
+                element.on(events, selector, handler);
+                unBindCallbacks.push(function () {
+                    element.off(events, selector, handler);
+                });
+            }
+
+
+            function bindMultiple(element, func, events) {
+                for (var i=0; i < events.length; i++) {
+                    bindAndRegisterOff($(element), events[i], func);
+                }
+            }
+
             function cantDoAdjustments() {
                 return !obj.is(":visible") || init;
             }
@@ -1546,17 +1571,13 @@
                 destroyed = TRUE;
                 slideNumberBeforeDestroy = currentSlide;
 
-                if (option[11]/*responsive*/) {
-                    jWin.off("resize focus", adjustResponsiveLayout);
-                }
+                performCallbacks(unBindCallbacks);
 
                 ensureSliderContainerCSSDurationReset();
 
                 if (controls) {
                     controls.remove();
                 }
-
-                $(document).off("click", option[2]/*customlink*/, customLinkClickHandler);
 
                 reorderSlides(0);
 
@@ -1578,9 +1599,15 @@
                 return options[a.toLowerCase()];
             };
 
-            baseSlider.setOption = function (a, val) {
+            baseSlider.setOption = function (name, val) {
                 publicDestroy();
-                options[a.toLowerCase()] = val;
+                if ($.isPlainObject(name)) {
+                    for (var a in name) {
+                        options[a] = name[a];
+                    }
+                } else {
+                    options[name.toLowerCase()] = val;
+                }
                 publicInit();
             };
 
@@ -2494,13 +2521,6 @@
      * Util scripts.
      */
 
-    function addListeners(element, func) {
-        var args = arguments;
-        for (var i=2; i < args.length; i++) {
-            element.addEventListener(args[i], func, FALSE);
-        }
-    }
-
     // The minVersion is specified in an array, like [1, 8, 0] for 1.8.0
     // Partially copy-pasted from: https://gist.github.com/dshaw/652870
     function minJQueryVersion(minVersion) {
@@ -2669,7 +2689,7 @@
     function makeBezier(coOrdArray) {
         var encodedFuncName = "bez_" + coOrdArray.join("_").replace(/\./g, "p");
         var jqueryEasing = $.easing;
-        if (typeof jqueryEasing[encodedFuncName] !== "function") {
+        if (!isFunction(jqueryEasing[encodedFuncName])) {
             var	polyBez = function(p1, p2) {
                 var A = [0, 0];
                 var B = [0, 0];
@@ -2689,7 +2709,7 @@
                         x -= z / xDeriv(x);
                     }
                     return x;
-                };
+                }
 
                 return function(t) {
                     return bezCoOrd(xForT(t), 1);
@@ -2700,7 +2720,7 @@
             }
         }
         return encodedFuncName;
-    };
+    }
 
 })(jQuery, window);
 // If you did just read the entire code, congrats.
