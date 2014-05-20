@@ -28,6 +28,7 @@
     var FIRST_STRING = "first";
     var ABSOLUTE_STRING = "absolute";
     var RELATIVE_STRING = "relative";
+    var HIDDEN_STRING = "hidden";
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
     var CSSVendorPrefix = getCSSVendorPrefix();
@@ -88,7 +89,8 @@
             loadStart: EMPTY_FUNCTION, /* option[41]/*loadStart*/
             loadFinish: EMPTY_FUNCTION,  /* option[42]/*loadFinish*/
             touch: FALSE,  /* option[43]/*touch*/
-            touchHandle: FALSE /* option[44]/*touchHandle*/
+            touchHandle: FALSE, /* option[44]/*touchHandle*/
+            destroyCallback: EMPTY_FUNCTION  /* option[45]/*destroyCallback*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -186,6 +188,11 @@
                     that.css({position: RELATIVE_STRING});
                 });
 
+                // Adding CSS classes
+                slidesContainer.addClass("slidesContainer");
+
+                slidesJquery.addClass("slide");
+
                 // Now we are going to fix the document, if it's 'broken'. (No <li>).
                 // I assume that it's can only be broken, if ajax is enabled. If it's broken without Ajax being enabled, the script doesn't have anything to fill the holes.
                 if (option[31]/*ajax*/) {
@@ -230,11 +237,11 @@
 
 
                 // Set obj overflow to hidden (and position to relative <strike>, if fade is enabled. </strike>)
-                obj.css({overflow: "hidden"});
+                obj.css({overflow: HIDDEN_STRING});
                 if (obj.css("position") == "static") obj.css({position: RELATIVE_STRING}); // Fixed a lot of IE6 + IE7 bugs.
 
                 // Float items to the left, and make sure that all elements are shown.
-                slidesJquery.css({"float": "left", listStyle: "none"});
+                slidesJquery.css({"float": "left", listStyle: "none", overflow: HIDDEN_STRING});
                 // The last CSS to make it work.
                 slidesContainer.add(slidesJquery).css({display: "block", position: RELATIVE_STRING, margin: "0"});
 
@@ -248,7 +255,11 @@
                 // startslide can only be a number (and not 0). Converting from 1 index to 0 index.
                 option[10]/*startslide*/ = parseInt10(option[10]/*startslide*/) - 1 || 0;
 
+                console.log(option[0]/*effect*/);
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
+                console.log(option[0]/*effect*/);
+
+
 
                 for (var a = 0; a < totalSlides; a++) {
                     if (!option[19]/*numerictext*/[a] && option[19]/*numerictext*/[a] != "") {
@@ -264,7 +275,8 @@
                 }
 
                 // Making sure that i have enough room in the <ul> (Through testing, i found out that the max supported size (height or width) in Firefox is 17895697px, Chrome supports up to 134217726px, and i didn't find any limits in IE (6/7/8/9)).
-                slidesContainer[option[7]/*vertical*/ ? 'height' : 'width'](9000000); // That gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in FireFox on OSX.
+                // 9000000px gives room for about 12500 slides of 700px each (and works in every browser i tested). Down to 9000000 from 10000000 because the later might not work perfectly in FireFox on OSX.
+                slidesContainer[option[7]/*vertical*/ ? "height" : "width"](9000000)[option[7]/*vertical*/ ? "width" : "height"]("100%");
 
                 // If responsive is turned on, autowidth doesn't work.
                 option[29]/*autowidth*/ = option[29]/*autowidth*/ && !option[11]/*responsive*/;
@@ -274,16 +286,16 @@
                 }
 
                 if (option[3]/*controlsShow*/) {
-                    controls = $('<span ' + option[36]/*controlsattr*/ + '></span>');
-                    obj[option[6]/*insertafter*/ ? 'after' : 'before'](controls);
+                    controls = $("<span " + option[36]/*controlsattr*/ + "></span>");
+                    obj[option[6]/*insertafter*/ ? "after" : "before"](controls);
 
                     if (option[18]/*numeric*/) {
-                        numericContainer = $('<ol ' + option[37]/*numericattr*/ + '></ol>');
+                        numericContainer = $("<ol " + option[37]/*numericattr*/ + "></ol>");
                         controls.prepend(numericContainer);
                         var usePages = option[18]/*numeric*/ == PAGES_MARKER_STRING;
                         var distanceBetweenPages = usePages ? numberOfVisibleSlides : 1;
                         for (var a = 0; a < totalSlides - ((option[16]/*continuous*/ || usePages) ? 1 : numberOfVisibleSlides) + 1; a += distanceBetweenPages) {
-                            numericControls[a] = $("<li data-target='" + (a + 1) + "'><a href='#'><span>" + option[19]/*numerictext*/[a] + "</span></a></li>")
+                            numericControls[a] = $("<li data-target=\"" + (a + 1) + "\"><a href=\"#\"><span>" + option[19]/*numerictext*/[a] + "</span></a></li>")
                                 .appendTo(numericContainer)
                                 .click(function () {
                                     enqueueAnimation(getTargetAttribute(this) - 1, TRUE);
@@ -528,7 +540,7 @@
 
                 function callback() {
                     if (!fadeOpacity && fadeElement.css("opacity") == 0) {
-                        fadeElement.css({visibility: "hidden"});
+                        fadeElement.css({visibility: HIDDEN_STRING});
                     }
                 }
 
@@ -613,60 +625,6 @@
                 } else {
                     return option[10]/*startslide*/;
                 }
-            }
-
-            function runOnImagesLoaded(target, waitForAllImages, callback) {
-                if (!target) {
-                    callback();
-                    return;
-                }
-                var elems = target.add(target.find("img")).filter("img");
-                var len = elems.length;
-                if (!len) {
-                    callback();
-                    // No need to do anything else.
-                    return;
-                }
-                function loadFunction(that) {
-                    that.off('load error');
-
-                    if (waitForAllImages) {
-                        len--;
-                        if (len == 0) {
-                            callback();
-                        }
-                    } else {
-                        callback();
-                    }
-                }
-
-                elems.each(function () {
-                    var that = this;
-                    var jQueryThat = $(that);
-                    jQueryThat.on('load error', callback(loadFunction, [jQueryThat]));
-                    /*
-                     * Start ugly working IE fix.
-                     */
-                    if (that.readyState == "complete") {
-                        jQueryThat.trigger("load");
-                    } else if (that.readyState) {
-                        // Sometimes IE doesn't fire the readystatechange, even though the readystate has been changed to complete. AARRGHH!! I HATE IE, I HATE IT, I HATE IE!
-                        that.src = that.src; // Do not ask me why this works, ask the IE team!
-                    }
-                    /*
-                     * End ugly working IE fix.
-                     */
-                    else if (that.complete) {
-                        jQueryThat.trigger("load");
-                    }
-                    else if (that.complete === undefined) {
-                        var src = that.src;
-                        // webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
-                        // data uri bypasses webkit log warning (thx doug jones)
-                        that.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
-                        that.src = src;
-                    }
-                });
             }
 
             function autoadjust(i, speed) {
@@ -1179,8 +1137,8 @@
                         var startEvent;
                         var endEvent1;
                         var endEvent2;
-                        var mouseEvent = type.substr(0, 1) == "m";
-                        if (mouseEvent) {
+                        var isMouseEvent = type.substr(0, 1) == "m";
+                        if (isMouseEvent) {
                             startEvent = MOUSEDOWN;
                             endEvent1 = MOUSEUP;
                             endEvent2 = "";
@@ -1198,7 +1156,7 @@
                             }
                             var filter = option[44]/*touchHandle*/ || obj;
                             var eventTarget = event.target;
-                            var isTarget = $(eventTarget).parents().add(eventTarget).filter(filter).length; // If mouseEvent, we know the target to be right
+                            var isTarget = $(eventTarget).parents().add(eventTarget).filter(filter).length;
                             if (!isTarget) {
                                 return;
                             } else {
@@ -1209,7 +1167,7 @@
                         if (type != endEvent1 && type != endEvent2) {
                             var x;
                             var y;
-                            if (mouseEvent) {
+                            if (isMouseEvent) {
                                 x = event.pageX;
                                 y = event.pageY;
                             } else {
@@ -1218,6 +1176,7 @@
                                 y = touch.pageY;
                             }
 
+
                             if (type == startEvent) {
                                 startX = x;
                                 startY = y;
@@ -1225,23 +1184,43 @@
                             } else {
                                 touchMove(x - startX, y - startY);
                             }
+
+                            allowScroll(event, isMouseEvent, prevX, prevY, x - startX, y - startY);
+
                             prevX = x - startX;
                             prevY = y - startY;
                         } else {
                             touchEnd(prevX, prevY);
                             startedTouch = FALSE;
+                            event.preventDefault();
                         }
-
-                        event.preventDefault();
                     };
                     bindMultiple(document, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL, MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
+                }
+
+                function allowScroll(event, isMouseEvent, prevX, prevY, x, y) {
+                    isMouseEvent = FALSE;
+                    if (isMouseEvent || isDirectionVertical(prevX, prevY, x, y) == option[7]/*vertical*/) {
+                        event.preventDefault();
+                    }
+                }
+
+                function isDirectionVertical(prevX, prevY, x, y) {
+                    var dX = prevX - x;
+                    var dY = prevY - y;
+
+                    return mathAbs(dY / dX) >= 1;
                 }
             }
 
             function performCallbacks(callbacks) {
                 while (callbacks.length) {
                     // Removing and running the first, so we maintain FIFO.
-                    callbacks.splice(0, 1)[0]();
+                    var callback = callbacks.splice(0, 1)[0];
+                    if (!callback) {
+                        console.log("Nope");
+                    }
+                    callback();
                 }
             }
 
@@ -1487,7 +1466,9 @@
 
             function bindAndRegisterOff(element, events, handler, selector) {
                 element.on(events, selector, handler);
-                unBindCallbacks.push(makeCallback(element.off, [events, selector, handler]));
+                unBindCallbacks.push(function () {
+                    element.off(events, selector, handler);
+                });
             }
 
 
@@ -1535,12 +1516,6 @@
                 return mod(a, totalSlides);
             }
 
-            // Actual modulo, not remainder. From here: http://stackoverflow.com/questions/4467539/javascript-modulo-not-behaving
-            // Added a or zero, to ensure it returns a number.
-            function mod(a, n) {
-                return (((a % n) + n) % n) || 0;
-            }
-
             function fixClearType(element) {
                 if (screen.fontSmoothingEnabled && element.style) element.style.removeAttribute("filter"); // Fix cleartype
             }
@@ -1567,6 +1542,8 @@
 
                 adjustPositionTo(currentSlide);
                 autoadjust(currentSlide, 0);
+
+                option[45]/*destroyCallback*/.call(baseSlider);
             }
 
             baseSlider.destroy = publicDestroy;
@@ -1709,19 +1686,27 @@
      * A lot of the code here is an if-else-elseif nightmare. This is because it is smaller in JavaScript, and this thing needs to be small (when minimized).
      */
 
+    var GROW_IN = "GrowIn";
+    var GROW_OUT = "GrowOut";
+    var ROUNDED = "Rounded";
+
     // Start by defining everything, the implementations are below.
     var normalEffectsPrefixObject = {
         box: {
             Random: [
                 "",
-                "GrowIn",
-                "GrowOut",
+                GROW_IN,
+                GROW_IN + ROUNDED,
+                GROW_OUT,
+                GROW_OUT + ROUNDED,
                 boxRandomTemplate
             ],
             Rain: [
                 "",
-                "GrowIn",
-                "GrowOut",
+                GROW_IN,
+                GROW_IN + ROUNDED,
+                GROW_OUT,
+                GROW_OUT + ROUNDED,
                 "FlyIn",
                 "FlyOut",
                 [
@@ -1740,7 +1725,11 @@
                     Grow: [
                         "In",
                         "Out",
-                        boxSpiralGrowTemplate
+                        [
+                            "",
+                            "Rounded",
+                            boxSpiralGrowTemplate
+                        ]
                     ]
                 }
             ]
@@ -1848,32 +1837,34 @@
 
     // The implementations
     // dir: 0: UpRight, 1: DownRight: 2: DownLeft, 3: UpLeft
-    // effect: 0: none, 1: growIn, 2: growOut, 3: flyIn, 4: flyOut.
+    // effect: 0: none, 1: growIn, 2: growRoundedIn, 3: growOut, 4: growRoundedOut, 5: flyIn, 6: flyOut
     function boxRainTemplate(obj, effect, dir) {
         var reverseRows = dir == 1 || dir == 3;
         var reverse = dir == 0 || dir == 3;
-        var grow = effect == 1 || effect == 2;
-        var flyIn = effect == 3 || effect == 4;
-        var reveal = effect == 4 || effect == 2;
-        boxTemplate(obj, reverse, reverseRows, grow, FALSE, 1, flyIn, reveal);
+        var grow = effect >= 1 && effect <= 4;
+        var flyIn = effect == 5 || effect == 6;
+        var reveal = effect == 6 || effect == 3  || effect == 4;
+        var roundedGrow = effect == 2 || effect == 4;
+        boxTemplate(obj, reverse, reverseRows, grow, FALSE, 1, flyIn, reveal, roundedGrow);
     }
 
     function boxSpiralTemplate(obj, direction) {
-        boxTemplate(obj, direction, FALSE, FALSE, FALSE, 2, FALSE, FALSE);
+        boxTemplate(obj, direction, FALSE, FALSE, FALSE, 2, FALSE, FALSE, FALSE);
     }
 
-    function boxSpiralGrowTemplate(obj, direction, reveal) {
-        boxTemplate(obj, direction, FALSE, TRUE, FALSE, 2, FALSE, reveal);
+    function boxSpiralGrowTemplate(obj, direction, reveal, rounded) {
+        boxTemplate(obj, direction, FALSE, TRUE, FALSE, 2, FALSE, reveal, rounded);
     }
 
-    // grow: 0: no grow, 1: growIn, 2: growOut
-    function boxRandomTemplate(obj, grow) {
-        var reveal = grow == 2;
-        boxTemplate(obj, FALSE, FALSE, grow, TRUE, 0, FALSE, reveal);
+    // effect: 0: no grow, 1: growIn: 2: growInRounded, 3: growOut, 4: growOutRounded
+    function boxRandomTemplate(obj, effect) {
+        var reveal = effect == 3 || effect == 4;
+        var roundedGrow = effect == 2 || effect == 4;
+        boxTemplate(obj, FALSE, FALSE, effect != 0, TRUE, 0, FALSE, reveal, roundedGrow);
     }
 
     // SelectionAlgorithm: 0: Standard selection, 1: rain, 2: spiral
-    function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal) {
+    function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal, roundedGrow) {
         var options = obj.options;
         var ease = options.ease;
         var boxRows = options.boxrows;
@@ -1969,8 +1960,10 @@
                 var box = $(boxLine[j]);
                 (function (box, timeBuff) {
                     var boxChildren = box.children();
-                    var goToWidth = box.width();
-                    var goToHeight = box.height();
+                    var orgWidth = box.width();
+                    var orgHeight = box.height();
+                    var goToWidth = orgWidth;
+                    var goToHeight = orgHeight;
                     var orgLeft = parseNumber(box.css("left"));
                     var orgTop = parseNumber(box.css("top"));
                     var goToLeft = orgLeft;
@@ -2008,6 +2001,9 @@
                             boxChildren.css({left: childOrgLeft - goToWidth / 2, top: childOrgTop - goToHeight / 2});
 
                             box.width(0).height(0);
+                            if (roundedGrow) {
+                                box.css({borderRadius: mathMax(orgHeight, orgWidth)});
+                            }
                         }
                     }
 
@@ -2023,7 +2019,8 @@
                             width: goToWidth,
                             height: goToHeight,
                             left: goToLeft,
-                            top: goToTop
+                            top: goToTop,
+                            borderRadius: grow && reveal && roundedGrow ? mathMax(orgHeight, orgWidth) : 0
                         }, speed, ease, function () {
                             count--;
                             if (count == 0) {
@@ -2393,7 +2390,7 @@
         options.boxcols = 1;
         options.boxrows = 1;
         options.speed = speed;
-        boxTemplate(obj);
+        boxTemplate(obj, FALSE);
     }
 
     // 1: up, 2: right, 3: down, 4, left:
@@ -2462,7 +2459,7 @@
             width: width,
             height: height,
             opacity: 0,
-            overflow: "hidden",
+            overflow: HIDDEN_STRING,
             position: ABSOLUTE_STRING,
             zIndex: obj.options.animationzindex
         });
@@ -2501,10 +2498,64 @@
      * Util scripts.
      */
 
-    function makeCallback2(func, args) {
+    function makeCallback(func, args) {
         return function () {
             func.apply(undefined, args);
         }
+    }
+
+    function runOnImagesLoaded(target, waitForAllImages, callback) {
+        if (!target) {
+            callback();
+            return;
+        }
+        var elems = target.add(target.find("img")).filter("img");
+        var len = elems.length;
+        if (!len) {
+            callback();
+            // No need to do anything else.
+            return;
+        }
+        function loadFunction(that) {
+            that.off('load error');
+
+            if (waitForAllImages) {
+                len--;
+                if (len == 0) {
+                    callback();
+                }
+            } else {
+                callback();
+            }
+        }
+
+        elems.each(function () {
+            var that = this;
+            var jQueryThat = $(that);
+            jQueryThat.on('load error', makeCallback(loadFunction, [jQueryThat]));
+            /*
+             * Start ugly working IE fix.
+             */
+            if (that.readyState == "complete") {
+                jQueryThat.trigger("load");
+            } else if (that.readyState) {
+                // Sometimes IE doesn't fire the readystatechange, even though the readystate has been changed to complete. AARRGHH!! I HATE IE, I HATE IT, I HATE IE!
+                that.src = that.src; // Do not ask me why this works, ask the IE team!
+            }
+            /*
+             * End ugly working IE fix.
+             */
+            else if (that.complete) {
+                jQueryThat.trigger("load");
+            }
+            else if (that.complete === undefined) {
+                var src = that.src;
+                // webkit hack from http://groups.google.com/group/jquery-dev/browse_thread/thread/eee6ab7b2da50e1f
+                // data uri bypasses webkit log warning (thx doug jones)
+                that.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+                that.src = src;
+            }
+        });
     }
 
     // The minVersion is specified in an array, like [1, 8, 0] for 1.8.0
@@ -2529,10 +2580,6 @@
         return FALSE;
     }
 
-    function stringTrim(str) {
-        return str.replace(/^\s+|\s+$/g, '');
-    }
-
     function getCSSVendorPrefix() {
         var property = "transition";
         var styleName = getVendorPrefixedProperty(property, $("<div>")[0].style);
@@ -2544,6 +2591,10 @@
             return "-" + prefix + "-";
         }
         return "";
+    }
+
+    function stringTrim(str) {
+        return str.replace(/^\s+|\s+$/g, '');
     }
 
     function endsWith(string, suffix) {
@@ -2613,6 +2664,12 @@
 
     function getTimeInMillis() {
         return +new Date();
+    }
+
+    // Actual modulo, not remainder. From here: http://stackoverflow.com/questions/4467539/javascript-modulo-not-behaving
+    // Added a or zero, to ensure it returns a number.
+    function mod(a, n) {
+        return (((a % n) + n) % n) || 0;
     }
 
     function mathAbs(number) {

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Sudo Slider | TouchHandle outside slider demo</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+    <link rel="STYLESHEET" type="text/css" href="../css/style.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var sudoSlider = $("#slider").sudoSlider({
+                continuous: true,
+                touch: true,
+                touchHandle: "#handle",
+                prevNext: true,
+                numeric: true,
+                effect: "fade"
+            });
+        });
+    </script>
+
+</head>
+<body>
+<div id="container">
+    <h1 id="link">Sudo Slider jQuery Plugin - TouchHandle outside slider demo</h1>
+
+    <div style="position:relative;">
+        <div id="slider" class="slider">
+            <img src="../images/01.jpg" alt="image description">
+            <img src="../images/02.jpg" alt="image description">
+            <img src="../images/03.jpg" alt="image description">
+            <img src="../images/04.jpg" alt="image description">
+            <img src="../images/05.jpg" alt="image description">
+        </div>
+    </div>
+    <h2>Drag me!</h2>
+    <img id="handle" src="../images/05.jpg" alt="image description">
+    <h3>Usage</h3>
+    <h4>Include the javascripts</h4>
+	<pre>
+&lt;script type="Text/Javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
+    <h4>The Javascript to start it.</h4>
+	<pre>
+&lt;script type="text/javascript" &gt;
+   $(document).ready(function(){
+      var sudoSlider = $("#slider").sudoSlider({
+         continuous: true,
+         touch: true,
+         touchHandle: "#handle",
+         prevNext: true,
+         numeric: true,
+         effect: "fade"
+      });
+   });
+&lt;/script&gt;</pre>
+    <h4>The HTML</h4>
+	<pre>
+&lt;div id="slider" &gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;h2&gt;Drag me!&lt;/h2&gt;
+&lt;img id="handle" src="../images/05.jpg" alt="image description"&gt;
+    </pre>
+</div>
+
+<div style="width:728px;height:90px;margin:0 auto;">
+    <script type="text/javascript">
+        <!--
+        google_ad_client = "pub-8170632875475442";
+        /* Sudo Slider, lang horisontal */
+        google_ad_slot = "0149025622";
+        google_ad_width = 728;
+        google_ad_height = 90;
+        //-->
+    </script>
+    <script type="text/javascript"
+            src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+    </script>
+</div>
+<script type="text/javascript">
+    /* Google Analytics, please remove
+     var _gaq = _gaq || [];
+     _gaq.push(['_setAccount', 'UA-20484420-1']);
+     _gaq.push(['_trackPageview']);
+
+     (function() {
+     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+     /* */
+</script>
+</body>
+</html>
