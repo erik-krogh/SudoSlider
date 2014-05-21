@@ -255,9 +255,7 @@
                 // startslide can only be a number (and not 0). Converting from 1 index to 0 index.
                 option[10]/*startslide*/ = parseInt10(option[10]/*startslide*/) - 1 || 0;
 
-                console.log(option[0]/*effect*/);
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
-                console.log(option[0]/*effect*/);
 
 
 
@@ -1216,11 +1214,7 @@
             function performCallbacks(callbacks) {
                 while (callbacks.length) {
                     // Removing and running the first, so we maintain FIFO.
-                    var callback = callbacks.splice(0, 1)[0];
-                    if (!callback) {
-                        console.log("Nope");
-                    }
-                    callback();
+                    callbacks.splice(0, 1)[0]();
                 }
             }
 
@@ -1231,7 +1225,10 @@
                 if (!option[31]/*ajax*/) {
                     return TRUE;
                 } else {
-                    return option[31]/*ajax*/[slide] || !(startedAjaxLoads[slide] && !finishedAjaxLoads[slide]);
+                    if (option[31]/*ajax*/[slide]) {
+                        return FALSE;
+                    }
+                    return !(startedAjaxLoads[slide] && !finishedAjaxLoads[slide]);
                 }
             }
 
@@ -2510,29 +2507,28 @@
             return;
         }
         var elems = target.add(target.find("img")).filter("img");
-        var len = elems.length;
-        if (!len) {
+        var numberOfRemainingImages = elems.length;
+        if (!numberOfRemainingImages) {
             callback();
-            // No need to do anything else.
             return;
-        }
-        function loadFunction(that) {
-            that.off('load error');
-
-            if (waitForAllImages) {
-                len--;
-                if (len == 0) {
-                    callback();
-                }
-            } else {
-                callback();
-            }
         }
 
         elems.each(function () {
             var that = this;
             var jQueryThat = $(that);
-            jQueryThat.on('load error', makeCallback(loadFunction, [jQueryThat]));
+            var events = "load error";
+            var loadFunction = function () {
+                jQueryThat.off(events, loadFunction);
+                if (waitForAllImages) {
+                    numberOfRemainingImages--;
+                    if (numberOfRemainingImages == 0) {
+                        callback();
+                    }
+                } else {
+                    callback();
+                }
+            };
+            jQueryThat.on(events, loadFunction);
             /*
              * Start ugly working IE fix.
              */
