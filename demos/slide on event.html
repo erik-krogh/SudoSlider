@@ -10,15 +10,11 @@
 		$(document).ready(function(){	
 			var sudoSlider = $("#slider").sudoSlider({
 				prevNext: false,
-				customLink:'a.eventclass',
-                numeric: true
+				customLink:'a.eventclass'
 			});
 			$('button.clickbuttonclass').click(function() {
 				// Here i do some check, to see if the content is valid.
-				var value = false;
-				$('input#someID').each(function() {
-					value = $(this).val();
-				});
+				var value = $('input#someID').val();
 				if(value) {
                     sudoSlider.goToSlide(2);
                 } else {
@@ -47,7 +43,8 @@
 				<li style="width: 696px;">
 					<p>Because you could enter somethings into the form, i got you a picture of a goat.
 					<img src="../images/05.jpg">
-</p>                <a class="eventclass" data-target="prev">Go back</a>
+                    </p>
+                    <a class="eventclass" data-target="prev">Go back</a>
 				</li>
 			</ul>
 		</div>
@@ -67,12 +64,12 @@
       });
       $('button.clickbuttonclass').click(function() {
          // Here i do some check, to see if the content is valid.
-         var value = false;
-         $('input#someID').each(function() {
-            value = $(this).val();
-         });
-         if(value) sudoSlider.goToSlide(2);
-         else alert('ERROR!!!');
+         var value = $('input#someID').val();
+         if (value) {
+            sudoSlider.goToSlide(2);
+         } else {
+            alert('ERROR!!!');
+         }
       });
    });
 &lt;/script&gt;</pre>
