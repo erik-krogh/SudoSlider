@@ -13,7 +13,6 @@
  *
  */
 // TODO: https://github.com/webbiesdk/SudoSlider/issues/8
-// TODO: Test in many browsers!
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -138,15 +137,13 @@
                 animateToAfterCompletionSpeed,
                 slideContainerCreated = FALSE,
                 option = [],
-                options = $.extend({}, optionsOrg),
+                options = $.extend(TRUE, {}, optionsOrg),
                 currentSliderPositionTop,
                 currentSliderPositionLeft,
                 unBindCallbacks = [];
 
             // The call to the init function is after the definition of all the functions.
             function initSudoSlider() {
-                option[31]/*ajax*/ = $.makeArray(option[31]/*ajax*/);
-
                 // Storing the public options in an array.
                 var optionIndex = 0;
                 for (var key in options) {
@@ -379,19 +376,22 @@
             };
 
             // Adjusts the slider when a change in layout has happened.
+            var previousAdjustedResponsiveWidth = -1;
             function adjustResponsiveLayout(forced) {
                 function doTheAdjustment() {
                     if ((cantDoAdjustments() && !forced) || totalSlides == 0) {
                         return;
                     }
-                    var slide = slides[currentSlide];
-                    var oldWidth = slide.width();
-                    var newWidth = getResponsiveWidth();
-                    for (var i = 0; i < totalSlides; i++) {
-                        slides[i].width(newWidth);
-                    }
 
-                    if (oldWidth != newWidth) {
+                    var newWidth = getResponsiveWidth();
+
+                    if (previousAdjustedResponsiveWidth != newWidth) {
+                        previousAdjustedResponsiveWidth = newWidth;
+
+                        for (var i = 0; i < totalSlides; i++) {
+                            slides[i].width(newWidth);
+                        }
+
                         stopAnimation();
                         ensureSliderContainerCSSDurationReset();
                         adjustPositionTo(currentSlide);
@@ -850,10 +850,14 @@
                 }
                 startedAjaxLoads[slide] = TRUE;
 
+                var target = option[31]/*ajax*/[slide];
+                if (!target) {
+                    callAsync(ajaxCallBack);
+                    return;
+                }
 
                 if (asyncDelayedSlideLoadTimeout) clearTimeout(asyncDelayedSlideLoadTimeout);// I dont want it to run to often.
 
-                var target = option[31]/*ajax*/[slide];
                 var targetslide = slides[slide];
 
                 // Loads the url as an image, either if it is an image, or if everything else failed.
@@ -921,10 +925,7 @@
 
                         finishedAjaxLoads[i] = TRUE;
 
-                        var callbacks = awaitingAjaxCallbacks[i];
-                        if (callbacks) {
-                            performCallbacks(callbacks);
-                        }
+                        performCallbacks(awaitingAjaxCallbacks[i]);
 
                         startAsyncDelayedLoad();
 
@@ -1212,7 +1213,7 @@
             }
 
             function performCallbacks(callbacks) {
-                while (callbacks.length) {
+                while (callbacks && callbacks.length) {
                     // Removing and running the first, so we maintain FIFO.
                     callbacks.splice(0, 1)[0]();
                 }
@@ -1244,9 +1245,10 @@
                 if (option[31]/*ajax*/) {
                     var waitCounter = 0;
                     for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
-                        if (!isContentInSlideReady(loadSlide)) {
+                        var realLoadSlide = getRealPos(loadSlide);
+                        if (!isContentInSlideReady(realLoadSlide)) {
                             waitCounter++;
-                            ajaxLoad(getRealPos(loadSlide), function () {
+                            ajaxLoad(realLoadSlide, function () {
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
                                 waitCounter--;
                                 if (waitCounter == 0) {
@@ -1266,22 +1268,16 @@
                 }
             }
 
-            var reorderedSlidesToStartFromSlide = 0;
-
             function ensureSliderContainerCSSDurationReset() {
                 if (option[40]/*useCSS*/) {
                     slidesContainer.css(CSSVendorPrefix + "transition-duration", "");
                 }
             }
 
+            var reorderedSlidesToStartFromSlide = 0;
             function reorderSlides(slide) {
                 if (getRealPos(slide) == reorderedSlidesToStartFromSlide) {
                     return;
-                }
-                for (var i = 0; i < totalSlides; i++) {
-                    if (!isContentInSlideReady(i)) {
-                        return; // Nope.
-                    }
                 }
                 reorderedSlidesToStartFromSlide = slide;
                 ensureSliderContainerCSSDurationReset();
