@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Sudo Slider | Fullscreen slider</title>
+	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+	<script type="text/javascript" src="../js/lib/jquery.properload.js"></script>
+	<script type="text/javascript">
+        var win = $(window);
+        $(document).ready(function () {
+            var sudoSlider = $("#slider").sudoSlider({
+                effect: "boxRainGrowInRoundedDownRight",
+                responsive: true,
+                prevNext: false,
+                continuous: true,
+                autoHeight: false,
+                touch: true,
+                customLink: ".sudoSliderLink",
+                updateBefore: true
+            });
+
+            win.on("resize blur focus", function () {
+                sudoSlider.height(win.height());
+            }).resize();
+
+
+            sudoSlider.find(".slide").each(function () {
+                var slide = $(this);
+                var imageSrc = slide.attr("data-background");
+                if (!imageSrc) {
+                    return;
+                }
+                $("<img />").attr("src", imageSrc).properload(function () {
+                    var backgroundImage = $(this);
+                    backgroundImage.appendTo(slide);
+                    var imageHeight = backgroundImage.height();
+                    var imageWidth = backgroundImage.width();
+                    var aspectRatio = imageWidth / imageHeight;
+
+                    backgroundImage.css({
+                        position: "absolute",
+                        zIndex: -1,
+                        top: 0,
+                        left: 0
+                    });
+
+                    win.on("resize blur focus", function () {
+                        var sliderWidth = sudoSlider.width();
+                        var sliderHeight = sudoSlider.height();
+                        if ((sliderWidth / sliderHeight) < aspectRatio ) {
+                            var leftMargin = ((sliderWidth - (sliderHeight * aspectRatio)) / 2) + "px";
+                            backgroundImage.css({
+                                top: 0,
+                                left: leftMargin,
+                                width: sliderHeight * aspectRatio,
+                                height: sliderHeight
+                            });
+                        } else {
+                            backgroundImage.css({
+                                left: 0,
+                                top: ((sliderHeight - (sliderWidth / aspectRatio)) / 2) + "px",
+                                height: sliderWidth / aspectRatio,
+                                width: sliderWidth
+                            });
+                        }
+                    }).resize();
+
+                }, true);
+            });
+        });
+	</script>
+	<style>
+        #slider .slide {
+            position: relative;
+            height: 100%;
+        }
+
+        .centeredDotsControls, .centeredDotsControls a, .centeredDotsControls a span {
+            z-index: 10001;
+            position: relative;
+        }
+
+        .centeredDotsControls a {
+            width: 25px;
+            height: 25px;
+            margin: 5px;
+            background: transparent;
+            box-shadow: 0 1px 1px black;
+            border: 3px solid #eee;
+            border-radius: 20px;
+            display: inline-block;
+            text-indent: -9000px;
+        }
+
+        .centeredDotsControls a.current {
+            background: #ffffff;
+        }
+
+    </style>
+
+</head>
+<body>
+<div style="height: 100%;">
+    <div id="slider">
+        <div data-background="../images/background1.jpg">
+            <h1 style="font-size: 400%;margin: 20px;text-align: center;line-height: 120%">
+                This is a fullscreen slider using SudoSlider <br />
+                Try to scroll down, you can place additional content below the slider.
+            </h1>
+        </div>
+        <div data-background="../images/background2.jpg">
+            <h1 style="color: white;font-size: 400%;margin: 20px;text-align: center;line-height: 120%;">
+                Oh yeah, touch works. So you can swipe the images if you want.
+            </h1>
+        </div>
+        <div data-background="../images/background3.jpg">
+            <h1 style="color: #000000;font-size: 400%;margin: 20px;text-align: center;line-height: 120%">
+                As with all SudoSlider sliders, the animations are hardware accelerated if the browser supports it.
+            </h1>
+        </div>
+        <div data-background="../images/background4.jpg">
+            <h1 style="color: #ffffff;font-size: 400%;margin: 20px;text-align: center;line-height: 120%">
+                I'm running out of good things to say. <br />
+                See the source code to see how this is done. <br />
+                Or download the plugin and find this demo in the download
+            </h1>
+        </div>
+        <div data-background="../images/background5.jpg">
+            <h1 style="color: #ffffff;font-size: 400%;margin: 20px;text-align: center;line-height: 120%">
+                I'm running out of good things to say. <br />
+                See the source code to see how this is done. <br />
+                Or download the plugin and find this demo in the download
+            </h1>
+        </div>
+
+    </div>
+    <span style="position:absolute;bottom: 0;left: 0; width: 100%;text-align: center;" class="controls">
+        <div style="display: block; margin: 0 auto" class="centeredDotsControls">
+            <a class="sudoSliderLink" data-target="1" href="#"><span>1</span></a>
+            <a class="sudoSliderLink" data-target="2" href="#"><span>2</span></a>
+            <a class="sudoSliderLink" data-target="3" href="#"><span>3</span></a>
+            <a class="sudoSliderLink" data-target="4" href="#"><span>4</span></a>
+            <a class="sudoSliderLink" data-target="5" href="#"><span>5</span></a>
+        </div>
+    </span>
+</div>
+<span style="text-align: center;display: inline;">
+    <h1>
+        If you wan't to see how to do this, see the source code.
+    </h1>
+    <h1>
+        Editing the HTML should be easy, and you don't have to worry about how the JavaScript/CSS works.
+    </h1>
+    <h2>This is more content!</h2>
+</span>
+<script type="text/javascript">
+    /* Google Analytics, please remove
+     var _gaq = _gaq || [];
+     _gaq.push(['_setAccount', 'UA-20484420-1']);
+     _gaq.push(['_trackPageview']);
+
+     (function() {
+     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+     /* */
+</script>
+</body>
+</html>
