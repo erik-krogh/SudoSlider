@@ -10,6 +10,7 @@
 	<script type="text/javascript">
         var win = $(window);
         $(document).ready(function () {
+            var container = $("#container");
             var sudoSlider = $("#slider").sudoSlider({
                 effect: "boxRainGrowInRoundedDownRight",
                 responsive: true,
@@ -22,7 +23,9 @@
             });
 
             win.on("resize blur focus", function () {
-                sudoSlider.height(win.height());
+                var height = win.height();
+                sudoSlider.height(height);
+                container.height(height);
             }).resize();
 
 
@@ -34,10 +37,20 @@
                 }
                 $("<img />").attr("src", imageSrc).properload(function () {
                     var backgroundImage = $(this);
-                    backgroundImage.appendTo(slide);
-                    var imageHeight = backgroundImage.height();
-                    var imageWidth = backgroundImage.width();
+                    var imageHeight = backgroundImage[0].naturalHeight;
+                    var imageWidth = backgroundImage[0].naturalWidth;
+
+                    if (!imageHeight) {
+                        var img = new Image();
+                        img.src = imageSrc;
+                        imageWidth = img.width;
+                        imageHeight = img.height;
+
+                    }
+
                     var aspectRatio = imageWidth / imageHeight;
+
+                    backgroundImage.appendTo(slide);
 
                     backgroundImage.css({
                         position: "absolute",
@@ -77,6 +90,14 @@
             height: 100%;
         }
 
+        #container {
+            width: auto;
+        }
+
+        #slider, #slider img {
+            width: 100%;
+        }
+
         .centeredDotsControls, .centeredDotsControls a, .centeredDotsControls a span {
             z-index: 10001;
             position: relative;
@@ -91,18 +112,29 @@
             border: 3px solid #eee;
             border-radius: 20px;
             display: inline-block;
-            text-indent: -9000px;
+            /*text-indent: -9000px;*/
+        }
+
+        .controls *, .controls {
+            z-index: 100000;
+        }
+
+        .centeredDotsControls a {
+            background: #333333;
+            text-decoration: none;
+            color: #fff;
         }
 
         .centeredDotsControls a.current {
             background: #ffffff;
+            color: #333;
         }
 
     </style>
 
 </head>
 <body>
-<div style="height: 100%;">
+<div id="container" style="margin: 0;">
     <div id="slider">
         <div data-background="../images/background1.jpg">
             <h1 style="font-size: 400%;margin: 20px;text-align: center;line-height: 120%">
@@ -136,7 +168,7 @@
         </div>
 
     </div>
-    <span style="position:absolute;bottom: 0;left: 0; width: 100%;text-align: center;" class="controls">
+    <span style="position:absolute; bottom: 0px; left: 0px;width: 100%;text-align: center;" class="controls">
         <div style="display: block; margin: 0 auto" class="centeredDotsControls">
             <a class="sudoSliderLink" data-target="1" href="#"><span>1</span></a>
             <a class="sudoSliderLink" data-target="2" href="#"><span>2</span></a>
