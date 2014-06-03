@@ -410,3 +410,4 @@ Change in script: The container that has the slide now has class="slidesContaine
 Change in script: Added a destroyCallback option. It is called after the slider has been destroyed (that includes when options are changed).
 Change in script: New effects, added optional suffix "Rounded" to all grow effects. Try it out in the all effects demo. Now 132 effects.
 Change in script: Fixed that when preloadAjax was false, nothing except the first slide was ever loaded. And other problems related to Ajax.
+Change in script: The auto animation pauses when responsive is on and the window is resized.

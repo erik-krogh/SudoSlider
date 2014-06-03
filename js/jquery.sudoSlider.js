@@ -13,6 +13,8 @@
  *
  */
 // TODO: https://github.com/webbiesdk/SudoSlider/issues/8
+// TODO: Description:
+// SudoSlider is a jQuery slider that supports any content, has effects you’ve only seen in image-sliders is responsive and much more. It has a lot of transition effects, all of which are done using CSS transitions (with JavaScript fallback for old browsers). The script doesn’t force any style on your page, and you can make your navigation buttons however you like.
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -140,7 +142,9 @@
                 options = $.extend(TRUE, {}, optionsOrg),
                 currentSliderPositionTop,
                 currentSliderPositionLeft,
-                unBindCallbacks = [];
+                unBindCallbacks = [],
+                autoStartedWithPause = FALSE,
+                animationWasInterrupted = FALSE;
 
             // The call to the init function is after the definition of all the functions.
             function initSudoSlider() {
@@ -183,6 +187,9 @@
                     var that = $(elem);
                     slides[index] = that;
                     that.css({position: RELATIVE_STRING});
+                    if (that.css("display") == "none") {
+                        that.css("display", "inline");
+                    }
                 });
 
                 // Adding CSS classes
@@ -373,7 +380,7 @@
                     }
                 }
                 return FALSE;
-            };
+            }
 
             // Adjusts the slider when a change in layout has happened.
             var previousAdjustedResponsiveWidth = -1;
@@ -390,6 +397,9 @@
 
                         for (var i = 0; i < totalSlides; i++) {
                             slides[i].width(newWidth);
+                        }
+                        if (autoStartedWithPause !== FALSE) {
+                            startAuto(autoStartedWithPause);
                         }
 
                         stopAnimation();
@@ -455,30 +465,41 @@
                         pause = option[14]/*pause*/;
                     }
                 }
+                if (animationWasInterrupted) {
+                    pause = mathMax(pause, 100);
+                }
                 stopAuto();
                 autoOn = TRUE;
+                autoStartedWithPause = pause;
                 autoTimeout = setTimeout(function () {
                     if (autoOn) {
                         enqueueAnimation(NEXT_STRING, FALSE);
+                        autoStartedWithPause = FALSE;
                     }
                 }, pause);
             }
 
             function stopAuto(autoPossibleStillOn) {
-                clearTimeout(autoTimeout);
+                if (autoTimeout) {
+                    clearTimeout(autoTimeout);
+                }
                 if (!autoPossibleStillOn) autoOn = FALSE;
             }
 
             function textSpeedToNumber(speed) {
-                return (parseInt10(speed) || speed == 0) ?
-                    parseInt10(speed) :
-                        speed == 'fast' ?
-                    200 :
-                    (speed == 'normal' || speed == 'medium') ?
-                        400 :
-                            speed == 'slow' ?
-                        600 :
-                        400;
+                if (parseInt10(speed) || speed == 0) {
+                    return parseInt10(speed);
+                }
+                if (speed == "fast") {
+                    return 200;
+                }
+                if (speed == "normal" || speed == "medium") {
+                    return 400;
+                }
+                if (speed == "slow") {
+                    return 600;
+                }
+                return 600;
             }
 
             function makecontrol(html, action) {
@@ -1155,6 +1176,7 @@
                             }
                             var filter = option[44]/*touchHandle*/ || obj;
                             var eventTarget = event.target;
+                            // TODO: Should i add parents?
                             var isTarget = $(eventTarget).parents().add(eventTarget).filter(filter).length;
                             if (!isTarget) {
                                 return;
@@ -1440,6 +1462,8 @@
 
             function stopAnimation() {
                 if (currentlyAnimating) {
+                    //noinspection JSUnusedAssignment
+                    animationWasInterrupted = TRUE;
                     // Doing it in this order isn't a problem in relation to the user-callbacks, since they are run in a setTimeout(callback, 0) anyway.
                     currentAnimationCallback();
 
@@ -1454,6 +1478,7 @@
                     }
                     autoadjust(currentSlide, 0);
                     adjustPositionTo(currentSlide);
+                    animationWasInterrupted = FALSE;
                 }
             }
 
