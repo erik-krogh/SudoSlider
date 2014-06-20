@@ -1,3 +1,4 @@
+/* General Layout in my demos */
 body {font:80% Trebuchet MS, Arial, Helvetica, Sans-Serif;color:#333;line-height:180%;margin:0;padding:0;}
 
 h1, h2, h3, h4, h5{margin: 0 0 15px 0;padding: 0;color: #690;font-weight: normal;}
@@ -15,11 +16,11 @@ pre {white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: pre-wrap; w
 
 /* // Sudo Slider */
 /* Numeric Navigation */
-ol {margin:1em 0;padding:0;height:28px;	}
-ol li{margin:0 10px 0 0; padding:0;float:left;list-style:none;height:28px;line-height:28px;}
-ol li a{float:left;height:28px;line-height:28px;border:1px solid #ccc;background:#DAF3F8;color:#555;padding:0 10px;text-decoration:none;}
-ol li.current a{background:#5DC9E1;color:#fff;}
-ol li a:focus, .prevBtn a:focus, .nextBtn a:focus{outline:none;}
+ol.numericControls {margin:1em 0;padding:0;height:28px;	}
+ol.numericControls li{margin:0 10px 0 0; padding:0;float:left;list-style:none;height:28px;line-height:28px;}
+ol.numericControls li a{float:left;height:28px;line-height:28px;border:1px solid #ccc;background:#DAF3F8;color:#555;padding:0 10px;text-decoration:none;}
+ol.numericControls li.current a{background:#5DC9E1;color:#fff;}
+ol.numericControls li a:focus, .prevBtn a:focus, .nextBtn a:focus{outline:none;}
 
 .graphic, .prevBtn, .nextBtn{margin:0;padding:0;display:block;overflow:hidden;text-indent:-8000px;}
 
