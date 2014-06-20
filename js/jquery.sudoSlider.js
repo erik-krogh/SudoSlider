@@ -13,8 +13,9 @@
  *
  */
 // TODO: https://github.com/webbiesdk/SudoSlider/issues/8
-// TODO: Description:
-// SudoSlider is a jQuery slider that supports any content, has effects you’ve only seen in image-sliders is responsive and much more. It has a lot of transition effects, all of which are done using CSS transitions (with JavaScript fallback for old browsers). The script doesn’t force any style on your page, and you can make your navigation buttons however you like.
+// TODO: Ordne z-index på anden måde, så der ikke er behov for at lave høj z-index på navigation.
+// TODO: Description: SudoSlider is a jQuery slider that supports any content, has effects you’ve only seen in image-sliders is responsive and much more. It has a lot of transition effects, all of which are done using CSS transitions (with JavaScript fallback for old browsers). The script doesn’t force any style on your page, and you can make your navigation buttons however you like.
+// TODO: CryptoCurrency donations
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -84,14 +85,13 @@
             nextHtml: '<a href="#" class="nextBtn"> next </a>', /* option[35]/*nexthtml*/
             controlsAttr: 'class="controls"', /* option[36]/*controlsattr*/
             numericAttr: 'class="numericControls"', /* option[37]/*numericattr*/
-            animationZIndex: 10000, /* option[38]/*animationZIndex*/
-            interruptible: FALSE, /* option[39]/*interruptible*/
-            useCSS: TRUE, /* option[40]/*useCSS*/
-            loadStart: EMPTY_FUNCTION, /* option[41]/*loadStart*/
-            loadFinish: EMPTY_FUNCTION,  /* option[42]/*loadFinish*/
-            touch: FALSE,  /* option[43]/*touch*/
-            touchHandle: FALSE, /* option[44]/*touchHandle*/
-            destroyCallback: EMPTY_FUNCTION  /* option[45]/*destroyCallback*/
+            interruptible: FALSE, /* option[38]/*interruptible*/
+            useCSS: TRUE, /* option[39]/*useCSS*/
+            loadStart: EMPTY_FUNCTION, /* option[40]/*loadStart*/
+            loadFinish: EMPTY_FUNCTION,  /* option[41]/*loadFinish*/
+            touch: FALSE,  /* option[42]/*touch*/
+            touchHandle: FALSE, /* option[43]/*touchHandle*/
+            destroyCallback: EMPTY_FUNCTION  /* option[44]/*destroyCallback*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -191,6 +191,10 @@
                         that.css("display", "inline");
                     }
                 });
+
+                if (slidesContainer.css("zIndex") == "auto") {
+                    slidesContainer.css({zIndex: -2});
+                }
 
                 // Adding CSS classes
                 slidesContainer.addClass("slidesContainer");
@@ -518,7 +522,7 @@
                         loadSlidesAndAnimate(direction, clicked, speed);
                     }
                 } else {
-                    if (option[39]/*interruptible*/ && currentlyAnimating) {
+                    if (option[38]/*interruptible*/ && currentlyAnimating) {
                         stopAnimation();
                         enqueueAnimation(direction, clicked, speed);
                     } else {
@@ -567,7 +571,7 @@
                     fadeElement.css({visibility: "visible"});
                 }
 
-                if (option[40]/*useCSS*/) {
+                if (option[39]/*useCSS*/) {
                     animate(fadeElement, adjustObject, fadetime, option[12]/*ease*/, callback);
                 } else {
                     fadeElement.animate(
@@ -703,7 +707,7 @@
                     adjustObject.width = getSliderDimensions(i, FALSE) || 1;
                 }
 
-                if (option[40]/*useCSS*/) {
+                if (option[39]/*useCSS*/) {
                     animate(obj, adjustObject, speed, option[12]/*ease*/)
                 } else {
                     if (speed == 0) {
@@ -733,7 +737,7 @@
                 currentSliderPositionLeft = left;
                 currentSliderPositionTop = top;
 
-                if (option[40]/*useCSS*/) {
+                if (option[39]/*useCSS*/) {
                     slidesContainer.css({transform: "translate(" + left + "px, " + top + "px)"});
                 } else {
                     function setMargins(left, top) {
@@ -978,7 +982,7 @@
                 }
                 option[23]/*initCallback*/.call(baseSlider);
 
-                if (option[43]/*touch*/) {
+                if (option[42]/*touch*/) {
                     setUpTouch();
                 }
 
@@ -1127,7 +1131,7 @@
                     var cubicBezierY = (speed*timeLeft)/(distanceLeft + speed*timeLeft);
                     var cubicBezierX = 1-cubicBezierY;//distanceLeft/(distanceLeft + speed*timeLeft);
 
-                    if (option[40]/*useCSS*/) {
+                    if (option[39]/*useCSS*/) {
                         easingToUse = "cubic-bezier(" + cubicBezierX + "," + cubicBezierY + ",0.3,1)";
                     } else {
                         easingToUse = makeBezier([cubicBezierX || 0, cubicBezierY || 0, 0.3, 1]);
@@ -1174,7 +1178,7 @@
                             if (type != startEvent) {
                                 return;
                             }
-                            var filter = option[44]/*touchHandle*/ || obj;
+                            var filter = option[43]/*touchHandle*/ || obj;
                             var eventTarget = event.target;
                             // TODO: Should i add parents?
                             var isTarget = $(eventTarget).parents().add(eventTarget).filter(filter).length;
@@ -1274,7 +1278,7 @@
                                 // This runs aync, so every callback is placed before the first is run. Therefore this works.
                                 waitCounter--;
                                 if (waitCounter == 0) {
-                                    option[42]/*loadFinish*/.call(baseSlider, dir + 1);
+                                    option[41]/*loadFinish*/.call(baseSlider, dir + 1);
                                     performAnimation(dir, speed, clicked, prevNext);
                                 }
                             });
@@ -1283,7 +1287,7 @@
                     if (waitCounter == 0) {
                         performAnimation(dir, speed, clicked, prevNext);
                     } else {
-                        option[41]/*loadStart*/.call(baseSlider, dir + 1);
+                        option[40]/*loadStart*/.call(baseSlider, dir + 1);
                     }
                 } else {
                     performAnimation(dir, speed, clicked, prevNext);
@@ -1291,7 +1295,7 @@
             }
 
             function ensureSliderContainerCSSDurationReset() {
-                if (option[40]/*useCSS*/) {
+                if (option[39]/*useCSS*/) {
                     slidesContainer.css(CSSVendorPrefix + "transition-duration", "");
                 }
             }
@@ -1428,6 +1432,7 @@
                     fromSlides: fromSlides,
                     toSlides: toSlides,
                     slider: obj,
+                    container: slidesContainer,
                     options: callOptions,
                     to: dir + 1,
                     from: currentSlide + 1,
@@ -1561,7 +1566,7 @@
                 adjustPositionTo(currentSlide);
                 autoadjust(currentSlide, 0);
 
-                option[45]/*destroyCallback*/.call(baseSlider);
+                option[44]/*destroyCallback*/.call(baseSlider);
             }
 
             baseSlider.destroy = publicDestroy;
@@ -2479,7 +2484,7 @@
             opacity: 0,
             overflow: HIDDEN_STRING,
             position: ABSOLUTE_STRING,
-            zIndex: obj.options.animationzindex
+            zIndex: findCloneZIndex(obj)
         });
         box.append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
         return box;
@@ -2493,7 +2498,7 @@
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $("<div>").css({zIndex: obj.options.animationzindex, position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
+        var result = $("<div>").css({zIndex: findCloneZIndex(obj), position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
         slides.each(function (index, elem) {
             var that = $(elem);
             var cloneWidth = that.outerWidth(TRUE);
@@ -2509,6 +2514,10 @@
         });
         result.width(width).height(height);
         return result;
+    }
+
+    function findCloneZIndex(obj) {
+        return (parseInt10(obj.container.css("z-index")) || 0) + 1;
     }
 
 
