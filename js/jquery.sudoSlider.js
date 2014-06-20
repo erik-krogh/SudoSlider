@@ -192,10 +192,6 @@
                     }
                 });
 
-                if (slidesContainer.css("zIndex") == "auto") {
-                    slidesContainer.css({zIndex: -2});
-                }
-
                 // Adding CSS classes
                 slidesContainer.addClass("slidesContainer");
 
@@ -2517,7 +2513,7 @@
     }
 
     function findCloneZIndex(obj) {
-        return (parseInt10(obj.container.css("z-index")) || 0) + 1;
+        return (parseInt10(obj.container.css("zIndex")) || 0) + 1;
     }
 
 
