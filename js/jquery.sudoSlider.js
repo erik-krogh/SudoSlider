@@ -12,10 +12,6 @@
  * http://jquery.com
  *
  */
-// TODO: https://github.com/webbiesdk/SudoSlider/issues/8
-// TODO: Ordne z-index på anden måde, så der ikke er behov for at lave høj z-index på navigation.
-// TODO: Description: SudoSlider is a jQuery slider that supports any content, has effects you’ve only seen in image-sliders is responsive and much more. It has a lot of transition effects, all of which are done using CSS transitions (with JavaScript fallback for old browsers). The script doesn’t force any style on your page, and you can make your navigation buttons however you like.
-// TODO: CryptoCurrency donations
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -1174,10 +1170,16 @@
                             if (type != startEvent) {
                                 return;
                             }
-                            var filter = option[43]/*touchHandle*/ || obj;
+
                             var eventTarget = event.target;
-                            // TODO: Should i add parents?
-                            var isTarget = $(eventTarget).parents().add(eventTarget).filter(filter).length;
+                            var target = $(eventTarget);
+                            if (!option[43]/*touchHandle*/) {
+                                target = target.parents().add(eventTarget);
+                            }
+                            var filter = option[43]/*touchHandle*/ || obj;
+
+                            var isTarget = target.filter(filter).length;
+
                             if (!isTarget) {
                                 return;
                             } else {
