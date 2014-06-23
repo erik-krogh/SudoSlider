@@ -401,10 +401,11 @@ Change in script: Changed the touch demo from using touchSwipe to using the new 
 Change in script: Added the touchHandle option. So you can specify what the user can drag. Even something that isn't within the slider.
 Change in docs: Added touchHandle demo.
 Change in docs: Added touchHandle outside slider demo.
+Change in docs: Added fullscreen demo.
 Change in script: Fixed that continuous with ajax content bugged.
 Change in script: InsertSlide now accepts negative number for positions. -1 equals inserting a slide in the far right of the slider, -2 one left of that etc.
 Change in script: The setOption method now also accepts an object, that represents option names and option values to be changed.
-Change in docs: Removed the "Responsive height/width" demo.
+Change in docs: Removed the "Responsive height/width", "flashlike" and "fade not crossfade" demo.
 Change in script: The controls container now has class="controls" instead of id="controls". And the container for the numeric controls has class="numericControls" instead of class="controls". These are just new default option values, they can easily be changed through options.
 Change in script: The container that has the slide now has class="slidesContainer" and each slide has class="slide"
 Change in script: Added a destroyCallback option. It is called after the slider has been destroyed (that includes when options are changed).
