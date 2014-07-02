@@ -87,7 +87,8 @@
             loadFinish: EMPTY_FUNCTION,  /* option[41]/*loadFinish*/
             touch: FALSE,  /* option[42]/*touch*/
             touchHandle: FALSE, /* option[43]/*touchHandle*/
-            destroyCallback: EMPTY_FUNCTION  /* option[44]/*destroyCallback*/
+            destroyCallback: EMPTY_FUNCTION,  /* option[44]/*destroyCallback*/
+            mouseTouch: FALSE /* option[45]/*mouseTouch*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -1218,7 +1219,9 @@
                             event.preventDefault();
                         }
                     };
-                    bindMultiple(document, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL, MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
+                    var eventsToBind = [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL];
+                    if (option[45]/*mouseTouch*/) eventsToBind = eventsToBind.concat([MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
+                    bindMultiple(document, dragFunction, eventsToBind);
                 }
 
                 function allowScroll(event, isMouseEvent, prevX, prevY, x, y) {
