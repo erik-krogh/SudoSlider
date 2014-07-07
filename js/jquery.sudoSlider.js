@@ -1225,8 +1225,12 @@
                 }
 
                 function allowScroll(event, isMouseEvent, prevX, prevY, x, y) {
-                    isMouseEvent = FALSE;
-                    if (isMouseEvent || isDirectionVertical(prevX, prevY, x, y) == option[7]/*vertical*/) {
+                    // If the user drags horizontally, prevent the (vertical) scroll event
+                    if (mathAbs(x) > mathAbs(y)) event.preventDefault();
+
+                    // Scrolling vertically when vertical slides are enabled should prevent
+                    // the scroll event.
+                    if (isDirectionVertical(prevX, prevY, x, y) && option[7]/*vertical*/) {
                         event.preventDefault();
                     }
                 }
