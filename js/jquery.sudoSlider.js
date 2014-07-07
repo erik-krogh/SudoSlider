@@ -12,7 +12,6 @@
  * http://jquery.com
  *
  */
-// TODO: Check protocol everywhere. Ctrf + f "http" should be 0.
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -1214,15 +1213,6 @@
                             if (!allowScroll(isMouseEvent, prevX, prevY, x - startX, y - startY)) {
                                 event.preventDefault();
                             }
-
-                            isMouseEvent = false;
-                            if (!allowScroll(isMouseEvent, prevX, prevY, x - startX, y - startY)) {
-                                console.log("Prevent");
-                            } else {
-                                console.log("nope")
-                            }
-
-
 
                             prevX = x - startX;
                             prevY = y - startY;
