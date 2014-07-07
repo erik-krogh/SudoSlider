@@ -12,6 +12,7 @@
  * http://jquery.com
  *
  */
+// TODO: Check protocol everywhere. Ctrf + f "http" should be 0.
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -1209,7 +1210,19 @@
                                 touchMove(x - startX, y - startY);
                             }
 
-                            allowScroll(event, isMouseEvent, prevX, prevY, x - startX, y - startY);
+
+                            if (!allowScroll(isMouseEvent, prevX, prevY, x - startX, y - startY)) {
+                                event.preventDefault();
+                            }
+
+                            isMouseEvent = false;
+                            if (!allowScroll(isMouseEvent, prevX, prevY, x - startX, y - startY)) {
+                                console.log("Prevent");
+                            } else {
+                                console.log("nope")
+                            }
+
+
 
                             prevX = x - startX;
                             prevY = y - startY;
@@ -1224,14 +1237,25 @@
                     bindMultiple(document, dragFunction, eventsToBind);
                 }
 
-                function allowScroll(event, isMouseEvent, prevX, prevY, x, y) {
-                    // If the user drags horizontally, prevent the (vertical) scroll event
-                    if (mathAbs(x) > mathAbs(y)) event.preventDefault();
-
-                    // Scrolling vertically when vertical slides are enabled should prevent
-                    // the scroll event.
-                    if (isDirectionVertical(prevX, prevY, x, y) && option[7]/*vertical*/) {
-                        event.preventDefault();
+                function allowScroll(isMouseEvent, prevX, prevY, x, y) {
+                    var directionVertical = isDirectionVertical(prevX, prevY, x, y);
+                    if (isMouseEvent) {
+                        return FALSE;
+                    }
+                    if (option[7]/*vertical*/) {
+                        // If the user drags vertically, prevent the (horizontal) scroll event
+                        if (mathAbs(y) > mathAbs(x) || directionVertical) {
+                            return FALSE;
+                        } else {
+                            return TRUE;
+                        }
+                    } else {
+                        // If the user drags horizontally, prevent the (vertical) scroll event
+                        if (mathAbs(x) > mathAbs(y) || !directionVertical) {
+                            return FALSE;
+                        } else {
+                            return TRUE;
+                        }
                     }
                 }
 
