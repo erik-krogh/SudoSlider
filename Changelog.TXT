@@ -416,3 +416,7 @@ Change in script: Remove the animationZIndex option. Now the z-index of the over
 
 3.3.1
 Change in script: Added the mouseTouch option (thanks to foobear). That pr. default disables that mouse input acts as touch input when touch is enabled.
+Change in script: Changed the way scrolling is allowed when using touch on a touch device (thanks to foobear).
+Change in script: Added allowScroll option, so you can disable the behaviour that allows scrolling while dragging the slider using touch.
+Change in docs: Removed the ticker mode demo.
+Change in script: Fixed an of by one alignment problem, caused by some CSS.

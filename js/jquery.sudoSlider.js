@@ -31,6 +31,7 @@
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
     var CSSVendorPrefix = getCSSVendorPrefix();
     var jWin = $(win);
+    var doc = $(document);
 
     var TOUCHSTART = "touchstart";
     var TOUCHMOVE = "touchmove";
@@ -54,7 +55,7 @@
             slideCount: 1, /*     option[8]/*slidecount*/
             moveCount: 1, /*     option[9]/*movecount*/
             startSlide: 1, /*     option[10]/*startslide*/
-            responsive: FALSE, /* option[11]/*responsive*/
+            responsive: TRUE, /* option[11]/*responsive*/
             ease: "swing", /* option[12]/*ease*/
             auto: FALSE, /* option[13]/*auto*/
             pause: 2000, /*  option[14]/*pause*/
@@ -88,7 +89,8 @@
             touch: FALSE,  /* option[42]/*touch*/
             touchHandle: FALSE, /* option[43]/*touchHandle*/
             destroyCallback: EMPTY_FUNCTION,  /* option[44]/*destroyCallback*/
-            mouseTouch: FALSE /* option[45]/*mouseTouch*/
+            mouseTouch: FALSE, /* option[45]/*mouseTouch*/
+            allowScroll: TRUE  /* option[46]/*allowScroll*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -242,7 +244,7 @@
                 if (obj.css("position") == "static") obj.css({position: RELATIVE_STRING}); // Fixed a lot of IE6 + IE7 bugs.
 
                 // Float items to the left, and make sure that all elements are shown.
-                slidesJquery.css({"float": "left", listStyle: "none", overflow: HIDDEN_STRING});
+                slidesJquery.css({"float": "left", listStyle: "none"});
                 // The last CSS to make it work.
                 slidesContainer.add(slidesJquery).css({display: "block", position: RELATIVE_STRING, margin: "0"});
 
@@ -316,7 +318,7 @@
                 }
 
                 if (option[2]/*customlink*/) {
-                    bindAndRegisterOff($(document), "click", customLinkClickHandler, option[2]/*customlink*/);
+                    bindAndRegisterOff(doc, "click", customLinkClickHandler, option[2]/*customlink*/);
                 }
 
                 runOnImagesLoaded(getSlides(option[10]/*startslide*/, option[8]/*slidecount*/), TRUE, function () {
@@ -383,13 +385,13 @@
             var previousAdjustedResponsiveWidth = -1;
             function adjustResponsiveLayout(forced) {
                 function doTheAdjustment() {
-                    if ((cantDoAdjustments() && !forced) || totalSlides == 0) {
+                    if ((cantDoAdjustments() && !(forced === TRUE)) || totalSlides == 0) {
                         return;
                     }
 
                     var newWidth = getResponsiveWidth();
 
-                    if (previousAdjustedResponsiveWidth != newWidth) {
+                    if (previousAdjustedResponsiveWidth != newWidth || (forced === TRUE)) {
                         previousAdjustedResponsiveWidth = newWidth;
 
                         for (var i = 0; i < totalSlides; i++) {
@@ -407,12 +409,17 @@
                 }
                 doTheAdjustment();
                 callAsync(doTheAdjustment); // Fixing invisible scrollbar.
-                setTimeout(doTheAdjustment, 20);
+                schedule(doTheAdjustment, 20);
             }
 
             // Returns the width of a single <li> if the page layout is responsive.
             function getResponsiveWidth() {
-                return obj.width() / numberOfVisibleSlides;
+                var width = obj.width();
+                if (option[7]/*vertical*/) {
+                    return width;
+                } else {
+                    return width / numberOfVisibleSlides;
+                }
             }
 
             // For backwards compability, the rel attribute is used as a fallback.
@@ -438,7 +445,7 @@
                         for (var i = 0; i < option[31]/*ajax*/.length; i++) {
                             if (option[31]/*ajax*/[i]) {
                                 clearTimeout(asyncDelayedSlideLoadTimeout);
-                                asyncDelayedSlideLoadTimeout = setTimeout(function () {
+                                asyncDelayedSlideLoadTimeout = schedule(function () {
                                     if (option[31]/*ajax*/[i]) {
                                         ajaxLoad(parseInt10(i));
                                     } else {
@@ -468,7 +475,7 @@
                 stopAuto();
                 autoOn = TRUE;
                 autoStartedWithPause = pause;
-                autoTimeout = setTimeout(function () {
+                autoTimeout = schedule(function () {
                     if (autoOn) {
                         enqueueAnimation(NEXT_STRING, FALSE);
                         autoStartedWithPause = FALSE;
@@ -1207,12 +1214,12 @@
                                 touchStart(x - startX, y - startY)
                             } else {
                                 touchMove(x - startX, y - startY);
+
+                                if (!allowScroll(isMouseEvent, x - startX, y - startY)) {
+                                    event.preventDefault();
+                                }
                             }
 
-
-                            if (!allowScroll(isMouseEvent, prevX, prevY, x - startX, y - startY)) {
-                                event.preventDefault();
-                            }
 
                             prevX = x - startX;
                             prevY = y - startY;
@@ -1222,38 +1229,27 @@
                             event.preventDefault();
                         }
                     };
-                    var eventsToBind = [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL];
-                    if (option[45]/*mouseTouch*/) eventsToBind = eventsToBind.concat([MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
-                    bindMultiple(document, dragFunction, eventsToBind);
+                    bindMultiple(doc, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL]);
+                    if (option[45]/*mouseTouch*/) {
+                        bindMultiple(doc, dragFunction, [MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
+                    }
+
                 }
 
-                function allowScroll(isMouseEvent, prevX, prevY, x, y) {
-                    var directionVertical = isDirectionVertical(prevX, prevY, x, y);
+                function allowScroll(isMouseEvent, x, y) {
+                    var isGeneralDirectionVertical = mathAbs(y) > mathAbs(x);
                     if (isMouseEvent) {
+                        // If the user drags vertically, prevent the (horizontal) scroll event
+                        return FALSE;
+                    }
+                    if (!option[46]/*allowScroll*/) {
                         return FALSE;
                     }
                     if (option[7]/*vertical*/) {
-                        // If the user drags vertically, prevent the (horizontal) scroll event
-                        if (mathAbs(y) > mathAbs(x) || directionVertical) {
-                            return FALSE;
-                        } else {
-                            return TRUE;
-                        }
+                        return !isGeneralDirectionVertical;
                     } else {
-                        // If the user drags horizontally, prevent the (vertical) scroll event
-                        if (mathAbs(x) > mathAbs(y) || !directionVertical) {
-                            return FALSE;
-                        } else {
-                            return TRUE;
-                        }
+                        return isGeneralDirectionVertical;
                     }
-                }
-
-                function isDirectionVertical(prevX, prevY, x, y) {
-                    var dX = prevX - x;
-                    var dY = prevY - y;
-
-                    return mathAbs(dY / dX) >= 1;
                 }
             }
 
@@ -1489,7 +1485,9 @@
                     //noinspection JSUnusedAssignment
                     animationWasInterrupted = TRUE;
                     // Doing it in this order isn't a problem in relation to the user-callbacks, since they are run in a setTimeout(callback, 0) anyway.
-                    currentAnimationCallback();
+                    if (currentAnimationCallback) {
+                        currentAnimationCallback();
+                    }
 
                     performCallbacks(currentAnimationObject.stopCallbacks);
 
@@ -1516,7 +1514,7 @@
 
             function bindMultiple(element, func, events) {
                 for (var i=0; i < events.length; i++) {
-                    bindAndRegisterOff($(element), events[i], func);
+                    bindAndRegisterOff(element, events[i], func);
                 }
             }
 
@@ -1602,14 +1600,14 @@
                 return options[a.toLowerCase()];
             };
 
-            baseSlider.setOption = function (name, val) {
+            baseSlider.setOption = function (key, val) {
                 publicDestroy();
-                if ($.isPlainObject(name)) {
-                    for (var a in name) {
-                        options[a] = name[a];
+                if ($.isPlainObject(key)) {
+                    for (var a in key) {
+                        options[a.toLowerCase()] = key[a];
                     }
                 } else {
-                    options[name.toLowerCase()] = val;
+                    options[key.toLowerCase()] = val;
                 }
                 publicInit();
             };
@@ -2219,7 +2217,7 @@
 
 
             count++;
-            setTimeout(makeCallback(animate, [
+            schedule(makeCallback(animate, [
                 slice, {
                     width: orgWidth,
                     height: orgHeight,
@@ -2401,7 +2399,7 @@
                     }
                 });
                 // If the animation doesn't do anything, the bind will never be triggered, so this is a fallback.
-                setTimeout(callbackFunction, speed + 100);
+                schedule(callbackFunction, speed + 100);
             });
         });
         return callbackFunction
@@ -2656,7 +2654,11 @@
 
     // Puts the specified function in a setTimeout([function], 0);
     function callAsync(func) {
-        setTimeout(func, 0);
+        schedule(func, 0);
+    }
+
+    function schedule(func, time) {
+        setTimeout(func, time);
     }
 
     function startsWith(string, prefix) {
