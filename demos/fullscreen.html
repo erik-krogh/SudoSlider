@@ -52,6 +52,10 @@
 
                     backgroundImage.appendTo(slide);
 
+                    slide.css({
+                        zIndex: 0
+                    });
+
                     backgroundImage.css({
                         position: "absolute",
                         zIndex: -1,
@@ -144,7 +148,7 @@
         </div>
         <div data-background="../images/background2.jpg">
             <h1 style="color: white;font-size: 400%;margin: 20px;text-align: center;line-height: 120%;">
-                Oh yeah, touch works. So you can swipe the images if you want.
+                Oh yeah, touch works in touch devices. So you can swipe the images if you want.
             </h1>
         </div>
         <div data-background="../images/background3.jpg">
