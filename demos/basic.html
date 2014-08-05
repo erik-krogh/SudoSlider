@@ -7,7 +7,9 @@
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			var sudoSlider = $("#slider").sudoSlider();
+			var sudoSlider = $("#slider").sudoSlider({
+                controlsFade: false
+            });
 		});
 	</script>
 
@@ -21,7 +23,7 @@
 	<h2>The most basic slider you can create with this plugin.</h2>
     <h2>As you may have noticed, this page contains no styling or CSS.</h2>
 	<a href="http://webbies.dk/SudoSlider/help/#Howto">How to make a slider</a>
-    <div id="slider">
+    <div id="slider" style="width: 696px;">
         <div><img src="../images/01.jpg" alt="image description"/></div>
         <div><img src="../images/02.jpg" alt="image description"/></div>
         <div><img src="../images/03.jpg" alt="image description"/></div>
@@ -43,7 +45,7 @@
 &lt;/script&gt;</pre>
 	<h4>The HTML</h4>
 	<pre>
-&lt;div id="slider" &gt;
+&lt;div id="slider" style="width:696px;" &gt;
    &lt;div&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/div&gt;
    &lt;div&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/div&gt;
    &lt;div&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/div&gt;
