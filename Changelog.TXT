@@ -420,3 +420,4 @@ Change in script: Changed the way scrolling is allowed when using touch on a tou
 Change in script: Added allowScroll option, so you can disable the behaviour that allows scrolling while dragging the slider using touch.
 Change in docs: Removed the ticker mode demo.
 Change in script: Fixed an of by one alignment problem, caused by some CSS.
+Change in script: Improved animation startup time for all animations where boxes or slices are animated in (so when they fade in, slide in, grow in etc.).

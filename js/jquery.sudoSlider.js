@@ -29,6 +29,7 @@
     var HIDDEN_STRING = "hidden";
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
+    var DIV_TAG = "<div>";
     var CSSVendorPrefix = getCSSVendorPrefix();
     var jWin = $(win);
     var doc = $(document);
@@ -167,7 +168,7 @@
 
                 // Is the ul element there?
                 var ulLength = slidesContainer.length;
-                var newUl = $("<div></div>");
+                var newUl = $(DIV_TAG);
                 if (!ulLength) {
                     obj.append(slidesContainer = newUl);
                     isSlideContainerUl = FALSE;
@@ -1625,12 +1626,12 @@
                     pos = mod(pos, totalSlides + 1);
                 }
 
-                html = $(html || "<div>");
+                html = $(html || DIV_TAG);
                 if (isSlideContainerUl) {
                     html = $("<li>").prepend(html);
                 } else {
                     if (html.length != 1) {
-                        html = $("<div>").prepend(html);
+                        html = $(DIV_TAG).prepend(html);
                     } else {
                         // Inserting as is.
                     }
@@ -1911,7 +1912,7 @@
         var boxCols = options.boxcols;
         var totalBoxes = boxRows * boxCols;
         var speed = options.speed / (totalBoxes == 1 ? 1 : 2.5); // To make the actual time spent equal to options.speed.
-        var boxes = createBoxes(obj, boxCols, boxRows, !reveal);
+        var boxes = createLazyBoxes(obj, boxCols, boxRows, !reveal);
         var timeBuff = 0;
         var rowIndex = 0;
         var colIndex = 0;
@@ -1924,9 +1925,9 @@
             shuffle(boxes);
         }
 
-
-        boxes.each(function () {
-            box2DArr[rowIndex][colIndex] = this;
+        for (var i = 0; i < boxes.length; i++) {
+            var element = boxes[i];
+            box2DArr[rowIndex][colIndex] = element;
             colIndex++;
             if (colIndex == boxCols) {
                 if (reverseRows) {
@@ -1936,7 +1937,7 @@
                 colIndex = 0;
                 box2DArr[rowIndex] = [];
             }
-        });
+        }
 
         var boxesResult = [];
         if (selectionAlgorithm == 1) {
@@ -1966,19 +1967,19 @@
             for (z = 0; z < rows2; z++) {
                 y = z;
                 for (x = z; x < boxCols - z - 1; x++) {
-                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                    boxesResult[n += negative] = boxes[y * boxCols + x];
                 }
                 x = boxCols - z - 1;
                 for (y = z; y < boxRows - z - 1; y++) {
-                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                    boxesResult[n += negative] = boxes[y * boxCols + x];
                 }
                 y = boxRows - z - 1;
                 for (x = boxCols - z - 1; x > z; x--) {
-                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                    boxesResult[n += negative] = boxes[y * boxCols + x];
                 }
                 x = z;
                 for (y = boxRows - z - 1; y > z; y--) {
-                    boxesResult[n += negative] = boxes.eq(y * boxCols + x);
+                    boxesResult[n += negative] = boxes[y * boxCols + x];
                 }
             }
         } else {
@@ -1996,79 +1997,92 @@
         var count = 0;
         for (var i = 0; i < boxesResult.length; i++) {
             var boxLine = boxesResult[i];
+
+            if (!isArray(boxLine)) {
+                boxLine = [boxLine];
+            }
+
             for (var j = 0; j < boxLine.length; j++) {
-                var box = $(boxLine[j]);
-                (function (box, timeBuff) {
-                    var boxChildren = box.children();
-                    var orgWidth = box.width();
-                    var orgHeight = box.height();
-                    var goToWidth = orgWidth;
-                    var goToHeight = orgHeight;
-                    var orgLeft = parseNumber(box.css("left"));
-                    var orgTop = parseNumber(box.css("top"));
-                    var goToLeft = orgLeft;
-                    var goToTop = orgTop;
-
-                    var childOrgLeft = parseNumber(boxChildren.css("left"));
-                    var childOrgTop = parseNumber(boxChildren.css("top"));
-                    var childGoToLeft = childOrgLeft;
-                    var childGoToTop = childOrgTop;
-
-                    if (flyIn) {
-                        var adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
-                        var adjustTop = reverse ? -goToHeight : goToHeight;
-
-                        var flyDistanceFactor = 1.5;
-
-                        if (reveal) {
-                            goToLeft -= adjustLeft * flyDistanceFactor;
-                            goToTop -= adjustTop * flyDistanceFactor;
-                        } else {
-                            box.css({left: orgLeft + adjustLeft * flyDistanceFactor, top: orgTop + adjustTop * flyDistanceFactor});
-                        }
-                    }
-
-                    if (grow) {
-                        if (reveal) {
-                            childGoToLeft -= goToWidth / 2;
-                            goToLeft += goToWidth / 2;
-                            childGoToTop -= goToHeight / 2;
-                            goToTop += goToHeight / 2;
-
-                            goToHeight = goToWidth = 0;
-                        } else {
-                            box.css({left: orgLeft + (goToWidth / 2), top: orgTop + (goToHeight / 2)});
-                            boxChildren.css({left: childOrgLeft - goToWidth / 2, top: childOrgTop - goToHeight / 2});
-
-                            box.width(0).height(0);
-                            if (roundedGrow) {
-                                box.css({borderRadius: mathMax(orgHeight, orgWidth)});
-                            }
-                        }
-                    }
-
-
+                var lazyBox = boxLine[j];
+                (function (lazyBox, delay) {
                     if (reveal) {
-                        box.css({opacity: 1});
+                        boxAnimationFunction(delay);
+                    } else {
+                        schedule(boxAnimationFunction, delay);
                     }
-                    count++;
-                    setTimeout(function () {
-                        animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, ease, FALSE, obj);
-                        animate(box, {
-                            opacity: reveal ? 0 : 1,
-                            width: goToWidth,
-                            height: goToHeight,
-                            left: goToLeft,
-                            top: goToTop,
-                            borderRadius: grow && reveal && roundedGrow ? mathMax(orgHeight, orgWidth) : 0
-                        }, speed, ease, function () {
-                            count--;
-                            if (count == 0) {
-                                obj.callback();
+                    function boxAnimationFunction (delay) {
+                        var box = lazyBox();
+                        var boxChildren = box.children();
+                        var orgWidth = box.width();
+                        var orgHeight = box.height();
+                        var goToWidth = orgWidth;
+                        var goToHeight = orgHeight;
+                        var orgLeft = parseNumber(box.css("left"));
+                        var orgTop = parseNumber(box.css("top"));
+                        var goToLeft = orgLeft;
+                        var goToTop = orgTop;
+
+                        var childOrgLeft = parseNumber(boxChildren.css("left"));
+                        var childOrgTop = parseNumber(boxChildren.css("top"));
+                        var childGoToLeft = childOrgLeft;
+                        var childGoToTop = childOrgTop;
+
+                        if (flyIn) {
+                            var adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
+                            var adjustTop = reverse ? -goToHeight : goToHeight;
+
+                            var flyDistanceFactor = 1.5;
+
+                            if (reveal) {
+                                goToLeft -= adjustLeft * flyDistanceFactor;
+                                goToTop -= adjustTop * flyDistanceFactor;
+                            } else {
+                                box.css({left: orgLeft + adjustLeft * flyDistanceFactor, top: orgTop + adjustTop * flyDistanceFactor});
                             }
-                        }, obj);
-                    }, timeBuff);
-                })(box, timeBuff);
+                        }
+
+                        if (grow) {
+                            if (reveal) {
+                                childGoToLeft -= goToWidth / 2;
+                                goToLeft += goToWidth / 2;
+                                childGoToTop -= goToHeight / 2;
+                                goToTop += goToHeight / 2;
+
+                                goToHeight = goToWidth = 0;
+                            } else {
+                                box.css({left: orgLeft + (goToWidth / 2), top: orgTop + (goToHeight / 2)});
+                                boxChildren.css({left: childOrgLeft - goToWidth / 2, top: childOrgTop - goToHeight / 2});
+
+                                box.width(0).height(0);
+                                if (roundedGrow) {
+                                    box.css({borderRadius: mathMax(orgHeight, orgWidth)});
+                                }
+                            }
+                        }
+
+
+                        if (reveal) {
+                            box.css({opacity: 1});
+                        }
+                        count++;
+                        schedule(function () {
+                            animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, ease, FALSE, obj);
+                            animate(box, {
+                                opacity: reveal ? 0 : 1,
+                                width: goToWidth,
+                                height: goToHeight,
+                                left: goToLeft,
+                                top: goToTop,
+                                borderRadius: grow && reveal && roundedGrow ? mathMax(orgHeight, orgWidth) : 0
+                            }, speed, ease, function () {
+                                count--;
+                                if (count == 0) {
+                                    obj.callback();
+                                }
+                            }, obj);
+                        }, delay);
+                    };
+                })(lazyBox, timeBuff);
             }
             timeBuff += (speed / boxesResult.length) * 1.5;
         }
@@ -2121,116 +2135,120 @@
         var slides = options.slices;
         var speed = options.speed / 2; // To make the actual time spent be equal to options.speed
         var ease = options.ease;
-        var objSlider = obj.slider;
-        var slicesElement = createBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
+        var slicesElement = createLazyBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
         var count = 0;
         var upDownAlternator = FALSE;
         if (reverse) {
             reverseArray(slicesElement);
-        } else {
-            $(reverseArray(slicesElement.get())).appendTo(objSlider);
         }
         if (randomize) {
             shuffle(slicesElement);
         }
-        slicesElement.each(function (i) {
+        $.each(slicesElement, function (i) {
             var timeout = ((speed / slides) * i);
-            var slice = $(this);
-            var orgWidth = slice.width();
-            var orgHeight = slice.height();
-            var goToLeft = slice.css("left");
-            var goToTop = slice.css("top");
-            var startPosition = vertical ? goToLeft : goToTop;
-
-            var innerBox = slice.children();
-            var startAdjustment = innerBox[vertical ? "width" : "height"]();
-            if (curtainEffect == 1) {
-                startPosition = 0
-            } else if (curtainEffect == 2) {
-                startPosition = startAdjustment / 2;
-            }
-            if (reverse) {
-                startPosition = startAdjustment - startPosition;
-            }
-            if (vertical) {
-                slice.css({
-                    width: (onlyFade || upDownEffect ? orgWidth : 0),
-                    left: startPosition
-                });
-            } else {
-                slice.css({
-                    height: (onlyFade || upDownEffect ? orgHeight : 0),
-                    top: startPosition
-                });
-            }
-
             if (reveal) {
-                var negative = upDownEffect == 1 ? -1 : 1;
-                slice.css({
-                    top: goToTop,
-                    left: goToLeft,
-                    width: orgWidth,
-                    height: orgHeight,
-                    opacity: 1
-                });
-                if (vertical) {
-                    goToTop = negative * orgHeight;
-                } else {
-                    goToLeft = negative * orgWidth;
-                }
+                doAnimationFunction(timeout);
+            } else {
+                schedule(doAnimationFunction, timeout);
             }
+            function doAnimationFunction(timeout) {
+                var slice = slicesElement[i]();
+                var orgWidth = slice.width();
+                var orgHeight = slice.height();
+                var goToLeft = slice.css("left");
+                var goToTop = slice.css("top");
+                var startPosition = vertical ? goToLeft : goToTop;
 
-            if (upDownEffect) {
-                var bottom = TRUE;
-                if (upDownEffect == 3) {
-                    if (upDownAlternator) {
+                var innerBox = slice.children();
+                var startAdjustment = innerBox[vertical ? "width" : "height"]();
+                if (curtainEffect == 1) {
+                    startPosition = 0
+                } else if (curtainEffect == 2) {
+                    startPosition = startAdjustment / 2;
+                }
+                if (reverse) {
+                    startPosition = startAdjustment - startPosition;
+                }
+                if (vertical) {
+                    slice.css({
+                        width: (onlyFade || upDownEffect ? orgWidth : 0),
+                        left: startPosition
+                    });
+                } else {
+                    slice.css({
+                        height: (onlyFade || upDownEffect ? orgHeight : 0),
+                        top: startPosition
+                    });
+                }
+
+                if (reveal) {
+                    var negative = upDownEffect == 1 ? -1 : 1;
+                    slice.css({
+                        top: goToTop,
+                        left: goToLeft,
+                        width: orgWidth,
+                        height: orgHeight,
+                        opacity: 1
+                    });
+                    if (vertical) {
+                        goToTop = negative * orgHeight;
+                    } else {
+                        goToLeft = negative * orgWidth;
+                    }
+                }
+
+                if (upDownEffect) {
+                    var bottom = TRUE;
+                    if (upDownEffect == 3) {
+                        if (upDownAlternator) {
+                            bottom = FALSE;
+                            upDownAlternator = FALSE;
+                        } else {
+                            upDownAlternator = TRUE;
+                        }
+                    } else if (upDownEffect == 2) {
                         bottom = FALSE;
-                        upDownAlternator = FALSE;
-                    } else {
-                        upDownAlternator = TRUE;
                     }
-                } else if (upDownEffect == 2) {
-                    bottom = FALSE;
-                }
-                if (vertical) {
-                    if (reveal) {
-                        goToTop = (bottom ? -1 : 1) * orgHeight;
+                    if (vertical) {
+                        if (reveal) {
+                            goToTop = (bottom ? -1 : 1) * orgHeight;
+                        } else {
+                            slice.css({
+                                bottom: bottom ? 0 : orgHeight,
+                                top: bottom ? orgHeight : 0,
+                                height: reveal ? orgHeight : 0
+                            });
+                        }
                     } else {
-                        slice.css({
-                            bottom: bottom ? 0 : orgHeight,
-                            top: bottom ? orgHeight : 0,
-                            height: reveal ? orgHeight : 0
-                        });
-                    }
-                } else {
-                    if (reveal) {
-                        goToLeft = (bottom ? -1 : 1) * orgWidth;
-                    } else {
-                        slice.css({
-                            right: bottom ? 0 : orgWidth,
-                            left: bottom ? orgWidth : 0,
-                            width: reveal ? orgWidth : 0
-                        });
+                        if (reveal) {
+                            goToLeft = (bottom ? -1 : 1) * orgWidth;
+                        } else {
+                            slice.css({
+                                right: bottom ? 0 : orgWidth,
+                                left: bottom ? orgWidth : 0,
+                                width: reveal ? orgWidth : 0
+                            });
+                        }
                     }
                 }
-            }
 
 
-            count++;
-            schedule(makeCallback(animate, [
-                slice, {
-                    width: orgWidth,
-                    height: orgHeight,
-                    opacity: reveal ? 0 : 1,
-                    left: goToLeft,
-                    top: goToTop
-                }, speed, ease, function () {
-                    count--;
-                    if (count == 0) {
-                        obj.callback();
-                    }
-                }, obj])
-            , timeout);
+                count++;
+                schedule(makeCallback(animate, [
+                        slice, {
+                            width: orgWidth,
+                            height: orgHeight,
+                            opacity: reveal ? 0 : 1,
+                            left: goToLeft,
+                            top: goToTop
+                        }, speed, ease, function () {
+                            count--;
+                            if (count == 0) {
+                                obj.callback();
+                            }
+                        }, obj])
+                    , timeout);
+            };
         });
         if (reveal) {
             obj.goToNext();
@@ -2283,7 +2301,7 @@
         var innerBox = makeClone(obj, TRUE);
         var width = innerBox.width();
         var height = innerBox.height();
-        var box = makeBox(innerBox, 0, 0, 0, 0, obj)
+        var box = createBox(innerBox, 0, 0, 0, 0, obj)
             .css({opacity: 1})
             .appendTo(obj.slider);
         var both = box.add(innerBox);
@@ -2455,13 +2473,20 @@
     }
 
 
-    function createBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
+    function createLazyBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
         var slider = obj.slider;
-        var result = $();
+        var result = [];
         var boxWidth, boxHeight;
         var first = TRUE;
+
         for (var rows = 0; rows < numberOfRows; rows++) {
             for (var cols = 0; cols < numberOfCols; cols++) {
+                createAndAttachBoxFunction(rows, cols);
+            }
+        }
+
+        function createAndAttachBoxFunction(rows, cols) {
+            result.push(function () {
                 var innerBox = makeClone(obj, useToSlides);
 
                 if (first) {
@@ -2470,22 +2495,23 @@
                     boxHeight = Math.ceil(innerBox.height() / numberOfRows);
                 }
 
-                var box = makeBox(
+                var box = createBox(
                     innerBox, // innerBox
-                        boxHeight * rows, // top
-                        boxWidth * cols, // left
+                    boxHeight * rows, // top
+                    boxWidth * cols, // left
                     boxHeight, // height
                     boxWidth, // width
                     obj // for options.
                 );
+
                 slider.append(box);
-                result = result.add(box);
-            }
+                return box;
+            });
         }
         return result;
     }
 
-    function makeBox(innerBox, top, left, height, width, obj) {
+    function createBox(innerBox, top, left, height, width, obj) {
         innerBox.css({
             width: innerBox.width(),
             height: innerBox.height(),
@@ -2493,7 +2519,7 @@
             top: -top,
             left: -left
         });
-        var box = $("<div>").css({
+        return $(DIV_TAG).css({
             left: left,
             top: top,
             width: width,
@@ -2502,9 +2528,7 @@
             overflow: HIDDEN_STRING,
             position: ABSOLUTE_STRING,
             zIndex: findCloneZIndex(obj)
-        });
-        box.append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
-        return box;
+        }).append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
     }
 
     // Makes a single box that contains clones of the toSlides/fromSlides. Positioned correctly relative to each other. And the returned box has the correct height and width.
@@ -2515,7 +2539,7 @@
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $("<div>").css({zIndex: findCloneZIndex(obj), position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
+        var result = $(DIV_TAG).css({zIndex: findCloneZIndex(obj), position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
         slides.each(function (index, elem) {
             var that = $(elem);
             var cloneWidth = that.outerWidth(TRUE);
@@ -2625,7 +2649,7 @@
 
     function getCSSVendorPrefix() {
         var property = "transition";
-        var styleName = getVendorPrefixedProperty(property, $("<div>")[0].style);
+        var styleName = getVendorPrefixedProperty(property, $(DIV_TAG)[0].style);
         if (styleName === FALSE) {
             return FALSE;
         }
