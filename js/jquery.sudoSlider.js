@@ -2135,120 +2135,120 @@
         var slides = options.slices;
         var speed = options.speed / 2; // To make the actual time spent be equal to options.speed
         var ease = options.ease;
-        var slicesElement = createLazyBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
+        var objSlider = obj.slider;
+        var lazySlides = createLazyBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
+        var slicesElement = $();
+        for (var i = 0; i < lazySlides.length; i++) {
+            slicesElement = slicesElement.add(lazySlides[i]());
+        }
         var count = 0;
         var upDownAlternator = FALSE;
         if (reverse) {
             reverseArray(slicesElement);
+        } else {
+            $(reverseArray(slicesElement.get())).appendTo(objSlider);
         }
         if (randomize) {
             shuffle(slicesElement);
         }
-        $.each(slicesElement, function (i) {
+        slicesElement.each(function (i) {
             var timeout = ((speed / slides) * i);
-            if (reveal) {
-                doAnimationFunction(timeout);
-            } else {
-                schedule(doAnimationFunction, timeout);
-            }
-            function doAnimationFunction(timeout) {
-                var slice = slicesElement[i]();
-                var orgWidth = slice.width();
-                var orgHeight = slice.height();
-                var goToLeft = slice.css("left");
-                var goToTop = slice.css("top");
-                var startPosition = vertical ? goToLeft : goToTop;
+            var slice = $(this);
+            var orgWidth = slice.width();
+            var orgHeight = slice.height();
+            var goToLeft = slice.css("left");
+            var goToTop = slice.css("top");
+            var startPosition = vertical ? goToLeft : goToTop;
 
-                var innerBox = slice.children();
-                var startAdjustment = innerBox[vertical ? "width" : "height"]();
-                if (curtainEffect == 1) {
-                    startPosition = 0
-                } else if (curtainEffect == 2) {
-                    startPosition = startAdjustment / 2;
+            var innerBox = slice.children();
+            var startAdjustment = innerBox[vertical ? "width" : "height"]();
+            if (curtainEffect == 1) {
+                startPosition = 0
+            } else if (curtainEffect == 2) {
+                startPosition = startAdjustment / 2;
+            }
+            if (reverse) {
+                startPosition = startAdjustment - startPosition;
+            }
+            if (vertical) {
+                slice.css({
+                    width: (onlyFade || upDownEffect ? orgWidth : 0),
+                    left: startPosition
+                });
+            } else {
+                slice.css({
+                    height: (onlyFade || upDownEffect ? orgHeight : 0),
+                    top: startPosition
+                });
+            }
+
+            if (reveal) {
+                var negative = upDownEffect == 1 ? -1 : 1;
+                slice.css({
+                    top: goToTop,
+                    left: goToLeft,
+                    width: orgWidth,
+                    height: orgHeight,
+                    opacity: 1
+                });
+                if (vertical) {
+                    goToTop = negative * orgHeight;
+                } else {
+                    goToLeft = negative * orgWidth;
                 }
-                if (reverse) {
-                    startPosition = startAdjustment - startPosition;
+            }
+
+            if (upDownEffect) {
+                var bottom = TRUE;
+                if (upDownEffect == 3) {
+                    if (upDownAlternator) {
+                        bottom = FALSE;
+                        upDownAlternator = FALSE;
+                    } else {
+                        upDownAlternator = TRUE;
+                    }
+                } else if (upDownEffect == 2) {
+                    bottom = FALSE;
                 }
                 if (vertical) {
-                    slice.css({
-                        width: (onlyFade || upDownEffect ? orgWidth : 0),
-                        left: startPosition
-                    });
+                    if (reveal) {
+                        goToTop = (bottom ? -1 : 1) * orgHeight;
+                    } else {
+                        slice.css({
+                            bottom: bottom ? 0 : orgHeight,
+                            top: bottom ? orgHeight : 0,
+                            height: reveal ? orgHeight : 0
+                        });
+                    }
                 } else {
-                    slice.css({
-                        height: (onlyFade || upDownEffect ? orgHeight : 0),
-                        top: startPosition
-                    });
+                    if (reveal) {
+                        goToLeft = (bottom ? -1 : 1) * orgWidth;
+                    } else {
+                        slice.css({
+                            right: bottom ? 0 : orgWidth,
+                            left: bottom ? orgWidth : 0,
+                            width: reveal ? orgWidth : 0
+                        });
+                    }
                 }
+            }
 
-                if (reveal) {
-                    var negative = upDownEffect == 1 ? -1 : 1;
-                    slice.css({
-                        top: goToTop,
-                        left: goToLeft,
+
+            count++;
+            schedule(makeCallback(animate, [
+                    slice, {
                         width: orgWidth,
                         height: orgHeight,
-                        opacity: 1
-                    });
-                    if (vertical) {
-                        goToTop = negative * orgHeight;
-                    } else {
-                        goToLeft = negative * orgWidth;
-                    }
-                }
-
-                if (upDownEffect) {
-                    var bottom = TRUE;
-                    if (upDownEffect == 3) {
-                        if (upDownAlternator) {
-                            bottom = FALSE;
-                            upDownAlternator = FALSE;
-                        } else {
-                            upDownAlternator = TRUE;
+                        opacity: reveal ? 0 : 1,
+                        left: goToLeft,
+                        top: goToTop
+                    }, speed, ease, function () {
+                        count--;
+                        if (count == 0) {
+                            obj.callback();
                         }
-                    } else if (upDownEffect == 2) {
-                        bottom = FALSE;
-                    }
-                    if (vertical) {
-                        if (reveal) {
-                            goToTop = (bottom ? -1 : 1) * orgHeight;
-                        } else {
-                            slice.css({
-                                bottom: bottom ? 0 : orgHeight,
-                                top: bottom ? orgHeight : 0,
-                                height: reveal ? orgHeight : 0
-                            });
-                        }
-                    } else {
-                        if (reveal) {
-                            goToLeft = (bottom ? -1 : 1) * orgWidth;
-                        } else {
-                            slice.css({
-                                right: bottom ? 0 : orgWidth,
-                                left: bottom ? orgWidth : 0,
-                                width: reveal ? orgWidth : 0
-                            });
-                        }
-                    }
-                }
-
-
-                count++;
-                schedule(makeCallback(animate, [
-                        slice, {
-                            width: orgWidth,
-                            height: orgHeight,
-                            opacity: reveal ? 0 : 1,
-                            left: goToLeft,
-                            top: goToTop
-                        }, speed, ease, function () {
-                            count--;
-                            if (count == 0) {
-                                obj.callback();
-                            }
-                        }, obj])
-                    , timeout);
-            };
+                    }, obj])
+                , timeout);
         });
         if (reveal) {
             obj.goToNext();
