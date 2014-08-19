@@ -1733,6 +1733,20 @@
 
     // Start by defining everything, the implementations are below.
     var normalEffectsPrefixObject = {
+        test: [
+            "",
+            "Reveal",
+            [
+                "",
+                "Vertical",
+                [
+                    "",
+                    "Reverse",
+                    "Random",
+                    testAnimation
+                ]
+            ]
+        ],
         box: {
             Random: [
                 "",
@@ -1796,7 +1810,7 @@
                 stackTemplate
             ]
         ]
-    }
+    };
 
     // Generic effects needs to have a "dir" attribute as their last argument.
     var genericEffectsPrefixObject = {
@@ -1828,7 +1842,7 @@
         },
         zip: zip,
         unzip: unzip
-    }
+    };
 
 
     function parsePrefixedEffects(resultObject, effectsObject, prefix, generic, argumentsStack) {
@@ -2120,6 +2134,14 @@
         var vertical = dir == 1 || dir == 3;
         var negative = dir == 1 || dir == 4;
         foldTemplate(obj, vertical, reverse, random, FALSE, 0, negative ? 1 : 2, reveal);
+    }
+
+    function testAnimation(obj, reveal, vertical, reverseArg) {
+        var reverse = reverseArg == 1;
+        var random = reverseArg == 2;
+
+        foldTemplate(obj, vertical, reverse, random, FALSE, 0, 1, reveal);
+        foldTemplate(obj, vertical, reverse, random, FALSE, 0, 2, reveal);
     }
 
     function zip(obj, dir) {
