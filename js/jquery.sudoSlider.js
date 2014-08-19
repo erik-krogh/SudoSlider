@@ -2005,11 +2005,6 @@
             for (var j = 0; j < boxLine.length; j++) {
                 var lazyBox = boxLine[j];
                 (function (lazyBox, delay) {
-                    if (reveal) {
-                        boxAnimationFunction(delay);
-                    } else {
-                        schedule(boxAnimationFunction, delay);
-                    }
                     function boxAnimationFunction (delay) {
                         var box = lazyBox();
                         var boxChildren = box.children();
@@ -2066,22 +2061,31 @@
                         }
                         count++;
                         schedule(function () {
-                            animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, ease, FALSE, obj);
-                            animate(box, {
-                                opacity: reveal ? 0 : 1,
-                                width: goToWidth,
-                                height: goToHeight,
-                                left: goToLeft,
-                                top: goToTop,
-                                borderRadius: grow && reveal && roundedGrow ? mathMax(orgHeight, orgWidth) : 0
-                            }, speed, ease, function () {
-                                count--;
-                                if (count == 0) {
-                                    obj.callback();
-                                }
-                            }, obj);
+                            doc.ready(function () {
+                                animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, ease, FALSE, obj);
+                                animate(box, {
+                                    opacity: reveal ? 0 : 1,
+                                    width: goToWidth,
+                                    height: goToHeight,
+                                    left: goToLeft,
+                                    top: goToTop,
+                                    borderRadius: grow && reveal && roundedGrow ? mathMax(orgHeight, orgWidth) : 0
+                                }, speed, ease, function () {
+                                    count--;
+                                    if (count == 0) {
+                                        obj.callback();
+                                    }
+                                }, obj);
+                            })
                         }, delay);
                     };
+
+                    var minWaitTime = 150;
+                    if (reveal || delay < minWaitTime) {
+                        boxAnimationFunction(delay);
+                    } else {
+                        schedule(makeCallback(boxAnimationFunction, [minWaitTime]), delay - minWaitTime);
+                    }
                 })(lazyBox, timeBuff);
             }
             timeBuff += (speed / boxesResult.length) * 1.5;
@@ -2476,38 +2480,30 @@
     function createLazyBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
         var slider = obj.slider;
         var result = [];
-        var boxWidth, boxHeight;
-        var first = TRUE;
-
-        for (var rows = 0; rows < numberOfRows; rows++) {
-            for (var cols = 0; cols < numberOfCols; cols++) {
-                createAndAttachBoxFunction(rows, cols);
+        var boxWidth = Math.ceil(obj.slider.width() / numberOfCols);
+        var boxHeight = Math.ceil(obj.slider.height() / numberOfRows);
+        for (var row = 0; row < numberOfRows; row++) {
+            for (var col = 0; col < numberOfCols; col++) {
+                doStuff(row, col);
             }
         }
-
-        function createAndAttachBoxFunction(rows, cols) {
+        function doStuff(row, col) {
             result.push(function () {
                 var innerBox = makeClone(obj, useToSlides);
 
-                if (first) {
-                    first = FALSE;
-                    boxWidth = Math.ceil(innerBox.width() / numberOfCols);
-                    boxHeight = Math.ceil(innerBox.height() / numberOfRows);
-                }
-
                 var box = createBox(
                     innerBox, // innerBox
-                    boxHeight * rows, // top
-                    boxWidth * cols, // left
+                    boxHeight * row, // top
+                    boxWidth * col, // left
                     boxHeight, // height
                     boxWidth, // width
                     obj // for options.
                 );
-
                 slider.append(box);
                 return box;
             });
         }
+
         return result;
     }
 
