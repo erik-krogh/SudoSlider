@@ -7,9 +7,10 @@
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
-		$(document).ready(function(){	
+        // TODO: Make sure to demonstrate that customLinks can be anything.
+		$(document).ready(function(){
 			var sudoSlider = $("#slider").sudoSlider({
-				customLink:'a.customLink',
+				customLink:'.customLink',
 				prevNext:false
 			});
 		});	
@@ -23,6 +24,7 @@
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - CustomLink demo</h1> 
 	<a href="http://webbies.dk/SudoSlider/help/#Settings-CustomLink">CustomLink in docs</a>
+    <h3>CustomLinks can be any html element, just make sure the html element is matched by the CSS selector in the customLink option. </h3>
 	<div style="position:relative;">
 		<div id="slider">
 			<ul>				
@@ -33,12 +35,13 @@
 				<li><img src="../images/05.jpg" alt="image description"/></li>			
 			</ul>
 		</div>
-		<a href="javascript:void(0);" class="customLink" data-target="1">Link to slide number 1</a><br />
-		<a href="javascript:void(0);" class="customLink" data-target="next">Link to the next slide</a><br />
-		<a href="javascript:void(0);" class="customLink" data-target="last">Link to the last slide</a><br />
-		<a href="javascript:void(0);" class="customLink" data-target="prev">Link to the previous slide</a><br />
-		<a href="javascript:void(0);" class="customLink" data-target="3">Link to slide number 3</a><br />
-		<a href="javascript:void(0);" class="customLink" data-target="first">Link to the first slide</a><br />
+        <a href="javascript:void(0);" class="customLink" data-target="1">Link to slide number 1</a><br />
+        <h3 class="customLink" data-target="next">Link to the next slide</h3>
+        <a href="javascript:void(0);" class="customLink" data-target="last">Link to the last slide</a><br />
+        <a href="javascript:void(0);" class="customLink" data-target="prev">Link to the previous slide</a><br />
+        <img width="100" height="30" class="customLink" data-target="5" src="../images/05.jpg" alt="image description"/><br/>
+        <a href="javascript:void(0);" class="customLink" data-target="3">Link to slide number 3</a><br />
+        <a href="javascript:void(0);" class="customLink" data-target="first">Link to the first slide</a><br />
 	</div>
 	<h3>Usage</h3>
 	<h4>Include the javascripts</h4>
@@ -50,7 +53,7 @@
 &lt;script type="text/javascript" &gt;
     $(document).ready(function(){	
         var sudoSlider = $("#slider").sudoSlider({
-           customLink:'a.customLink',
+           customLink:'.customLink',
            prevNext:false
         });
     });
@@ -66,12 +69,13 @@
         &lt;li&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/li&gt;	
     &lt;/ul&gt;
 &lt;/div&gt;
-&lt;a class="customLink" data-target="1"&gt;Link to slide number 1&lt;/a&gt;&lt;br /&gt;
-&lt;a class="customLink" data-target="next"&gt;Link to the next slide&lt;/a&gt;&lt;br /&gt;
-&lt;a class="customLink" data-target="last"&gt;Link to the last slide&lt;/a&gt;&lt;br /&gt;
-&lt;a class="customLink" data-target="prev"&gt;Link to the previous slide&lt;/a&gt;&lt;br /&gt;
-&lt;a class="customLink" data-target="3"&gt;Link to slide number 3&lt;/a&gt;&lt;br /&gt;
-&lt;a class="customLink" data-target="first"&gt;Link to the first slide&lt;/a&gt;&lt;br /&gt;
+&lt;a href="javascript:void(0);" class="customLink" data-target="1"&gt;Link to slide number 1&lt;/a&gt;&lt;br /&gt;
+&lt;h3 class="customLink" data-target="next"&gt;Link to the next slide&lt;/h3&gt;
+&lt;a href="javascript:void(0);" class="customLink" data-target="last"&gt;Link to the last slide&lt;/a&gt;&lt;br /&gt;
+&lt;a href="javascript:void(0);" class="customLink" data-target="prev"&gt;Link to the previous slide&lt;/a&gt;&lt;br /&gt;
+&lt;img width="100" height="30" class="customLink" data-target="5" src="../images/05.jpg" alt="image description"/&gt;&lt;br/&gt;
+&lt;a href="javascript:void(0);" class="customLink" data-target="3"&gt;Link to slide number 3&lt;/a&gt;&lt;br /&gt;
+&lt;a href="javascript:void(0);" class="customLink" data-target="first"&gt;Link to the first slide&lt;/a&gt;&lt;br /&gt;
 </pre>
 </div>
 
