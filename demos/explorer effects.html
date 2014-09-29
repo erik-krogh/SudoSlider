@@ -15,7 +15,7 @@
         (function () {
             $(document).ready(function(){
                 var effects = $.fn.sudoSlider.effects;
-
+                var slides = $("#slider").children();
                 var sudoSlider = $("#slider").sudoSlider({
                     effect: function (obj) {
                         alert("No effect specified");
@@ -186,11 +186,10 @@
 
                     });
                     function setEffectAndSlide(name) {
-                        sudoSlider.setOption("effect", name);
+                        slides.attr("data-effect", name);
                         $("#selectedEffectContainer").text(name);
-                        setTimeout(function () {
-                            sudoSlider.goToSlide("next");
-                        }, 0);
+                        sudoSlider.stopAnimation();
+                        sudoSlider.goToSlide("next");
 
                         if (!$.fn.sudoSlider.effects[name]) {
                             var allNames = getKeyArray($.fn.sudoSlider.effects);

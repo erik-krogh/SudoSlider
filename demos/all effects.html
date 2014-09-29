@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
+            var slides = $("#slider").children();
             var sudoSlider = $("#slider").sudoSlider({
                 effect: "slide",
                 prevNext: true,
@@ -19,12 +20,10 @@
             $.each($.fn.sudoSlider.effects, function (effectName, effect) {
                 count++;
                 container.append($("<a> " + effectName + " </a> <span>| </span>").click(function () {
-                    if (sudoSlider.getOption("effect") != effect) {
-                        sudoSlider.setOption("effect", effect);
-                    }
+                    slides.attr("data-effect", effectName);
                     sudoSlider.stopAnimation();
                     sudoSlider.goToSlide("next");
-                }))
+                }));
             });
             $("#effectCounter").text(count);
         });
