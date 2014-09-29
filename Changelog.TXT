@@ -423,3 +423,4 @@ Change in script: Fixed an of by one alignment problem, caused by some CSS.
 Change in script: Improved animation startup time for all animations where boxes or slices are animated in (so when they fade in, slide in, grow in etc.).
 Change in script: Responsive option is now true as default.
 Change in docs: Added the touch and links demo. Showcasing links inside a slider that you can move around using touch.
+Change in script: You can have wildcards when specifying effect. So "box*Grow*" chooses randomly between every effect matching that.

@@ -25,7 +25,7 @@
                     controlsFade: false,
                     continuous: true,
                     numeric: true,
-                    vertical: true,
+                    vertical: false,
                     interruptible: true
                 });
 
@@ -110,6 +110,24 @@
                     return result;
                 }
 
+                effectMap = makeWildcards(effectMap);
+                function makeWildcards(effectMap) {
+                    var result = {};
+                    $.each(effectMap, function (name, effectTree) {
+                        if ($.isFunction(effectTree)) {
+                            result[name] = effectTree;
+                        } else {
+                            if ($.fn.sudoSlider.effects[name]) {
+                                result[name] = makeWildcards(effectTree);
+                            } else {
+                                result[name + "*"] = makeWildcards(effectTree);
+                            }
+                        }
+
+                    });
+                    return result;
+                }
+
 
                 effectMap = makeArrows(effectMap);
                 function makeArrows(effectMap) {
@@ -179,7 +197,7 @@
                             var text = "This is a prefix, it selects randomly between: ";
                             var first = true;
                             for (var i = 0; i < allNames.length; i++) {
-                                if (startsWith(allNames[i], name)) {
+                                if (matches(allNames[i], name)) {
                                     if (first) {
                                         first = false;
                                     } else {
@@ -198,8 +216,8 @@
                 }
             });
 
-            function startsWith(string, prefix) {
-                return string.indexOf(prefix) == 0;
+            function matches(string, patternWithWildCards) {
+                return !!string.match(new RegExp("^" + patternWithWildCards.split("*").join(".*") + "$", "g"));
             }
 
             function getKeyArray(object) {

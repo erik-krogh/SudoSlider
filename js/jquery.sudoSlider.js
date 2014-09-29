@@ -1227,7 +1227,7 @@
                         } else {
                             touchEnd(prevX, prevY);
                             startedTouch = FALSE;
-                            event.preventDefault();
+//                            event.preventDefault(); // TODO: Test this on iPad.
                         }
                     };
                     bindMultiple(doc, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL]);
@@ -1730,23 +1730,11 @@
     var GROW_IN = "GrowIn";
     var GROW_OUT = "GrowOut";
     var ROUNDED = "Rounded";
+    var FLY_IN = "FlyIn";
+    var FLY_OUT = "FlyOut";
 
-    // Start by defining everything, the implementations are below.
+    // Start by defining everything, the implementations are below
     var normalEffectsPrefixObject = {
-        test: [
-            "",
-            "Reveal",
-            [
-                "",
-                "Vertical",
-                [
-                    "",
-                    "Reverse",
-                    "Random",
-                    testAnimation
-                ]
-            ]
-        ],
         box: {
             Random: [
                 "",
@@ -1754,6 +1742,8 @@
                 GROW_IN + ROUNDED,
                 GROW_OUT,
                 GROW_OUT + ROUNDED,
+                FLY_IN,
+                FLY_OUT,
                 boxRandomTemplate
             ],
             Rain: [
@@ -1762,8 +1752,8 @@
                 GROW_IN + ROUNDED,
                 GROW_OUT,
                 GROW_OUT + ROUNDED,
-                "FlyIn",
-                "FlyOut",
+                FLY_IN,
+                FLY_OUT,
                 [
                     "UpLeft",
                     "DownLeft",
@@ -1808,6 +1798,21 @@
                 "",
                 "Reverse",
                 stackTemplate
+            ]
+        ],
+        // TODO: Name!
+        unnamed: [
+            "",
+            "Reveal",
+            [
+                "",
+                "Vertical",
+                [
+                    "",
+                    "Reverse",
+                    "Random",
+                    testAnimation
+                ]
             ]
         ]
     };
@@ -1911,11 +1916,12 @@
         boxTemplate(obj, direction, FALSE, TRUE, FALSE, 2, FALSE, reveal, rounded);
     }
 
-    // effect: 0: no grow, 1: growIn: 2: growInRounded, 3: growOut, 4: growOutRounded
+    // effect: 0: no grow, 1: growIn: 2: growInRounded, 3: growOut, 4: growOutRounded, 5: flyIn, 6: flyOut
     function boxRandomTemplate(obj, effect) {
-        var reveal = effect == 3 || effect == 4;
+        var reveal = effect == 3 || effect == 4 || effect == 6;
         var roundedGrow = effect == 2 || effect == 4;
-        boxTemplate(obj, FALSE, FALSE, effect != 0, TRUE, 0, FALSE, reveal, roundedGrow);
+        var flyIn = effect == 5 || effect == 6;
+        boxTemplate(obj, FALSE, FALSE, effect > 0 && effect < 5, TRUE, 0, flyIn, reveal, roundedGrow);
     }
 
     // SelectionAlgorithm: 0: Standard selection, 1: rain, 2: spiral
@@ -2037,8 +2043,17 @@
                         var childGoToTop = childOrgTop;
 
                         if (flyIn) {
-                            var adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
-                            var adjustTop = reverse ? -goToHeight : goToHeight;
+                            var adjustTop;
+                            var adjustLeft;
+
+                            if (randomize) {
+                                adjustLeft = pickRandomValue([-goToWidth, goToWidth]);
+                                adjustTop = pickRandomValue([goToHeight, goToHeight]);
+                            } else {
+                                adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
+                                adjustTop = reverse ? -goToHeight : goToHeight;
+                            }
+
 
                             var flyDistanceFactor = 1.5;
 
@@ -2545,7 +2560,7 @@
             opacity: 0,
             overflow: HIDDEN_STRING,
             position: ABSOLUTE_STRING,
-            zIndex: findCloneZIndex(obj)
+            zIndex: findCloneZIndex(obj) // TODO: Maybe not z-index
         }).append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
     }
 
@@ -2703,6 +2718,10 @@
         setTimeout(func, time);
     }
 
+    function matches(string, patternWithWildCards) {
+        return !!string.match(new RegExp("^" + patternWithWildCards.split("*").join(".*") + "$", "g"));
+    }
+
     function startsWith(string, prefix) {
         return string.indexOf(prefix) == 0;
     }
@@ -2792,7 +2811,7 @@
                 } else {
                     var array = [];
                     for (var name in effects) {
-                        if (startsWith(name, effectName)) {
+                        if (matches(name, effectName)) {
                             array.push(effects[name]);
                         }
                     }
