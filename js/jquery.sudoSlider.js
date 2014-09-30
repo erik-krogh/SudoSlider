@@ -2048,7 +2048,7 @@
 
                             if (randomize) {
                                 adjustLeft = pickRandomValue([-goToWidth, goToWidth]);
-                                adjustTop = pickRandomValue([goToHeight, goToHeight]);
+                                adjustTop = pickRandomValue([-goToHeight, goToHeight]);
                             } else {
                                 adjustLeft = reverse != reverseRows ? -goToWidth : goToWidth;
                                 adjustTop = reverse ? -goToHeight : goToHeight;
@@ -2715,7 +2715,7 @@
     }
 
     function schedule(func, time) {
-        setTimeout(func, time);
+        return setTimeout(func, time);
     }
 
     function matches(string, patternWithWildCards) {
@@ -2804,7 +2804,7 @@
                 return makeRandomEffect(array);
             } else {
                 var effects = objectToLowercase($.fn.sudoSlider.effects);
-                var effectName = inputEffect.toLowerCase();
+                var effectName = stringTrim(inputEffect.toLowerCase());
                 var result = effects[effectName];
                 if (result) {
                     return result;
