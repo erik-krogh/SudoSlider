@@ -414,7 +414,7 @@ Change in script: Fixed that when preloadAjax was false, nothing except the firs
 Change in script: The auto animation pauses when responsive is on and the window is resized.
 Change in script: Remove the animationZIndex option. Now the z-index of the overlaying animation is found more intelligently.
 
-3.3.1
+3.3.1 (04-10-2014)
 Change in script: Added the mouseTouch option (thanks to foobear). That pr. default disables that mouse input acts as touch input when touch is enabled.
 Change in script: Changed the way scrolling is allowed when using touch on a touch device (thanks to foobear).
 Change in script: Added allowScroll option, so you can disable the behaviour that allows scrolling while dragging the slider using touch.
@@ -424,4 +424,5 @@ Change in script: Improved animation startup time for all animations where boxes
 Change in script: Responsive option is now true as default.
 Change in docs: Added the "touch and links" demo. Showcasing links inside a slider that you can move around using touch.
 Change in script: You can have wildcards when specifying effect. So "box*Grow*" chooses randomly between every effect matching that.
-Various fixes.
+Change in script: No more ugly z-index when doing animations.
+Various fixes. Including some Old-IE fixes.

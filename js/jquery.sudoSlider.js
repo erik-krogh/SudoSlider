@@ -179,6 +179,11 @@
                 slideContainerCreated = TRUE;
 
                 var slidesJquery = childrenNotAnimationClones(slidesContainer);
+
+                // IE-Old fix.
+                slidesJquery.filter("img").wrap(DIV_TAG);
+                slidesJquery = childrenNotAnimationClones(slidesContainer);
+
                 slides = [];
 
                 totalSlides = slidesJquery.length;
@@ -2107,7 +2112,7 @@
                                 }, obj);
                             })
                         }, delay);
-                    };
+                    }
 
                     var minWaitTime = 150;
                     if (reveal || delay < minWaitTime) {
@@ -2312,17 +2317,18 @@
         var options = obj.options;
         var ease = options.ease;
         var speed = options.speed;
+        var callback = obj.callback;
         if (pushIn) {
             var fromSlides = obj.fromSlides;
             var toSlides = makeClone(obj, TRUE).hide();
-            toSlides.prependTo(obj.slider);
+            obj.slider.append(toSlides);
             var height = mathMax(toSlides.height(), fromSlides.height());
             var width = mathMax(toSlides.width(), fromSlides.width());
             toSlides.css(vertical ? {left: negative * width} : {top: negative * height}).show();
-            animate(toSlides, {left: 0, top: 0}, speed, ease, obj.callback, obj);
+            animate(toSlides, {left: 0, top: 0}, speed, ease, callback, obj);
         } else {
             var fromSlides = makeClone(obj, FALSE);
-            fromSlides.prependTo(obj.slider);
+            obj.slider.append(fromSlides);
             obj.goToNext();
             var toSlides = obj.toSlides;
 
@@ -2330,7 +2336,7 @@
             var height = measurementSlides.height();
             var width = measurementSlides.width();
 
-            animate(fromSlides, vertical ? {left: negative * width} : {top: negative * height}, speed, ease, obj.callback, obj);
+            animate(fromSlides, vertical ? {left: negative * width} : {top: negative * height}, speed, ease, callback, obj);
         }
     }
 
@@ -2342,7 +2348,7 @@
         var innerBox = makeClone(obj, TRUE);
         var width = innerBox.width();
         var height = innerBox.height();
-        var box = createBox(innerBox, 0, 0, 0, 0, obj)
+        var box = createBox(innerBox, 0, 0, 0, 0)
             .css({opacity: 1})
             .appendTo(obj.slider);
         var both = box.add(innerBox);
@@ -2452,8 +2458,10 @@
             callAsync(function () {
                 elem.css(properties);
 
+                var startTime = getTimeInMillis();
+
                 elem.on(events, function (event) {
-                    if (elem.is(event.target)) {
+                    if (elem.is(event.target) && (getTimeInMillis() - startTime) - speed > -100) {
                         callbackFunction();
                     }
                 });
@@ -2516,9 +2524,22 @@
 
     function createLazyBoxes(obj, numberOfCols, numberOfRows, useToSlides) {
         var slider = obj.slider;
+        var vertical = obj.options.vertical;
         var result = [];
-        var boxWidth = Math.ceil(obj.slider.width() / numberOfCols);
-        var boxHeight = Math.ceil(obj.slider.height() / numberOfRows);
+        var width = vertical ? obj.slider.width() : 0;
+        var height = vertical ? 0 : obj.slider.height();
+
+        obj.toSlides.each(function () {
+            var that = $(this);
+            if (vertical) {
+                height += that.height();
+            } else {
+                width += that.width();
+            }
+        });
+
+        var boxWidth = Math.ceil(width / numberOfCols);
+        var boxHeight = Math.ceil(height / numberOfRows);
         for (var row = 0; row < numberOfRows; row++) {
             for (var col = 0; col < numberOfCols; col++) {
                 doStuff(row, col);
@@ -2528,14 +2549,7 @@
             result.push(function () {
                 var innerBox = makeClone(obj, useToSlides);
 
-                var box = createBox(
-                    innerBox, // innerBox
-                    boxHeight * row, // top
-                    boxWidth * col, // left
-                    boxHeight, // height
-                    boxWidth, // width
-                    obj // for options.
-                );
+                var box = createBox(innerBox, boxHeight * row, boxWidth * col, boxHeight, boxWidth);
                 slider.append(box);
                 return box;
             });
@@ -2544,7 +2558,7 @@
         return result;
     }
 
-    function createBox(innerBox, top, left, height, width, obj) {
+    function createBox(innerBox, top, left, height, width) {
         innerBox.css({
             width: innerBox.width(),
             height: innerBox.height(),
@@ -2559,8 +2573,7 @@
             height: height,
             opacity: 0,
             overflow: HIDDEN_STRING,
-            position: ABSOLUTE_STRING,
-            zIndex: findCloneZIndex(obj) // TODO: Maybe not z-index
+            position: ABSOLUTE_STRING
         }).append(innerBox).addClass(ANIMATION_CLONE_MARKER_CLASS);
     }
 
@@ -2572,7 +2585,7 @@
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $(DIV_TAG).css({zIndex: findCloneZIndex(obj), position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
+        var result = $(DIV_TAG).css({position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
         slides.each(function (index, elem) {
             var that = $(elem);
             var cloneWidth = that.outerWidth(TRUE);
@@ -2589,11 +2602,6 @@
         result.width(width).height(height);
         return result;
     }
-
-    function findCloneZIndex(obj) {
-        return (parseInt10(obj.container.css("zIndex")) || 0) + 1;
-    }
-
 
     /*
      * Util scripts.
