@@ -31,6 +31,11 @@
             });
 		});	
 	</script>
+    <style type="text/css">
+        .slider {
+            width: 696px;
+        }
+    </style>
 
 	
 </head>
@@ -41,14 +46,14 @@
     <br/>
     <h2>The "random" effect chooses randomly between all effects. </h2>
     <div class="slider" data-effect="random"></div>
-    <h2> A prefix of some effects, chooses randomly between all those effects. </h2>
-    <div class="slider" data-effect="boxRain"></div>
     <h2>You can select randomly between multiple effects by separating them with a comma.</h2>
-    <div class="slider" data-effect="boxRainGrow,fade,sliceRandom"></div>
+    <div class="slider" data-effect="boxRainGrowInDownRight,fade,sliceRandom"></div>
     <h2>You can use wildcards</h2>
+    <div class="slider" data-effect="boxRain*"></div>
+    <h2>Mutiple wildcards</h2>
     <div class="slider" data-effect="box*Grow*"></div>
     <h2>A more advanced example</h2>
-    <div class="slider" data-effect="blinds1, boxRandom*, boxRainDown*, boxRainFlyInUp* ,boxSpiral*Grow, fade, fold, foldRan*, *zip"></div>
+    <div class="slider" data-effect="blinds1, boxRandom*, boxRainDown*, boxRainFlyInUp* ,boxSpiral*Grow*, fade, fold, foldRan*, *zip"></div>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">

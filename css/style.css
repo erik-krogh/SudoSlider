@@ -15,6 +15,8 @@ body {font:80% Trebuchet MS, Arial, Helvetica, Sans-Serif;color:#333;line-height
 pre {white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; }
 
 /* // Sudo Slider */
+#slider {width: 696px} /* It can be a good idea to set a width of the slider, mostly so Old-IE can figure out how to render */
+
 /* Numeric Navigation */
 ol.numericControls {margin:1em 0;padding:0;height:28px;	}
 ol.numericControls li{margin:0 10px 0 0; padding:0;float:left;list-style:none;height:28px;line-height:28px;}

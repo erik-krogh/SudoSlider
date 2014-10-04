@@ -8,13 +8,13 @@
     <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            var slides = $("#slider").children();
             var sudoSlider = $("#slider").sudoSlider({
                 effect: "slide",
                 prevNext: true,
                 controlsFade: false,
                 continuous: true
             });
+            var slides = $("#slider").children().children();
             var container = $("#effectLinksHolder");
             var count = 0;
             $.each($.fn.sudoSlider.effects, function (effectName, effect) {
