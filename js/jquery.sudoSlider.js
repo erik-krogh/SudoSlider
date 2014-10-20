@@ -182,8 +182,6 @@
 
                 var slidesJquery = childrenNotAnimationClones(slidesContainer);
 
-                // IE-Old fix.
-                slidesJquery.filter("img").wrap(DIV_TAG);
                 slidesJquery = childrenNotAnimationClones(slidesContainer);
 
                 slides = [];
@@ -1021,7 +1019,9 @@
                 option[0]/*effect*/ = function (obj) {
                     if (runningTouchEffect) {
                         runningTouchEffect = FALSE;
-                        obj.options.ease = easingToUse;
+                        var options = obj.options;
+                        options.ease = easingToUse;
+                        options.cssease = easingToUse;
                         return slide(obj);
                     } else {
                         return prevEffect(obj);
@@ -1307,13 +1307,11 @@
                                 }
                             }
 
-
                             prevX = x - startX;
                             prevY = y - startY;
                         } else {
                             touchEnd(prevX, prevY);
                             startedTouch = FALSE;
-//                            event.preventDefault(); // TODO: Test this on iPad.
                         }
                     };
                     bindMultiple(doc, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL]);
