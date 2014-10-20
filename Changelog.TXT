@@ -426,3 +426,7 @@ Change in docs: Added the "touch and links" demo. Showcasing links inside a slid
 Change in script: You can have wildcards when specifying effect. So "box*Grow*" chooses randomly between every effect matching that.
 Change in script: No more ugly z-index when doing animations.
 Various fixes. Including some Old-IE fixes.
+
+3.3.2
+Change in script: Touch now works well when you slide across multiple slides, that includes if slideCount > 1.
+Change in script: Added a new option CSSease, so you can set the ease used for CSS and JavaScript animations separately.

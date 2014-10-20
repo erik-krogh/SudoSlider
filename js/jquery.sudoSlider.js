@@ -1,5 +1,5 @@
 /*
- * Sudo Slider verion 3.3.1 - jQuery plugin
+ * Sudo Slider verion 3.3.2 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -27,6 +27,7 @@
     var ABSOLUTE_STRING = "absolute";
     var RELATIVE_STRING = "relative";
     var HIDDEN_STRING = "hidden";
+    var SWING = "swing";
     var EMPTY_FUNCTION = function () { };
     var ANIMATION_CLONE_MARKER_CLASS = "sudo-box";
     var DIV_TAG = "<div>";
@@ -57,7 +58,7 @@
             moveCount: 1, /*     option[9]/*movecount*/
             startSlide: 1, /*     option[10]/*startslide*/
             responsive: TRUE, /* option[11]/*responsive*/
-            ease: "swing", /* option[12]/*ease*/
+            ease: SWING, /* option[12]/*ease*/
             auto: FALSE, /* option[13]/*auto*/
             pause: 2000, /*  option[14]/*pause*/
             resumePause: FALSE, /* option[15]/*resumepause*/
@@ -91,7 +92,8 @@
             touchHandle: FALSE, /* option[43]/*touchHandle*/
             destroyCallback: EMPTY_FUNCTION,  /* option[44]/*destroyCallback*/
             mouseTouch: FALSE, /* option[45]/*mouseTouch*/
-            allowScroll: TRUE  /* option[46]/*allowScroll*/
+            allowScroll: TRUE, /* option[46]/*allowScroll*/
+            CSSease: SWING /* option[47]/*CSSease*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -202,6 +204,10 @@
 
                 slidesJquery.addClass("slide");
 
+                slidesJquery.each(function (index, elem) {
+                    $(elem).attr("data-slide", index + 1);
+                });
+
                 // Now we are going to fix the document, if it's 'broken'. (No <li>).
                 // I assume that it's can only be broken, if ajax is enabled. If it's broken without Ajax being enabled, the script doesn't have anything to fill the holes.
                 if (option[31]/*ajax*/) {
@@ -265,7 +271,6 @@
                 option[10]/*startslide*/ = parseInt10(option[10]/*startslide*/) - 1 || 0;
 
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
-
 
 
                 for (var a = 0; a < totalSlides; a++) {
@@ -389,6 +394,7 @@
 
             // Adjusts the slider when a change in layout has happened.
             var previousAdjustedResponsiveWidth = -1;
+
             function adjustResponsiveLayout(forced) {
                 function doTheAdjustment() {
                     if ((cantDoAdjustments() && !(forced === TRUE)) || totalSlides == 0) {
@@ -413,6 +419,7 @@
                         autoadjust(currentSlide, 0);
                     }
                 }
+
                 doTheAdjustment();
                 callAsync(doTheAdjustment); // Fixing invisible scrollbar.
                 schedule(doTheAdjustment, 20);
@@ -578,7 +585,7 @@
                 }
 
                 if (option[39]/*useCSS*/) {
-                    animate(fadeElement, adjustObject, fadetime, option[12]/*ease*/, callback);
+                    animate(fadeElement, adjustObject, fadetime, option[47]/*CSSease*/, callback);
                 } else {
                     fadeElement.animate(
                         adjustObject,
@@ -609,7 +616,7 @@
                     i = totalSlides;
                 }
 
-                if (option[18]/*numeric*/){
+                if (option[18]/*numeric*/) {
                     for (var control = 0; control < numericControls.length; ++control) {
                         var element = numericControls[control];
                         setCurrentElement(element, i)
@@ -714,7 +721,7 @@
                 }
 
                 if (option[39]/*useCSS*/) {
-                    animate(obj, adjustObject, speed, option[12]/*ease*/)
+                    animate(obj, adjustObject, speed, option[47]/*CSSease*/)
                 } else {
                     if (speed == 0) {
                         // Doing CSS if speed == 0, 1: its faster. 2: it fixes bugs.
@@ -752,12 +759,16 @@
                             marginTop: top
                         });
                     }
+
                     setMargins(0, 0);
                     setMargins(left, top);
                 }
             }
 
             function getSlidePosition(slide, vertical) {
+                if (vertical == undefined) {
+                    vertical = option[7]/*vertical*/;
+                }
                 var targetSlide = slides[getRealPos(slide)];
                 return (targetSlide && targetSlide.length) ? -targetSlide.position()[vertical ? "top" : "left"] : 0;
             }
@@ -1028,7 +1039,13 @@
                 var timeBuffer = [];
                 var bufferIndex = 0;
 
+                var currentTouchSlide;
+                var baseDistance;
+
                 function touchStart(x, y) {
+                    currentTouchSlide = currentSlide;
+                    baseDistance = 0;
+
                     currentlyAnimating = TRUE;
                     ensureSliderContainerCSSDurationReset();
                     initialOffsetTop = currentSliderPositionTop;
@@ -1044,22 +1061,75 @@
                     lastDistance = distance;
                     startTime = getTimeInMillis();
                     lastTime = startTime;
+
+                    var currentSlidePosition = getSlidePosition(currentTouchSlide);
+                    distanceToRightSlide = getSlidePosition(currentTouchSlide + 1) - currentSlidePosition;
+
+                    correctionWhenCalculatingWhereToMoveTouchDistance = FALSE;
                 }
+
+                var distanceToRightSlide;
+                var correctionWhenCalculatingWhereToMoveTouchDistance;
 
                 function touchMove(x, y) {
                     var distance;
                     if (option[7]/*vertical*/) {
-                        distance = mathAbs(y);
+                        distance = y;
                     } else {
-                        distance = mathAbs(x);
+                        distance = x;
                     }
-                    positionsBuffer[bufferIndex]  = distance - lastDistance;
+                    var distanceAbs = mathAbs(distance);
+                    positionsBuffer[bufferIndex] = distanceAbs - lastDistance;
                     var newTime = getTimeInMillis();
                     timeBuffer[bufferIndex] = newTime - lastTime;
                     bufferIndex = (bufferIndex + 1) % bufferSize;
 
                     lastTime = newTime;
-                    lastDistance = distance;
+                    lastDistance = distanceAbs;
+
+                    if (option[16]/*continuous*/ && totalSlides >= numberOfVisibleSlides + 1) {
+                        // Moving everything to the right
+                        var direction = 0;
+                        if ((distance - baseDistance) < distanceToRightSlide) {
+                            correctionWhenCalculatingWhereToMoveTouchDistance = FALSE;
+
+                            baseDistance += distanceToRightSlide;
+                            direction = 1;
+
+                            var rightSlidePositionBefore = getSlidePosition(currentTouchSlide + direction);
+
+                            centerTargetSlideAfter(currentTouchSlide + direction);
+                            var rightSlidePositionAfter = getSlidePosition(currentTouchSlide + direction);
+
+                        }
+
+                        // Moving everything to the left.
+                        if ((distance - baseDistance) > 0) {
+                            direction = -1;
+
+                            var rightSlidePositionBefore = getSlidePosition(currentTouchSlide);
+
+                            centerTargetSlideAfter(currentTouchSlide + direction);
+                            rightSlidePositionAfter = getSlidePosition(currentTouchSlide);
+
+                            var moveBaseDistance = getSlidePosition(currentTouchSlide - 1) - rightSlidePositionAfter;
+                            baseDistance += moveBaseDistance;
+
+                            correctionWhenCalculatingWhereToMoveTouchDistance = -moveBaseDistance;
+                        }
+
+                        if (direction != 0) {
+                            currentTouchSlide += direction;
+
+                            if (option[7]/*vertical*/) {
+                                initialOffsetTop -= rightSlidePositionBefore - rightSlidePositionAfter;
+                            } else {
+                                initialOffsetLeft -= rightSlidePositionBefore - rightSlidePositionAfter;
+                            }
+
+                            distanceToRightSlide = getSlidePosition(currentTouchSlide + 1) - getSlidePosition(currentTouchSlide);
+                        }
+                    }
 
                     if (option[7]/*vertical*/) {
                         x = 0;
@@ -1076,6 +1146,13 @@
                     } else {
                         distance = x;
                     }
+                    distance -= baseDistance;
+
+                    if (correctionWhenCalculatingWhereToMoveTouchDistance) {
+                        distance -= correctionWhenCalculatingWhereToMoveTouchDistance;
+                        currentTouchSlide++;
+                    }
+
                     var distanceAbs = mathAbs(distance);
                     var currentTime = getTimeInMillis();
                     var time = 0;
@@ -1117,6 +1194,10 @@
                         }
                     }
 
+
+                    direction = direction == NEXT_STRING ? currentTouchSlide + 1 : currentTouchSlide - 1;
+                    direction = mod(direction, totalSlides);
+
                     var distanceLeft;
                     if (goToAnotherSlide) {
                         distanceLeft = slideDimensions - distanceAbs;
@@ -1134,8 +1215,8 @@
                         timeLeft = mathMin(timeFromDistance, (option[1]/*speed*/));
                     }
 
-                    var cubicBezierY = (speed*timeLeft)/(distanceLeft + speed*timeLeft);
-                    var cubicBezierX = 1-cubicBezierY;//distanceLeft/(distanceLeft + speed*timeLeft);
+                    var cubicBezierY = (speed * timeLeft) / (distanceLeft + speed * timeLeft);
+                    var cubicBezierX = 1 - cubicBezierY;//distanceLeft/(distanceLeft + speed*timeLeft);
 
                     if (option[39]/*useCSS*/) {
                         easingToUse = "cubic-bezier(" + cubicBezierX + "," + cubicBezierY + ",0.3,1)";
@@ -1146,9 +1227,9 @@
                     clickable = FALSE;
                     runningTouchEffect = TRUE;
                     if (goToAnotherSlide) {
-                        performAnimation(filterDir(direction), timeLeft, TRUE, TRUE, TRUE);
+                        performAnimation(direction, timeLeft, TRUE, TRUE, TRUE);
                     } else {
-                        performAnimation(currentSlide, timeLeft, TRUE, TRUE, TRUE);
+                        performAnimation(currentTouchSlide, timeLeft, TRUE, TRUE, TRUE);
                     }
                 }
 
@@ -1322,8 +1403,10 @@
             }
 
             var reorderedSlidesToStartFromSlide = 0;
+
             function reorderSlides(slide) {
-                if (getRealPos(slide) == reorderedSlidesToStartFromSlide) {
+                slide = getRealPos(slide);
+                if (slide == reorderedSlidesToStartFromSlide) {
                     return;
                 }
                 reorderedSlidesToStartFromSlide = slide;
@@ -1369,7 +1452,7 @@
 
 
                 // Finding a "shortcut", used for calculating the offsets.
-                var diff = -currentSlide + dir;
+                var diff = dir - currentSlide;
                 var targetSlide;
                 if (option[16]/*continuous*/ && !prevNext) {
                     var diffAbs = mathAbs(diff);
@@ -1519,7 +1602,7 @@
 
 
             function bindMultiple(element, func, events) {
-                for (var i=0; i < events.length; i++) {
+                for (var i = 0; i < events.length; i++) {
                     bindAndRegisterOff(element, events[i], func);
                 }
             }
@@ -1830,12 +1913,11 @@
             blinds
         ],
         fold: fold,
-        push:
-            [
-                "Out",
-                "In",
-                pushTemplate
-            ],
+        push: [
+            "Out",
+            "In",
+            pushTemplate
+        ],
         reveal: revealTemplate,
         slice: {
             "": [
@@ -1908,7 +1990,7 @@
         var reverse = dir == 0 || dir == 3;
         var grow = effect >= 1 && effect <= 4;
         var flyIn = effect == 5 || effect == 6;
-        var reveal = effect == 6 || effect == 3  || effect == 4;
+        var reveal = effect == 6 || effect == 3 || effect == 4;
         var roundedGrow = effect == 2 || effect == 4;
         boxTemplate(obj, reverse, reverseRows, grow, FALSE, 1, flyIn, reveal, roundedGrow);
     }
@@ -1932,7 +2014,6 @@
     // SelectionAlgorithm: 0: Standard selection, 1: rain, 2: spiral
     function boxTemplate(obj, reverse, reverseRows, grow, randomize, selectionAlgorithm, flyIn, reveal, roundedGrow) {
         var options = obj.options;
-        var ease = options.ease;
         var boxRows = options.boxrows;
         var boxCols = options.boxcols;
         var totalBoxes = boxRows * boxCols;
@@ -2030,7 +2111,7 @@
             for (var j = 0; j < boxLine.length; j++) {
                 var lazyBox = boxLine[j];
                 (function (lazyBox, delay) {
-                    function boxAnimationFunction (delay) {
+                    function boxAnimationFunction(delay) {
                         var box = lazyBox();
                         var boxChildren = box.children();
                         var orgWidth = box.width();
@@ -2066,7 +2147,10 @@
                                 goToLeft -= adjustLeft * flyDistanceFactor;
                                 goToTop -= adjustTop * flyDistanceFactor;
                             } else {
-                                box.css({left: orgLeft + adjustLeft * flyDistanceFactor, top: orgTop + adjustTop * flyDistanceFactor});
+                                box.css({
+                                    left: orgLeft + adjustLeft * flyDistanceFactor,
+                                    top: orgTop + adjustTop * flyDistanceFactor
+                                });
                             }
                         }
 
@@ -2080,7 +2164,10 @@
                                 goToHeight = goToWidth = 0;
                             } else {
                                 box.css({left: orgLeft + (goToWidth / 2), top: orgTop + (goToHeight / 2)});
-                                boxChildren.css({left: childOrgLeft - goToWidth / 2, top: childOrgTop - goToHeight / 2});
+                                boxChildren.css({
+                                    left: childOrgLeft - goToWidth / 2,
+                                    top: childOrgTop - goToHeight / 2
+                                });
 
                                 box.width(0).height(0);
                                 if (roundedGrow) {
@@ -2096,7 +2183,7 @@
                         count++;
                         schedule(function () {
                             doc.ready(function () {
-                                animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, ease, FALSE, obj);
+                                animate(boxChildren, {left: childGoToLeft, top: childGoToTop}, speed, FALSE, FALSE, obj);
                                 animate(box, {
                                     opacity: reveal ? 0 : 1,
                                     width: goToWidth,
@@ -2104,7 +2191,7 @@
                                     left: goToLeft,
                                     top: goToTop,
                                     borderRadius: grow && reveal && roundedGrow ? mathMax(orgHeight, orgWidth) : 0
-                                }, speed, ease, function () {
+                                }, speed, FALSE, function () {
                                     count--;
                                     if (count == 0) {
                                         obj.callback();
@@ -2180,7 +2267,6 @@
         var options = obj.options;
         var slides = options.slices;
         var speed = options.speed / 2; // To make the actual time spent be equal to options.speed
-        var ease = options.ease;
         var objSlider = obj.slider;
         var lazySlides = createLazyBoxes(obj, vertical ? slides : 1, vertical ? 1 : slides, !reveal);
         var slicesElement = $();
@@ -2288,7 +2374,7 @@
                         opacity: reveal ? 0 : 1,
                         left: goToLeft,
                         top: goToTop
-                    }, speed, ease, function () {
+                    }, speed, FALSE, function () {
                         count--;
                         if (count == 0) {
                             obj.callback();
@@ -2315,7 +2401,6 @@
         var vertical = dir == 2 || dir == 4;
         var negative = (dir == 2 || dir == 3) ? 1 : -1;
         var options = obj.options;
-        var ease = options.ease;
         var speed = options.speed;
         var callback = obj.callback;
         if (pushIn) {
@@ -2325,7 +2410,7 @@
             var height = mathMax(toSlides.height(), fromSlides.height());
             var width = mathMax(toSlides.width(), fromSlides.width());
             toSlides.css(vertical ? {left: negative * width} : {top: negative * height}).show();
-            animate(toSlides, {left: 0, top: 0}, speed, ease, callback, obj);
+            animate(toSlides, {left: 0, top: 0}, speed, FALSE, callback, obj);
         } else {
             var fromSlides = makeClone(obj, FALSE);
             obj.slider.append(fromSlides);
@@ -2336,14 +2421,13 @@
             var height = measurementSlides.height();
             var width = measurementSlides.width();
 
-            animate(fromSlides, vertical ? {left: negative * width} : {top: negative * height}, speed, ease, callback, obj);
+            animate(fromSlides, vertical ? {left: negative * width} : {top: negative * height}, speed, FALSE, callback, obj);
         }
     }
 
     function revealTemplate(obj, dir) {
         var vertical = dir == 1 || dir == 3;
         var options = obj.options;
-        var ease = options.ease;
         var speed = options.speed;
         var innerBox = makeClone(obj, TRUE);
         var width = innerBox.width();
@@ -2374,14 +2458,13 @@
             both.height(height);
         }
         // </FF css animation fix>
-        animate(innerBox, {left: 0, top: 0}, speed, ease, FALSE, obj);
-        animate(box, {width: width, height: height}, speed, ease, obj.callback, obj);
+        animate(innerBox, {left: 0, top: 0}, speed, FALSE, EMPTY_FUNCTION, obj);
+        animate(box, {width: width, height: height}, speed, FALSE, obj.callback, obj);
     }
 
     function slide(obj) {
         var ul = childrenNotAnimationClones(obj.slider);
         var options = obj.options;
-        var ease = options.ease;
         var speed = options.speed;
         var target = obj.target;
 
@@ -2389,17 +2472,23 @@
         var top = target.top;
 
         if (obj.options.usecss) {
-            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, ease, obj.callback, obj, TRUE);
+            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, FALSE, obj.callback, obj, TRUE);
         } else {
-            animate(ul, {marginTop: top, marginLeft: left}, speed, ease, obj.callback, obj);
+            animate(ul, {marginTop: top, marginLeft: left}, speed, FALSE, obj.callback, obj);
         }
     }
 
     function animate(elem, properties, speed, ease, callback, obj, doNotResetCss) {
         var usecss = !obj || obj.options.usecss;
         if (CSSVendorPrefix === FALSE || !usecss) {
+            if (!ease) {
+                ease = obj.options.ease;
+            }
             elem.animate(properties, speed, ease, callback);
             return;
+        }
+        if (!ease) {
+            ease = obj.options.cssease;
         }
 
         var CSSObject = {};
@@ -2412,7 +2501,7 @@
         CSSObject[transitionTiming] = speed + "ms";
 
         var transitionEase = transitionProperty + "-timing-function";
-        if (ease == "swing") {
+        if (ease == SWING) {
             ease = "ease-in-out";
         }
         CSSObject[transitionEase] = ease;
@@ -2475,7 +2564,6 @@
     function fadeOutIn(obj) {
         var options = obj.options;
         var fadeSpeed = options.speed;
-        var ease = options.ease;
 
         var fadeinspeed = parseInt10(fadeSpeed * (3 / 5));
         var fadeoutspeed = fadeSpeed - fadeinspeed;
@@ -2484,7 +2572,7 @@
             obj.fromSlides.stop().css({opacity: 1});
         });
 
-        animate(obj.fromSlides, { opacity: 0.0001 }, fadeoutspeed, ease, makeCallback(finishFadeAnimation, [obj, fadeSpeed]), obj);
+        animate(obj.fromSlides, {opacity: 0.0001}, fadeoutspeed, FALSE, makeCallback(finishFadeAnimation, [obj, fadeSpeed]), obj);
     }
 
 
@@ -2585,7 +2673,11 @@
         var orgTop = firstSlidePosition.top;
         var height = 0;
         var width = 0;
-        var result = $(DIV_TAG).css({position: ABSOLUTE_STRING, top: 0, left: 0}).addClass(ANIMATION_CLONE_MARKER_CLASS);
+        var result = $(DIV_TAG).css({
+            position: ABSOLUTE_STRING,
+            top: 0,
+            left: 0
+        }).addClass(ANIMATION_CLONE_MARKER_CLASS);
         slides.each(function (index, elem) {
             var that = $(elem);
             var cloneWidth = that.outerWidth(TRUE);
@@ -2849,17 +2941,20 @@
         var encodedFuncName = "bez_" + coOrdArray.join("_").replace(/\./g, "p");
         var jqueryEasing = $.easing;
         if (!isFunction(jqueryEasing[encodedFuncName])) {
-            var	polyBez = function(p1, p2) {
+            var polyBez = function (p1, p2) {
                 var A = [0, 0];
                 var B = [0, 0];
                 var C = [0, 0];
+
                 function bezCoOrd(t, ax) {
                     C[ax] = 3 * p1[ax], B[ax] = 3 * (p2[ax] - p1[ax]) - C[ax], A[ax] = 1 - C[ax] - B[ax];
                     return t * (C[ax] + t * (B[ax] + t * A[ax]));
                 }
+
                 function xDeriv(t) {
                     return C[0] + t * (2 * B[0] + 3 * A[0] * t);
                 }
+
                 function xForT(t) {
                     var x = t, i = 0, z;
                     while (++i < 14) {
@@ -2870,12 +2965,12 @@
                     return x;
                 }
 
-                return function(t) {
+                return function (t) {
                     return bezCoOrd(xForT(t), 1);
                 }
             };
-            jqueryEasing[encodedFuncName] = function(x, t, b, c, d) {
-                return c * polyBez([coOrdArray[0], coOrdArray[1]], [coOrdArray[2], coOrdArray[3]])(t/d) + b;
+            jqueryEasing[encodedFuncName] = function (x, t, b, c, d) {
+                return c * polyBez([coOrdArray[0], coOrdArray[1]], [coOrdArray[2], coOrdArray[3]])(t / d) + b;
             }
         }
         return encodedFuncName;
