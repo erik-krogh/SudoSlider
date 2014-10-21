@@ -182,8 +182,6 @@
 
                 var slidesJquery = childrenNotAnimationClones(slidesContainer);
 
-                slidesJquery = childrenNotAnimationClones(slidesContainer);
-
                 slides = [];
 
                 totalSlides = slidesJquery.length;
