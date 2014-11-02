@@ -87,13 +87,14 @@
             interruptible: FALSE, /* option[38]/*interruptible*/
             useCSS: TRUE, /* option[39]/*useCSS*/
             loadStart: EMPTY_FUNCTION, /* option[40]/*loadStart*/
-            loadFinish: EMPTY_FUNCTION,  /* option[41]/*loadFinish*/
-            touch: FALSE,  /* option[42]/*touch*/
+            loadFinish: EMPTY_FUNCTION, /* option[41]/*loadFinish*/
+            touch: FALSE, /* option[42]/*touch*/
             touchHandle: FALSE, /* option[43]/*touchHandle*/
-            destroyCallback: EMPTY_FUNCTION,  /* option[44]/*destroyCallback*/
+            destroyCallback: EMPTY_FUNCTION, /* option[44]/*destroyCallback*/
             mouseTouch: FALSE, /* option[45]/*mouseTouch*/
             allowScroll: TRUE, /* option[46]/*allowScroll*/
-            CSSease: SWING /* option[47]/*CSSease*/
+            CSSease: SWING, /* option[47]/*CSSease*/
+            zoomFactor : 1 /* option[48]/*zoomFactor*/
         };
         // Defining the base element.
         var baseSlider = this;
@@ -766,7 +767,9 @@
                     vertical = option[7]/*vertical*/;
                 }
                 var targetSlide = slides[getRealPos(slide)];
-                return (targetSlide && targetSlide.length) ? -targetSlide.position()[vertical ? "top" : "left"] : 0;
+                var result = (targetSlide && targetSlide.length) ? -targetSlide.position()[vertical ? "top" : "left"] : 0;
+
+                return result / option[48]/*zoomFactor*/;
             }
 
             function callQueuedAnimation() {

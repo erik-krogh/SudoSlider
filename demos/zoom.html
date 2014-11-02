@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Sudo Slider | Zoom</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <link rel="STYLESHEET" type="text/css" href="../css/style.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var zoom = 1;
+            if (msieversion()) {
+                zoom = 0.7;
+            }
+            var sudoSlider = $("#slider").sudoSlider({
+                useCSS: false,
+                continuous: true,
+                numeric: true,
+                zoomFactor : zoom
+            });
+        });
+
+        // From here: http://stackoverflow.com/questions/19999388/jquery-check-if-user-is-using-ie
+        function msieversion() {
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+                return true;
+            } else {
+                // If another browser, return 0
+                return false;
+            }
+
+        }
+
+    </script>
+
+
+
+
+</head>
+<body>
+<div id="container">
+	<h1>Sudo Slider jQuery Plugin - Zoom</h1>
+	<div style="position:relative;zoom:70%;">
+		<div id="slider">
+			<ul>
+				<li><img src="../images/01.jpg" alt="image description"/></li>
+				<li><img src="../images/02.jpg" alt="image description"/></li>
+				<li><img src="../images/03.jpg" alt="image description"/></li>
+				<li><img src="../images/04.jpg" alt="image description"/></li>
+				<li><img src="../images/05.jpg" alt="image description"/></li>
+			</ul>
+		</div>
+	</div>
+	<h3>See the source code</h3>
+<script type="text/javascript">
+    /* Google Analytics, please remove
+     var _gaq = _gaq || [];
+     _gaq.push(['_setAccount', 'UA-20484420-1']);
+     _gaq.push(['_trackPageview']);
+
+     (function() {
+     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+     /* */
+</script>
+</body>
+</html>
