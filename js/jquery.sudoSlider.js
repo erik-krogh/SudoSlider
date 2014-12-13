@@ -1,5 +1,5 @@
 /*
- * Sudo Slider verion 3.3.2 - jQuery plugin
+ * Sudo Slider verion 3.3.3 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -256,6 +256,8 @@
                 // The last CSS to make it work.
                 slidesContainer.add(slidesJquery).css({display: "block", position: RELATIVE_STRING, margin: "0"});
 
+                adjustPositionToPosition(0, 0, TRUE);
+
                 option[8]/*slidecount*/ = parseInt10(option[8]/*slidecount*/);
 
                 // Lets just redefine slidecount
@@ -314,6 +316,9 @@
                     if (option[17]/*prevnext*/) {
                         nextbutton = makecontrol(option[35]/*nexthtml*/, NEXT_STRING);
                         prevbutton = makecontrol(option[34]/*prevhtml*/, PREV_STRING);
+                    }
+                    if (option[5]/*controlsfade*/) {
+                        fadeControls(currentSlide, 0);
                     }
                 }
 
@@ -597,10 +602,10 @@
 
             // Fade the controls, if we are at the end of the slide.
             // It's all the different kind of controls.
-            function fadeControls(a, fadetime) {
-                fadeControl(a, fadetime, FALSE); // abusing that the number 0 == FALSE.
+            function fadeControls(slide, fadetime) {
+                fadeControl(slide, fadetime, FALSE); // abusing that the number 0 == FALSE.
                 // The new way of doing it.
-                fadeControl(a < totalSlides - numberOfVisibleSlides, fadetime, TRUE);
+                fadeControl(slide < totalSlides - numberOfVisibleSlides, fadetime, TRUE);
             }
 
             // Updating the 'current' class
@@ -742,13 +747,14 @@
                 adjustPositionToPosition(left, top);
             }
 
-            function adjustPositionToPosition(left, top) {
+            function adjustPositionToPosition(left, top, both) {
                 currentSliderPositionLeft = left;
                 currentSliderPositionTop = top;
 
-                if (option[39]/*useCSS*/) {
+                if (option[39]/*useCSS*/ || both) {
                     slidesContainer.css({transform: "translate(" + left + "px, " + top + "px)"});
-                } else {
+                }
+                if (!option[39]/*useCSS*/ || both) {
                     function setMargins(left, top) {
                         slidesContainer.css({
                             marginLeft: left,
@@ -1687,12 +1693,16 @@
 
             baseSlider.setOption = function (key, val) {
                 publicDestroy();
-                if ($.isPlainObject(key)) {
-                    for (var a in key) {
-                        options[a.toLowerCase()] = key[a];
-                    }
-                } else {
-                    options[key.toLowerCase()] = val;
+
+                options[key.toLowerCase()] = val;
+
+                publicInit();
+            };
+
+            baseSlider.setOptions = function (newOptions) {
+                publicDestroy();
+                for (var key in newOptions) {
+                    options[key.toLowerCase()] = newOptions[key];
                 }
                 publicInit();
             };
