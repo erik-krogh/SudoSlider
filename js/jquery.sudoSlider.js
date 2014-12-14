@@ -1805,7 +1805,7 @@
             beforeAnimation: EMPTY_FUNCTION, /* option[24]/*beforeanimation*/
             afterAnimation: EMPTY_FUNCTION, /* option[25]/*afteranimation*/
             history: FALSE, /* option[26]/*history*/
-            autoHeight: TRUE, /*  option[27]/*autoheight*/
+            autoHeight: TRUE, /*  option[27]/*autoheight*/ // TODO: Consider removing height when re-initializing.
             autoWidth: TRUE, /*  option[28]/*autowidth*/
             updateBefore: FALSE, /* option[29]/*updateBefore*/
             ajax: FALSE, /* option[30]/*ajax*/

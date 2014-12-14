@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="myApp" ng-controller="BodyController">
+<head>
+    <title>Sudo Slider | Options explorer</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+    <!--<link rel="STYLESHEET" type="text/css" href="../css/style.css">-->
+    <link rel="STYLESHEET" type="text/css" href="css/optionsExplorerStyle.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
+    <!--<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>-->
+    <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
+    <script type="text/javascript" src="js/sudoSliderAngular.js"></script>
+    <script type="text/javascript" src="js/optionExplorer.js"></script>
+
+    <style type="text/css" ng-bind="style"></style>
+
+
+</head>
+<body>
+<!-- HTML Template shamelessly stolen from: http://codepen.io/Cheesetoast/pen/KFAaq -->
+<div id="pagewrap">
+
+    <div id="header">
+        <h1>Sudo Slider jQuery Plugin - Options explorer</h1>
+
+        <h2>The resulting slider</h2>
+
+        <div style="position:relative;min-height: 241px;margin:10px 10px 10px 20px;">
+            <div sudo-slider="optionDefinitions" slider-api="sliderApi">
+                <div class="slidesContainer">
+                    <div ng-repeat="slide in slides" ng-bind-html="slide.html"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="content">
+        <label>
+            <h2>The style</h2>
+            <textarea rows="7" ng-model="style" style="width: 100%;"></textarea>
+        </label>
+        <h2>Export and import</h2>
+        <label>Import: <textarea ng-model="importString" style="width: 100%;"></textarea> <button ng-click="doImport()">Do import</button> </label> <br />
+
+        <label>Export: <textarea style="width: 100%;">{{getExportOutput()}}</textarea></label><br />
+    </div>
+
+    <div id="middle">
+        <h2>The content</h2>
+
+        <div id="slides" style="margin-top: 10px;margin-bottom: 10px;">
+            <div ng-repeat="slide in slides">
+                <label>
+                    Slide {{$index}}:
+                    <textarea rows="2" style="width: 100%;" ng-model="slide.html" ng-change="sliderApi.adjust()"></textarea>
+                </label>
+                <button ng-click="removeSlide($index)">Delete slide</button>
+            </div>
+            <button ng-click="addSlide()">Add slide</button>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div id="options">
+            <h2>The options</h2>
+            <label>Filter options: <input type="text" ng-model="optionFilter"> </label> <br />
+            <label>Hide options with default values: <input type="checkbox" ng-model="filterNonDefault"> </label>
+
+            <div ng-repeat="definition in optionDefinitions | filter:optionFilter | nonDefaultValues:filterNonDefault" class="optionDefinition"
+                 ng-controller="OptionController">
+                <div ng-if="definition.type == 'boolean'">
+                    <label>
+                        {{definition.name}}:
+                        <input type="checkbox" name="{{definition.name}}" ng-model="definition.value">
+                    </label>
+                </div>
+                <div ng-if="definition.type == 'dropdown'">
+                    <label>
+                        {{definition.name}}:
+                        <select ng-model="definition.value"
+                                ng-options="value for value in definition.choices | filter:dropDownFilter"
+                                class="{{clazz()}}"></select>
+                        <label> filter: <input type="text" ng-model="dropDownFilter"> </label>
+                    </label>
+                </div>
+                <div ng-if="definition.type == 'number' || definition.type == 'text'">
+                    <label>
+                        {{definition.name}}:
+                        <input type="text" name="{{definition.name}}" ng-model="definition.value" class="{{clazz()}}">
+                    </label>
+
+                    <div ng-if="definition.optional">
+                        <label>Enable:
+                            <input type="checkbox" name="{{definition.name}}.enabled" ng-model="definition.enabled">
+                        </label>
+
+                    </div>
+                </div>
+                <div ng-if="definition.type == 'function'">
+                    <label>
+                        {{definition.name}}:
+                    <textarea type="text" name="{{definition.name}}" ng-model="definition.functionValue"
+                              ng-change="setOptionFunction(definition.functionValue)" style="width: 100%;" rows="2"></textarea>
+                    </label>
+                </div>
+                <div ng-if="definition.type == 'array'">
+                    <label>
+                        {{definition.name}}:
+                        <input type="text" name="{{definition.name}}" ng-model="definition.arrayValue"
+                               ng-change="setArrayValue(definition.arrayValue)" class="{{clazz()}}">
+                    </label>
+
+                    <div ng-if="definition.optional">
+                        <label>Enable:
+                            <input type="checkbox" name="{{definition.name}}.enabled" ng-model="definition.enabled">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer" style="border: 0;">
+        <hr style="width: 100%;">
+        <!--<h4>Footer</h4>
+        <p>Footer text</p>-->
+    </div>
+</div>
+</body>
+</html>
