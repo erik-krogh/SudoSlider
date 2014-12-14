@@ -439,3 +439,4 @@ Change in script: Added the sudoSlider object as an extra argument to ajaxload, 
 Change in script: If you have a single tag with class="slidesContainer" under the SudoSlider element, all the slides can (and will) be placed under that element.
 Change in script: The method "adjust" now adjusts twice, first time when its called, and a second in a 0ms timeout.
 Change in script: Removed the controlsShow option, since it was redundant.
+Change in script: A factory method that returns the default options is now available at $.fn.sudoSlider.getDefaultOptions

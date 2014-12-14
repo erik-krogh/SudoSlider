@@ -45,60 +45,10 @@
     var SLIDES_CONTAINER = "slidesContainer";
 
     $.fn.sudoSlider = function (optionsOrg) {
-        // default configuration properties
-        var defaults = {
-            effect: "slide", /*option[0]/*effect*/
-            speed: 1500, /*  option[1]/*speed*/
-            customLink: FALSE, /* option[2]/*customlink*/
-            controlsFadeSpeed: 400, /*   option[3]/*controlsfadespeed*/
-            controlsFade: TRUE, /*  option[4]/*controlsfade*/
-            insertAfter: TRUE, /*  option[5]/*insertafter*/
-            vertical: FALSE, /* option[6]/*vertical*/
-            slideCount: 1, /*     option[7]/*slidecount*/
-            moveCount: 1, /*     option[8]/*movecount*/
-            startSlide: 1, /*     option[9]/*startslide*/
-            responsive: TRUE, /* option[10]/*responsive*/
-            ease: SWING, /* option[11]/*ease*/
-            auto: FALSE, /* option[12]/*auto*/
-            pause: 2000, /*  option[13]/*pause*/
-            resumePause: FALSE, /* option[14]/*resumepause*/
-            continuous: FALSE, /* option[15]/*continuous*/
-            prevNext: TRUE, /*  option[16]/*prevnext*/
-            numeric: FALSE, /* option[17]/*numeric*/
-            numericText: [], /*    option[18]/*numerictext*/
-            slices: 15, /*   option[19]/*slices*/
-            boxCols: 8, /*    option[20]/*boxCols*/
-            boxRows: 4, /*    option[21]/*boxRows*/
-            initCallback: EMPTY_FUNCTION, /* option[22]/*initCallback*/
-            ajaxLoad: EMPTY_FUNCTION, /* option[23]/*ajaxload*/
-            beforeAnimation: EMPTY_FUNCTION, /* option[24]/*beforeanimation*/
-            afterAnimation: EMPTY_FUNCTION, /* option[25]/*afteranimation*/
-            history: FALSE, /* option[26]/*history*/
-            autoHeight: TRUE, /*  option[27]/*autoheight*/
-            autoWidth: TRUE, /*  option[28]/*autowidth*/
-            updateBefore: FALSE, /* option[29]/*updateBefore*/
-            ajax: FALSE, /* option[30]/*ajax*/
-            preloadAjax: 100, /*   option[31]/*preloadajax*/
-            loadingText: "", /*    option[32]/*loadingtext*/
-            prevHtml: '<a href="#" class="prevBtn"> previous </a>', /* option[33]/*prevhtml*/
-            nextHtml: '<a href="#" class="nextBtn"> next </a>', /* option[34]/*nexthtml*/
-            controlsAttr: 'class="controls"', /* option[35]/*controlsattr*/
-            numericAttr: 'class="numericControls"', /* option[36]/*numericattr*/
-            interruptible: FALSE, /* option[37]/*interruptible*/
-            useCSS: TRUE, /* option[38]/*useCSS*/
-            loadStart: EMPTY_FUNCTION, /* option[39]/*loadStart*/
-            loadFinish: EMPTY_FUNCTION,  /* option[40]/*loadFinish*/
-            touch: FALSE,  /* option[41]/*touch*/
-            touchHandle: FALSE, /* option[42]/*touchHandle*/
-            destroyCallback: EMPTY_FUNCTION,  /* option[43]/*destroyCallback*/
-            mouseTouch: FALSE, /* option[44]/*mouseTouch*/
-            allowScroll: TRUE, /* option[45]/*allowScroll*/
-            CSSease: SWING /* option[46]/*CSSease*/
-        };
         // Defining the base element.
         var baseSlider = this;
 
-        optionsOrg = $.extend(objectToLowercase(defaults), objectToLowercase(optionsOrg));
+        optionsOrg = $.extend(objectToLowercase(getDefaultOptions()), objectToLowercase(optionsOrg));
         if (CSSVendorPrefix === FALSE || !minJQueryVersion([1, 8, 0])) {
             optionsOrg.usecss = FALSE;
         }
@@ -1821,8 +1771,65 @@
             initSudoSlider();
         });
     };
+
     /*
-     * End generic slider. Start animations.
+     * End generic slider.
+     * Factory method for default options (no accidental writes!).
+    */
+    function getDefaultOptions() {
+        return {
+            effect: "slide", /*option[0]/*effect*/
+            speed: 1500, /*  option[1]/*speed*/
+            customLink: FALSE, /* option[2]/*customlink*/
+            controlsFadeSpeed: 400, /*   option[3]/*controlsfadespeed*/
+            controlsFade: TRUE, /*  option[4]/*controlsfade*/
+            insertAfter: TRUE, /*  option[5]/*insertafter*/
+            vertical: FALSE, /* option[6]/*vertical*/
+            slideCount: 1, /*     option[7]/*slidecount*/
+            moveCount: 1, /*     option[8]/*movecount*/
+            startSlide: 1, /*     option[9]/*startslide*/
+            responsive: TRUE, /* option[10]/*responsive*/
+            ease: SWING, /* option[11]/*ease*/
+            auto: FALSE, /* option[12]/*auto*/
+            pause: 2000, /*  option[13]/*pause*/
+            resumePause: FALSE, /* option[14]/*resumepause*/
+            continuous: FALSE, /* option[15]/*continuous*/
+            prevNext: TRUE, /*  option[16]/*prevnext*/
+            numeric: FALSE, /* option[17]/*numeric*/
+            numericText: [], /*    option[18]/*numerictext*/
+            slices: 15, /*   option[19]/*slices*/
+            boxCols: 8, /*    option[20]/*boxCols*/
+            boxRows: 4, /*    option[21]/*boxRows*/
+            initCallback: EMPTY_FUNCTION, /* option[22]/*initCallback*/
+            ajaxLoad: EMPTY_FUNCTION, /* option[23]/*ajaxload*/
+            beforeAnimation: EMPTY_FUNCTION, /* option[24]/*beforeanimation*/
+            afterAnimation: EMPTY_FUNCTION, /* option[25]/*afteranimation*/
+            history: FALSE, /* option[26]/*history*/
+            autoHeight: TRUE, /*  option[27]/*autoheight*/
+            autoWidth: TRUE, /*  option[28]/*autowidth*/
+            updateBefore: FALSE, /* option[29]/*updateBefore*/
+            ajax: FALSE, /* option[30]/*ajax*/
+            preloadAjax: 100, /*   option[31]/*preloadajax*/
+            loadingText: "", /*    option[32]/*loadingtext*/
+            prevHtml: '<a href="#" class="prevBtn"> previous </a>', /* option[33]/*prevhtml*/
+            nextHtml: '<a href="#" class="nextBtn"> next </a>', /* option[34]/*nexthtml*/
+            controlsAttr: 'class="controls"', /* option[35]/*controlsattr*/
+            numericAttr: 'class="numericControls"', /* option[36]/*numericattr*/
+            interruptible: FALSE, /* option[37]/*interruptible*/
+            useCSS: TRUE, /* option[38]/*useCSS*/
+            loadStart: EMPTY_FUNCTION, /* option[39]/*loadStart*/
+            loadFinish: EMPTY_FUNCTION,  /* option[40]/*loadFinish*/
+            touch: FALSE,  /* option[41]/*touch*/
+            touchHandle: FALSE, /* option[42]/*touchHandle*/
+            destroyCallback: EMPTY_FUNCTION,  /* option[43]/*destroyCallback*/
+            mouseTouch: FALSE, /* option[44]/*mouseTouch*/
+            allowScroll: TRUE, /* option[45]/*allowScroll*/
+            CSSease: SWING /* option[46]/*CSSease*/
+        };
+    }
+    $.fn.sudoSlider.getDefaultOptions = getDefaultOptions;
+
+    /* Start animations.
      * A lot of the code here is an if-else-elseif nightmare. This is because it is smaller in JavaScript, and this thing needs to be small (when minimized).
      */
 
