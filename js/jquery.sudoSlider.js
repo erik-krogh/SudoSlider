@@ -42,6 +42,7 @@
     var MOUSEDOWN = "mousedown";
     var MOUSEMOVE = "mousemove";
     var MOUSEUP = "mouseup";
+    var SLIDES_CONTAINER = "slidesContainer";
 
     $.fn.sudoSlider = function (optionsOrg) {
         // default configuration properties
@@ -49,7 +50,7 @@
             effect: "slide", /*option[0]/*effect*/
             speed: 1500, /*  option[1]/*speed*/
             customLink: FALSE, /* option[2]/*customlink*/
-            controlsShow: TRUE, /*  option[3]/*controlsShow*/
+            controlsShow: TRUE, /*  option[3]/*controlsShow*/ // TODO: Remove this .
             controlsFadeSpeed: 400, /*   option[4]/*controlsfadespeed*/
             controlsFade: TRUE, /*  option[5]/*controlsfade*/
             insertAfter: TRUE, /*  option[6]/*insertafter*/
@@ -174,7 +175,7 @@
                 if (!ulLength) {
                     obj.append(slidesContainer = newUl);
                     isSlideContainerUl = FALSE;
-                } else if (!(isSlideContainerUl = slidesContainer.is("ul")) && !slideContainerCreated) {
+                } else if (!((isSlideContainerUl = slidesContainer.is("ul")) || slidesContainer.hasClass(SLIDES_CONTAINER)) && !slideContainerCreated) {
                     newUl.append(slidesContainer);
                     obj.append(slidesContainer = newUl);
                 }
@@ -196,7 +197,7 @@
                 });
 
                 // Adding CSS classes
-                slidesContainer.addClass("slidesContainer");
+                slidesContainer.addClass(SLIDES_CONTAINER);
 
                 slidesJquery.addClass("slide");
 
@@ -270,6 +271,8 @@
 
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);
 
+                // Cloning numericText, so the array same array can be modifed outside SudoSlider without doing weird things.
+                option[19]/*numerictext*/ = option[19]/*numerictext*/.slice(0);
 
                 for (var a = 0; a < totalSlides; a++) {
                     if (!option[19]/*numerictext*/[a] && option[19]/*numerictext*/[a] != "") {
@@ -345,7 +348,7 @@
                             hashPlugin.change(URLChange);
                         } else {
                             // This assumes that jQuery BBQ is included. If not, stuff won't work in old browsers.
-                            jWin.on("hashchange", URLChange);
+                            bindAndRegisterOff(jWin, "hashchange", URLChange); // TODO: Test
                         }
                         URLChange();
 
@@ -819,11 +822,11 @@
             }
 
             function afterAniCall(el, a) {
-                option[26]/*afteranimation*/.call(el, a);
+                option[26]/*afteranimation*/.call(el, a, baseSlider);
             }
 
             function beforeAniCall(el, a) {
-                option[25]/*beforeanimation*/.call(el, a);
+                option[25]/*beforeanimation*/.call(el, a, baseSlider);
             }
 
             // Convert the direction into a usefull number.
@@ -974,7 +977,7 @@
                         startAsyncDelayedLoad();
 
                         callAsync(function () {
-                            option[24]/*ajaxload*/.call(slides[i], i + 1, img);
+                            option[24]/*ajaxload*/.call(slides[i], i + 1, img, baseSlider);
                         });
 
                         if (init) {
@@ -1788,11 +1791,14 @@
                 stopAuto();
             };
 
-            baseSlider.adjust = function () {
+            baseSlider.adjust = function adjust(repeat) {
                 var autoAdjustSpeed = mathMax(adjustTargetTime - getTimeInMillis(), 0);
                 autoadjust(currentSlide, autoAdjustSpeed);
                 if (!currentlyAnimating) {
                     adjustPositionTo(currentSlide);
+                }
+                if (!repeat) {
+                    callAsync(makeCallback(adjust, [true]));
                 }
             };
 
@@ -2542,17 +2548,16 @@
             }
         };
 
-        callAsync(function () {
-            if (speed < 20) { // If instant animation
-                elem.css(properties);
-                callbackFunction();
-                return;
-            }
-            elem.css(CSSObject);
+        if (speed < 20) { // If instant animation
+            elem.css(properties);
+            callbackFunction();
+            return;
+        }
 
+        callAsync(function () {
+            elem.css(CSSObject);
             callAsync(function () {
                 elem.css(properties);
-
                 var startTime = getTimeInMillis();
 
                 elem.on(events, function (event) {
@@ -2729,13 +2734,16 @@
             var events = "load error";
             var loadFunction = function () {
                 jQueryThat.off(events, loadFunction);
+                numberOfRemainingImages--;
                 if (waitForAllImages) {
-                    numberOfRemainingImages--;
                     if (numberOfRemainingImages == 0) {
                         callback();
                     }
                 } else {
                     callback();
+                }
+                if (numberOfRemainingImages == 0) {
+                    jQueryThat.off(events, loadFunction);
                 }
             };
             jQueryThat.on(events, loadFunction);

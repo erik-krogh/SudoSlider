@@ -427,7 +427,7 @@ Change in script: You can have wildcards when specifying effect. So "box*Grow*" 
 Change in script: No more ugly z-index when doing animations.
 Various fixes. Including some Old-IE fixes.
 
-3.3.2
+3.3.2 (21-10-2014)
 Change in script: Touch now works well when you slide across multiple slides, that includes if slideCount > 1.
 Change in script: Added a new option CSSease, so you can set the ease used for CSS and JavaScript animations separately.
 
@@ -435,4 +435,6 @@ Change in script: Added a new option CSSease, so you can set the ease used for C
 Change in demos: Fixed that the fullscreen demo bugged when putting the window in "portrait" mode.
 Change in script: Resetting the position using margins and translate when slider is initialized.
 Change in script: The setOption method no longer accepts an object of options, that behaviour is now in the new setOptions method.
-
+Change in script: Added the sudoSlider object as an extra argument to ajaxload, afteranimation and beforeanimation. The other function already has it as "this".
+Change in script: If you have a single tag with class="slidesContainer" under the SudoSlider element, all the slides can (and will) be placed under that element.
+Change in script: The method "adjust" now adjusts twice, first time when its called, and a second in a 0ms timeout.
