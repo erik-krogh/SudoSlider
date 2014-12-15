@@ -1270,9 +1270,9 @@
                             startedTouch = FALSE;
                         }
                     };
-                    bindMultiple(doc, dragFunction, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL]);
+                    bindAndRegisterOff(doc, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL].join(" "), dragFunction);
                     if (option[44]/*mouseTouch*/) {
-                        bindMultiple(doc, dragFunction, [MOUSEDOWN, MOUSEMOVE, MOUSEUP]);
+                        bindAndRegisterOff(doc, [MOUSEDOWN, MOUSEMOVE, MOUSEUP].join(" "), dragFunction);
                     }
 
                 }
@@ -1552,13 +1552,6 @@
                 unBindCallbacks.push(function () {
                     element.off(events, selector, handler);
                 });
-            }
-
-
-            function bindMultiple(element, func, events) {
-                for (var i = 0; i < events.length; i++) {
-                    bindAndRegisterOff(element, events[i], func);
-                }
             }
 
             function cantDoAdjustments() {
@@ -1905,9 +1898,9 @@
                 "Reverse",
                 stackTemplate
             ]
-        ],
+        ]
         // TODO: Name!
-        unnamed: [
+        /*unnamed: [
             "",
             "Reveal",
             [
@@ -1920,7 +1913,7 @@
                     testAnimation
                 ]
             ]
-        ]
+        ]*/
     };
 
     // Generic effects needs to have a "dir" attribute as their last argument.
@@ -2566,8 +2559,9 @@
                 elem.css(properties);
                 var startTime = getTimeInMillis();
 
-                elem.on(events, function (event) {
+                elem.on(events, function eventHandler(event) {
                     if (elem.is(event.target) && (getTimeInMillis() - startTime) - speed > -100) {
+                        elem.off(events, eventHandler);
                         callbackFunction();
                     }
                 });
@@ -2747,9 +2741,6 @@
                     }
                 } else {
                     callback();
-                }
-                if (numberOfRemainingImages == 0) {
-                    jQueryThat.off(events, loadFunction);
                 }
             };
             jQueryThat.on(events, loadFunction);
