@@ -1,4 +1,4 @@
-1.0.1 (~25-07-2014):
+1.0.1 (~25-07-2010):
 Change in script: Fixed crossfade for IE6 + IE7 (didn't accept position:absolute, unless there's a top:0 and left:0 with it).
 1.0.2:
 Change in docs: Fixed some links that were wrong in index.html.
