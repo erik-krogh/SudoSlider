@@ -658,6 +658,8 @@
                 return pixels;
             }
 
+            var prevHeightWidthAdjustObject  = {};
+
             function adjustHeightWidth(i) {
                 if (i != adjustingTo || cantDoAdjustments()) {
                     return;
@@ -671,6 +673,13 @@
                 }
                 if (option[28]/*autowidth*/) {
                     adjustObject.width = getSliderDimensions(i, FALSE) || 1;
+                }
+
+
+                if (simpleObjectEquals(prevHeightWidthAdjustObject, adjustObject)) {
+                    return;
+                } else {
+                    prevHeightWidthAdjustObject = adjustObject;
                 }
 
                 if (option[38]/*useCSS*/) {
@@ -2490,6 +2499,10 @@
     }
 
     function animate(elem, properties, speed, ease, callback, obj, doNotResetCss) {
+        if (!obj && "height" in properties) {
+            console.log(speed);
+            console.log("Separator");
+        }
         var usecss = !obj || obj.options.usecss;
         if (CSSVendorPrefix === FALSE || !usecss) {
             if (!ease) {
@@ -2709,6 +2722,19 @@
     /*
      * Util scripts.
      */
+
+    // This is not deep equals, and only using ==
+    function simpleObjectEquals(a, b) {
+        if (getKeys(a).length != getKeys(b).length) {
+            return FALSE;
+        }
+        for (var key in a) {
+            if (a[key] != b[key]) {
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
 
     function makeCallback(func, args) {
         return function () {
