@@ -2499,10 +2499,6 @@
     }
 
     function animate(elem, properties, speed, ease, callback, obj, doNotResetCss) {
-        if (!obj && "height" in properties) {
-            console.log(speed);
-            console.log("Separator");
-        }
         var usecss = !obj || obj.options.usecss;
         if (CSSVendorPrefix === FALSE || !usecss) {
             if (!ease) {
