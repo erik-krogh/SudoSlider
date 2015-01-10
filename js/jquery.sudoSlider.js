@@ -642,13 +642,13 @@
             }
 
             // Axis: TRUE == height, FALSE == width.
-            function getSliderDimensions(fromSlide, axis) {
+            function getSliderDimensions(fromSlide, vertical) {
                 var pixels = 0;
                 for (var slide = fromSlide; slide < fromSlide + numberOfVisibleSlides; slide++) {
                     var targetSlide = slides[getRealPos(slide)];
                     if (targetSlide) {
-                        var targetPixels = targetSlide['outer' + (axis ? "Height" : "Width")](TRUE);
-                        if (axis == option[6]/*vertical*/) {
+                        var targetPixels = targetSlide['outer' + (vertical ? "Height" : "Width")](TRUE);
+                        if (vertical == option[6]/*vertical*/) {
                             pixels += targetPixels;
                         } else {
                             pixels = mathMax(targetPixels, pixels);
@@ -1564,7 +1564,7 @@
             }
 
             function cantDoAdjustments() {
-                return !obj.is(":visible") || init;
+                return !obj.is(":visible") || init || destroyed;
             }
 
             function defaultStopFunction() {
@@ -1612,21 +1612,21 @@
             // First i just define those i use more than one. Then i just add the others as anonymous functions.
             function publicDestroy() {
                 stopAnimation();
+                autoadjust(currentSlide, 0);
                 destroyed = TRUE;
+
                 slideNumberBeforeDestroy = currentSlide;
 
                 performCallbacks(unBindCallbacks);
 
                 ensureSliderContainerCSSDurationReset();
-
                 if (controls) {
                     controls.remove();
                 }
 
-                reorderSlides(0);
 
+                reorderSlides(0);
                 adjustPositionTo(currentSlide);
-                autoadjust(currentSlide, 0);
 
                 option[43]/*destroyCallback*/.call(baseSlider);
             }
@@ -1639,32 +1639,38 @@
                 }
             }
 
+            function runOnDestroyedSlider(func) {
+                return function () {
+                    var reinit = !destroyed;
+                    publicDestroy();
+
+                    func.apply(this, arguments);
+
+                    if (reinit) {
+                        publicInit();
+                    }
+                }
+            }
+
             baseSlider.init = publicInit;
 
             baseSlider.getOption = function (a) {
                 return options[a.toLowerCase()];
             };
 
-            baseSlider.setOption = function (key, val) {
-                publicDestroy();
-
+            baseSlider.setOption = runOnDestroyedSlider(function (key, val) {
                 options[key.toLowerCase()] = val;
+            });
 
-                publicInit();
-            };
-
-            baseSlider.setOptions = function (newOptions) {
-                publicDestroy();
+            baseSlider.setOptions = runOnDestroyedSlider(function (newOptions) {
                 for (var key in newOptions) {
                     options[key.toLowerCase()] = newOptions[key];
                 }
-                publicInit();
-            };
+            });
 
             baseSlider.runWhenNotAnimating = runWhenNotAnimating;
 
-            baseSlider.insertSlide = function (html, pos, numtext, goToSlide) {
-                publicDestroy();
+            baseSlider.insertSlide = runOnDestroyedSlider(function (html, pos, numtext, goToSlide) {
                 // pos = 0 means before everything else.
                 // pos = 1 means after the first slide.
                 // if pos is negative, then we count from the right instead.
@@ -1703,21 +1709,17 @@
                 }
 
                 option[18]/*numerictext*/.splice(pos, 0, numtext || parseInt10(pos) + 1);
-                publicInit();
-            };
+            });
 
-            baseSlider.removeSlide = function (pos) {
+            baseSlider.removeSlide = runOnDestroyedSlider(function (pos) {
                 pos--; // 1 == the first.
-                publicDestroy();
 
                 slides[mathMin(pos, totalSlides - 1)].remove();
                 option[18]/*numerictext*/.splice(pos, 1);
                 if (pos < slideNumberBeforeDestroy) {
                     slideNumberBeforeDestroy--;
                 }
-
-                publicInit();
-            };
+            });
 
             baseSlider.goToSlide = function (a, speed) {
                 var parsedDirection = (a == parseInt10(a)) ? a - 1 : a;
