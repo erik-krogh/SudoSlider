@@ -1,6 +1,29 @@
 /// <reference path="lib/jquery.d.ts" />
 /// <reference path="lib/angular.d.ts" />
-(function (angular, $) {
+
+interface JQuery {
+    sudoSlider(options : any) : JQueryStatic
+}
+
+interface OptionDefinition {
+    name : string;
+    type: string;
+    value?: any;
+}
+
+interface DemoDefinition {
+    name: string;
+    options: any;
+}
+
+interface SudoSliderFactory {
+    defaultOptionDefinitions: () => OptionDefinition[];
+    defaultOptionValues: () => any;
+    insertValuesIntoOptionDefinitions: (optionDefinitions : OptionDefinition[], options: any) => void;
+    getDemoDefinitions: () => DemoDefinition[];
+}
+
+(function (angular : ng.IAngularStatic, $ : JQueryStatic) {
     angular.module('sudoSlider', []).directive('sudoSlider', ["sudoSlider", "$timeout", function (factory, $timeout) {
         return {
             scope: {
@@ -8,8 +31,11 @@
                 sudoSlider: "="
             },
             link: function ($scope, element, attrs) {
-                var options = {}, slider;
+                var options = {},
+                    slider;
+
                 $scope.sliderApi = $scope.sliderApi || {};
+
                 $scope.$watch("sudoSlider", function (value) {
                     var options;
                     if ($.isArray(value)) {
@@ -22,35 +48,42 @@
                             }
                             options[definition.name] = definitionValue;
                         }
-                    }
-                    else {
+                    } else {
                         options = value ? value : {};
                     }
+
                     slider.destroy();
+
                     slider.setOptions(options);
+
                     // When i destroy it myself, i init it myself.
                     slider.init();
                 }, true);
+
                 slider = $(element).sudoSlider(options);
+
+
                 for (var prop in slider) {
                     if (slider.hasOwnProperty(prop)) {
                         $scope.sliderApi[prop] = slider[prop];
                     }
                 }
+
                 element.on('$destroy', function () {
                     slider.destroy();
                 });
             }
         };
     }]).factory('sudoSlider', function () {
-        var factory = {
+        var factory : SudoSliderFactory = {
             defaultOptionDefinitions: getOptionDefinitions,
             defaultOptionValues: $.fn.sudoSlider.getDefaultOptions,
             insertValuesIntoOptionDefinitions: insertValuesIntoOptionDefinitions,
             getDemoDefinitions: getDemoDefinitions
         };
-        return factory;
+        return factory
     });
+
     function insertValuesIntoOptionDefinitions(optionDefinitions, options) {
         $.each(optionDefinitions, function (index, optionDefinition) {
             if (!options.hasOwnProperty(optionDefinition.name)) {
@@ -61,27 +94,23 @@
                 if ($.isFunction(newValue)) {
                     optionDefinition.stringValue = newValue.toString();
                     optionDefinition.value = newValue;
-                }
-                else {
+                } else {
                     optionDefinition.stringValue = newValue;
                     try {
                         optionDefinition.value = eval("(" + newValue + ")");
-                    }
-                    catch (ignored) {
+                    } catch (ignored) {
                     }
                 }
-            }
-            else if (optionDefinition.type == "array") {
+
+            } else if (optionDefinition.type == "array") {
                 if ($.isArray(newValue)) {
                     optionDefinition.stringValue = "[" + newValue.toString() + "]";
                     optionDefinition.value = newValue;
-                }
-                else {
+                } else {
                     optionDefinition.stringValue = newValue;
                     optionDefinition.value = JSON.parse(newValue);
                 }
-            }
-            else {
+            } else {
                 optionDefinition.value = newValue;
             }
             if (optionDefinition.optional) {
@@ -89,8 +118,9 @@
             }
         });
     }
+
     function getOptionDefinitions() {
-        var optionDefinitions = [
+        var optionDefinitions : OptionDefinition[] = [
             {
                 name: "effect",
                 type: "dropdown",
@@ -291,10 +321,13 @@
                 type: "boolean"
             }
         ];
+
         var defaultOptions = $.fn.sudoSlider.getDefaultOptions();
+
         if (Object.keys(defaultOptions).length != optionDefinitions.length) {
             console.error("Mismatch between options (" + Object.keys(defaultOptions).length + ") and option definitions (" + optionDefinitions.length + ") length");
         }
+
         $.each(optionDefinitions, function (index, def) {
             if (!defaultOptions.hasOwnProperty(def.name)) {
                 console.error("Could not find the option " + def.name + " in the SudoSlider options. ");
@@ -304,6 +337,7 @@
         });
         return optionDefinitions;
     }
+
     function getDemoDefinitions() {
         return [
             {
@@ -320,11 +354,11 @@
             },
             {
                 name: "captions",
-                options: {
+                options : {
                     effect: "fade",
-                    continuous: true,
+                    continuous:true,
                     initCallback: function () {
-                        var storage = {};
+                        var storage : any = {};
                         $(this).data("captions", storage);
                         var that = this;
                         storage.captions = $();
@@ -350,7 +384,7 @@
                         storage.insertCaption = function (t) {
                             var slide = that.getSlide(t);
                             var imageText = storage.imageText[t - 1] || "I don't know what to say about this one.";
-                            var caption = $('<div>' + imageText + '</div>').css(storage.css).appendTo(slide);
+                            var caption = $('<div>' + imageText + '</div>').css(<Object>storage.css).appendTo(slide);
                             storage.captions = storage.captions.add(caption);
                             if (slide.css("position") == "static") {
                                 slide.css("position", "relative");
@@ -363,7 +397,7 @@
                             }
                         }
                     },
-                    destroyCallback: function () {
+                    destroyCallback : function () {
                         var storage = $(this).data("captions");
                         if (!storage) {
                             return;
@@ -371,21 +405,21 @@
                         storage.captions.remove();
                         storage.captions = $();
                     },
-                    ajaxLoad: function (t, img, that) {
+                    ajaxLoad: function(t, img, that){
                         var storage = $(that).data("captions");
                         storage.insertCaption(t);
                     },
-                    beforeAnimation: function (t, that) {
+                    beforeAnimation: function(t, that){
                         var storage = $(that).data("captions");
                         $(this).children().filter(storage.captions).hide();
                     },
-                    afterAnimation: function (t, that) {
+                    afterAnimation: function(t, that){
                         var storage = $(that).data("captions");
                         $(this).children().filter(storage.captions).slideDown(400);
                     }
                 }
             }
-        ];
+        ]
     }
+
 })(angular, jQuery);
-//# sourceMappingURL=sudoSliderAngular.js.map

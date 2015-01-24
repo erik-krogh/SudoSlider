@@ -12,6 +12,8 @@
  * http://jquery.com
  *
  */
+// TODO: Text rotator
+// TODO: Having half a slide in either end, that is partially faded out like: http://riley87.co.uk/theme/ionic/
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -1889,6 +1891,7 @@
                 }
             ]
         },
+        // TODO: Look at this and autoheight.
         fade: {
             "": fade,
             OutIn: fadeOutIn
