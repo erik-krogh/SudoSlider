@@ -299,7 +299,7 @@
                             hashPlugin.change(URLChange);
                         } else {
                             // This assumes that jQuery BBQ is included. If not, stuff won't work in old browsers.
-                            bindAndRegisterOff(jWin, "hashchange", URLChange); // TODO: Test
+                            bindAndRegisterOff(jWin, "hashchange", URLChange);
                         }
                         URLChange();
 
@@ -683,6 +683,7 @@
                 } else {
                     prevHeightWidthAdjustObject = adjustObject;
                 }
+                console.log("adjusting to : " + adjustObject.height);
 
                 if (option[38]/*useCSS*/) {
                     animate(obj, adjustObject, speed, option[46]/*CSSease*/)
@@ -1892,7 +1893,6 @@
                 }
             ]
         },
-        // TODO: Look at this and autoheight.
         fade: {
             "": fade,
             OutIn: fadeOutIn
@@ -2640,8 +2640,27 @@
         var slider = obj.slider;
         var vertical = obj.options.vertical;
         var result = [];
-        var width = vertical ? obj.slider.width() : 0;
-        var height = vertical ? 0 : obj.slider.height();
+        var width;
+        if (!vertical) {
+            width = 0;
+        } else {
+            if (useToSlides) {
+                width = obj.toSlides.width();
+            } else {
+                width = obj.slider.width();
+            }
+        }
+
+        var height;
+        if (vertical) {
+            height = 0;
+        } else {
+            if (useToSlides) {
+                height = obj.toSlides.height();
+            } else {
+                height = obj.slider.height();
+            }
+        }
 
         obj.toSlides.each(function () {
             var that = $(this);
