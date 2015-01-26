@@ -683,7 +683,6 @@
                 } else {
                     prevHeightWidthAdjustObject = adjustObject;
                 }
-                console.log("adjusting to : " + adjustObject.height);
 
                 if (option[38]/*useCSS*/) {
                     animate(obj, adjustObject, speed, option[46]/*CSSease*/)
