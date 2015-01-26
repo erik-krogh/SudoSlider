@@ -1613,6 +1613,7 @@
 
             // First i just define those i use more than one. Then i just add the others as anonymous functions.
             function publicDestroy() {
+                stopAuto();
                 stopAnimation();
                 autoadjust(currentSlide, 0);
                 destroyed = TRUE;
