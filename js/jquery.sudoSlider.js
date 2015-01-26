@@ -2942,7 +2942,7 @@
                 var array = inputEffect.split(",");
                 return makeRandomEffect(array);
             } else {
-                var effects = objectToLowercase($.fn.sudoSlider.effects);
+                var effects = objectToLowercase(allEffects);
                 var effectName = stringTrim(inputEffect.toLowerCase());
                 var result = effects[effectName];
                 if (result) {
