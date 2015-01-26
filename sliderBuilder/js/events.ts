@@ -1,14 +1,38 @@
-class EventBus {
-    private handlers:any = []; // Map from functions to arrays of callbacks.
+/// <reference path="lib/jquery.d.ts" />
+/// <reference path="sudoSliderAngular.ts" />
 
-    register(clazz, callback: (event: any) => any) {
-        var classObject = this.findClassObject(clazz);
-        classObject || this.handlers.push(classObject = {clazz: clazz, handlers: [] });
-        classObject.handlers.push(callback);
+class EventBus {
+    private handlers: any = {}; // Map from functions to arrays of callbacks.
+    private lastEvent: any = {};
+
+    register(clazz, callback: (event: any) => any, sendLast : boolean = false, win: any = null) {
+        var name = clazz.name;
+        var classObject  = this.handlers[name];
+        if (!classObject) {
+            classObject = {clazz: clazz, handlers: []};
+            this.handlers[name] = classObject;
+        }
+        var handlers = classObject.handlers;
+        handlers.push(callback);
+        if (sendLast && this.lastEvent[name]) {
+            callback(this.lastEvent[name]);
+        }
+        if (win !== null) {
+            $(win).on("beforeunload", function () {
+                for (var i = 0; i < handlers.length; i++) {
+                    if (handlers[i] === callback) {
+                        handlers.splice(i, 1);
+                        break;
+                    }
+                }
+            });
+        }
     }
 
     fireEvent(event) {
-        var classObject = this.findClassObject(event.constructor);
+        var name = event.constructor.name;
+        this.lastEvent[name] = event;
+        var classObject  = this.handlers[name];
         if (classObject) {
             var handlers = classObject.handlers;
             for (var i = 0; i < handlers.length; i++) {
@@ -17,12 +41,50 @@ class EventBus {
         }
     }
 
-    private findClassObject(clazz) {
-        for (var i = 0; i < this.handlers.length; i++) {
-            if (this.handlers[i].clazz === clazz) {
-                return this.handlers[i];
-            }
+    private static instance = new EventBus();
+    static getInstance() {
+        // Global, I'm serious.
+        var win : any = window;
+        if (!win) {
+            alert("This is bad!");
         }
-        return false;
+        while (win.opener) {
+            win = win.opener;
+        }
+        return win.EventBus.instance;
+    }
+}
+
+
+class SudoSliderApiEvent {
+    callback:(api:any) => any;
+    name:string;
+
+    constructor(callback:(api:any) => any, name:string) {
+        this.callback = callback;
+        this.name = name;
+    }
+}
+
+class SudoSliderUpdateOptionsEvent {
+    newDefinitions:OptionDefinition[];
+
+    constructor(newDefinitions:OptionDefinition[]) {
+        this.newDefinitions = newDefinitions;
+    }
+}
+
+class SudoSliderSlidesUpdateEvent {
+    newSlides:{html: string}[];
+
+    constructor(newSlides:{html: string}[]) {
+        this.newSlides = newSlides;
+    }
+}
+
+class SliderBuilderStyleChangeEvent {
+    style : string;
+    constructor(style: string) {
+        this.style = style;
     }
 }

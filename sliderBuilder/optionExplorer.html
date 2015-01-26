@@ -7,7 +7,7 @@
 
     <link rel="STYLESHEET" type="text/css" href="css/style.css">
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
 
@@ -17,33 +17,50 @@
 
     <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
     <script type="text/javascript" src="js/sudoSliderAngular.js"></script>
+    <script type="text/javascript" src="js/events.js"></script>
     <script type="text/javascript" src="js/optionExplorer.js"></script>
 
-    <style type="text/css" ng-bind="style"></style>
+    <style type="text/css" ng-bind="style" ng-if="showInlineSlider()"></style>
 </head>
 <body>
 <div class="container">
     <!-- The header -->
-    <div class="page-header">
+    <div class="page-header" style="margin-bottom: 0px;">
         <h1>SudoSlider options explorer</h1>
         <p class="lead">Change the options and the content, the slider will update immediately.</p>
     </div>
 
     <!-- The slider -->
-    <div class="row" style="border-bottom: 1px solid #eee;margin-bottom:20px;">
+    <div class="row" style="border-bottom: 1px solid #eee;" ng-if="showInlineSlider()">
         <div style="position:relative;min-height: 241px;margin:10px 10px 10px 20px;">
-            <div sudo-slider="optionDefinitions" slider-api="sliderApi">
-                <div class="slidesContainer">
+            <div sudo-slider>
+                <div class="slidesContainer" ng-controller="SudoSliderSlidesController">
                     <div ng-repeat="slide in slides" ng-bind-html="slide.html"></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div class="row" style="border-bottom: 1px solid #eee;" ng-if="!showInlineSlider() || true">
+        <h3 style="text-align: center;">Control the slider.</h3>
+        <div style="text-align: center;margin-bottom: 10px;">
+            <button class="btn btn-primary" ng-click="sliderApi.goToSlide('prev')" style="margin-bottom: 0px;">Previous</button>
+            <button class="btn btn-primary" ng-click="sliderApi.goToSlide('next')" style="margin-bottom: 0px;">Next</button>
+            <button class="btn btn-primary" ng-click="sliderApi.startAuto()" style="margin-bottom: 0px;">Start auto</button>
+            <button class="btn btn-primary" ng-click="sliderApi.stopAuto()" style="margin-bottom: 0px;">Stop auto</button>
+            <button class="btn btn-primary" ng-click="sliderApi.destroy()" style="margin-bottom: 0px;">Destroy</button>
+            <button class="btn btn-primary" ng-click="sliderApi.init()" style="margin-bottom: 0px;">Init</button>
+        </div>
+    </div>
+
     <!-- Modifying the slider -->
-    <div class="row">
+    <div class="row" style="margin-top: 10px;">
         <!-- Demo selection, style, import and export -->
         <div class="col-md-4 well">
+            <div ng-controller="PopupController">
+                <button class="btn btn-primary" ng-click="openSliderPopup()" style="margin-bottom: 20px;">Open slider in popup</button>
+            </div>
+
             <div ng-controller="DemoLoaderController">
                 <div class="btn-group" dropdown>
 
@@ -170,7 +187,7 @@
             <div id="slides" style="margin-top: 10px;margin-bottom: 10px;">
                 <div ng-repeat="slide in slides">
                     <label>
-                        Slide {{$index}}:
+                        Slide {{$index + 1}}:
                         <textarea class="form-control" rows="3" ng-model="slide.html" ng-change="sliderApi.adjust()"></textarea>
                     </label>
                     <button ng-click="removeSlide($index)">Delete slide</button>

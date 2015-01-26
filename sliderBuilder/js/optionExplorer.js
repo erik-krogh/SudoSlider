@@ -2,13 +2,32 @@
 /// <reference path="lib/angular.d.ts" />
 /// <reference path="sudoSliderAngular.ts" />
 /// <reference path="events.ts" />
-// TODO: Export in pop-up window thinghy. http://stackoverflow.com/questions/1258563/how-can-i-access-the-dom-tree-of-child-window
-// TODO: Slider in pop-up window, consider having an event-bus for message passing.
+// TODO: Export in pop-up window thinghy.
 (function (angular, $) {
-    var myApp = angular.module('myApp', ['ngSanitize', 'sudoSlider', 'ui.bootstrap']).controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider, $timeout) {
-        $scope.sliderApi = {};
+    var eventBus = EventBus.getInstance();
+    var myApp = angular.module('myApp', ['ngSanitize', 'sudoSlider', 'ui.bootstrap', "sudoSlider"]).controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider, $timeout) {
+        (function () {
+            var sliderApi = {};
+            $scope.sliderApi = sliderApi;
+            // TODO: ECMAScript Harmony Proxies can make this way way pretier. Or __noSuchMethod__ if chrome supported it.
+            // Events doesn't return anything, so "getOption", "getValue" and "getSlide" doesn't make sense here.
+            var apiNames = ["init", "destroy", "setOption", "setOptions", "runWhenNotAnimating", "insertSlide", "removeSlide", "goToSlide", "block", "unblock", "startAuto", "stopAuto", "adjust", "stopAnimation"];
+            $.each(apiNames, function (index, name) {
+                sliderApi[name] = function () {
+                    var _this = this;
+                    var args = arguments;
+                    eventBus.fireEvent(new SudoSliderApiEvent(function (api) { return api[name].apply(_this, args); }, name));
+                };
+            });
+        })();
         $scope.style = ".slide img{\n" + "    width:100%;\n" + "}";
+        $scope.$watch("style", function (newStyle) {
+            eventBus.fireEvent(new SliderBuilderStyleChangeEvent(newStyle));
+        });
         $scope.optionDefinitions = sudoSlider.defaultOptionDefinitions();
+        $scope.$watch("optionDefinitions", function (newValue) {
+            eventBus.fireEvent(new SudoSliderUpdateOptionsEvent(newValue));
+        }, true);
         $scope.slides = [
             { html: "<img src=\"../images/01.jpg\"/>" },
             { html: "<img src=\"../images/02.jpg\"/>" },
@@ -16,6 +35,13 @@
             { html: "<img src=\"../images/04.jpg\"/>" },
             { html: "<img src=\"../images/05.jpg\"/>" }
         ];
+        $scope.$watch("slides", function (slides) {
+            eventBus.fireEvent(new SudoSliderSlidesUpdateEvent(slides));
+            $scope.sliderApi.destroy();
+            $timeout(function () {
+                $scope.sliderApi.init();
+            });
+        }, true);
         $scope.removeSlide = function (index) {
             $scope.sliderApi.removeSlide(index + 1);
             $scope.slides.splice(index, 1);
@@ -27,12 +53,22 @@
                 $scope.sliderApi.init();
             }, 0);
         };
-        $scope.$watch("slides", function () {
-            $scope.sliderApi.destroy();
-            $timeout(function () {
-                $scope.sliderApi.init();
+        $scope.sliderPopupCounter = 0;
+        $scope.showInlineSlider = function () {
+            return $scope.sliderPopupCounter == 0;
+        };
+    }]).controller('PopupController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider) {
+        $scope.openSliderPopup = function () {
+            var newWindow = window.open("sliderPopup.html", "_blank", "width=1000, height=600");
+            $(newWindow).load(function () {
+                $scope.$parent.sliderPopupCounter++;
+                $scope.$apply();
             });
-        }, true);
+            $(newWindow).on("beforeunload", function () {
+                $scope.$parent.sliderPopupCounter--;
+                $scope.$apply();
+            });
+        };
     }]).controller('ImportExportController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider) {
         $scope.importString = "";
         $scope.doImport = function () {

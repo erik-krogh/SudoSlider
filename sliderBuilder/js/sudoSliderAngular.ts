@@ -1,8 +1,9 @@
 /// <reference path="lib/jquery.d.ts" />
 /// <reference path="lib/angular.d.ts" />
+/// <reference path="events.ts" />
 
 interface JQuery {
-    sudoSlider(options : any) : JQueryStatic
+    sudoSlider(options?:any) : JQueryStatic
 }
 
 interface OptionDefinition {
@@ -19,70 +20,96 @@ interface DemoDefinition {
 interface SudoSliderFactory {
     defaultOptionDefinitions: () => OptionDefinition[];
     defaultOptionValues: () => any;
-    insertValuesIntoOptionDefinitions: (optionDefinitions : OptionDefinition[], options: any) => void;
+    insertValuesIntoOptionDefinitions: (optionDefinitions:OptionDefinition[], options:any) => void;
     getDemoDefinitions: () => DemoDefinition[];
 }
 
-(function (angular : ng.IAngularStatic, $ : JQueryStatic) {
-    angular.module('sudoSlider', []).directive('sudoSlider', ["sudoSlider", "$timeout", function (factory, $timeout) {
-        return {
-            scope: {
-                sliderApi: '=',
-                sudoSlider: "="
-            },
-            link: function ($scope, element, attrs) {
-                var options = {},
-                    slider;
+(function (angular:ng.IAngularStatic, $:JQueryStatic) {
+    angular.module('sudoSlider', [])
+        .directive('sudoSlider', ["sudoSlider", "$timeout", function (factory, $timeout) {
+            return {
+                scope: {
+                    sliderApi: '=?',
+                    sudoSlider: "=?"
+                },
+                link: function ($scope, element, attrs) {
+                    var slider;
 
-                $scope.sliderApi = $scope.sliderApi || {};
+                    $scope.sliderApi = $scope.sliderApi || {};
 
-                $scope.$watch("sudoSlider", function (value) {
-                    var options;
-                    if ($.isArray(value)) {
-                        options = {};
-                        for (var i = 0; i < value.length; i++) {
-                            var definition = value[i];
-                            var definitionValue = definition.value;
-                            if (definition.optional && !definition.enabled) {
-                                definitionValue = false;
+                    EventBus.getInstance().register(SudoSliderApiEvent, function (event:SudoSliderApiEvent) {
+                        return event.callback($scope.sliderApi);
+                    }, false, window);
+
+                    var updateDefinitions = function (newDefinitions) {
+                        var options;
+                        if ($.isArray(newDefinitions)) {
+                            options = {};
+                            for (var i = 0; i < newDefinitions.length; i++) {
+                                var definition = newDefinitions[i];
+                                var definitionValue = definition.value;
+                                if (definition.optional && !definition.enabled) {
+                                    definitionValue = false;
+                                }
+                                options[definition.name] = definitionValue;
                             }
-                            options[definition.name] = definitionValue;
+                        } else {
+                            options = newDefinitions ? newDefinitions : {};
                         }
-                    } else {
-                        options = value ? value : {};
+
+                        slider.destroy();
+
+                        slider.setOptions(options);
+
+                        // When i destroy it myself, i init it myself.
+                        slider.init();
+                    };
+                    $scope.$watch("sudoSlider", updateDefinitions, true);
+
+                    $timeout(function () {
+                        EventBus.getInstance().register(SudoSliderUpdateOptionsEvent, function (event:SudoSliderUpdateOptionsEvent) {
+                            updateDefinitions(event.newDefinitions);
+                        }, true, window);
+                    });
+
+                    slider = $(element).sudoSlider();
+                    $scope.slider = slider;
+
+
+                    for (var prop in slider) {
+                        if (slider.hasOwnProperty(prop)) {
+                            $scope.sliderApi[prop] = slider[prop];
+                        }
                     }
 
-                    slider.destroy();
-
-                    slider.setOptions(options);
-
-                    // When i destroy it myself, i init it myself.
-                    slider.init();
-                }, true);
-
-                slider = $(element).sudoSlider(options);
-
-
-                for (var prop in slider) {
-                    if (slider.hasOwnProperty(prop)) {
-                        $scope.sliderApi[prop] = slider[prop];
-                    }
+                    element.on('$destroy', function () {
+                        slider.destroy();
+                    });
                 }
-
-                element.on('$destroy', function () {
-                    slider.destroy();
-                });
-            }
-        };
-    }]).factory('sudoSlider', function () {
-        var factory : SudoSliderFactory = {
-            defaultOptionDefinitions: getOptionDefinitions,
-            defaultOptionValues: $.fn.sudoSlider.getDefaultOptions,
-            insertValuesIntoOptionDefinitions: insertValuesIntoOptionDefinitions,
-            getDemoDefinitions: getDemoDefinitions
-        };
-        return factory
-    });
+            };
+        }]).controller('SudoSliderSlidesController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider:SudoSliderFactory) {
+            $scope.slides = [
+                {html: "<img src=\"../images/01.jpg\"/>"},
+                {html: "<img src=\"../images/02.jpg\"/>"},
+                {html: "<img src=\"../images/03.jpg\"/>"},
+                {html: "<img src=\"../images/04.jpg\"/>"},
+                {html: "<img src=\"../images/05.jpg\"/>"}
+            ];
+            EventBus.getInstance().register(SudoSliderSlidesUpdateEvent, function (event:SudoSliderSlidesUpdateEvent) {
+                $scope.slides = event.newSlides;
+                // We risk that the last event is fired immediately.
+                if(!$scope.$$phase) {
+                    $scope.$apply();
+                }
+            }, true, window);
+        }]).factory('sudoSlider', function () {
+            return {
+                defaultOptionDefinitions: getOptionDefinitions,
+                defaultOptionValues: $.fn.sudoSlider.getDefaultOptions,
+                insertValuesIntoOptionDefinitions: insertValuesIntoOptionDefinitions,
+                getDemoDefinitions: getDemoDefinitions
+            };
+        });
 
     function insertValuesIntoOptionDefinitions(optionDefinitions, options) {
         $.each(optionDefinitions, function (index, optionDefinition) {
@@ -120,7 +147,7 @@ interface SudoSliderFactory {
     }
 
     function getOptionDefinitions() {
-        var optionDefinitions : OptionDefinition[] = [
+        var optionDefinitions:OptionDefinition[] = [
             {
                 name: "effect",
                 type: "dropdown",
@@ -354,11 +381,11 @@ interface SudoSliderFactory {
             },
             {
                 name: "captions",
-                options : {
+                options: {
                     effect: "fade",
-                    continuous:true,
+                    continuous: true,
                     initCallback: function () {
-                        var storage : any = {};
+                        var storage:any = {};
                         $(this).data("captions", storage);
                         var that = this;
                         storage.captions = $();
@@ -397,7 +424,7 @@ interface SudoSliderFactory {
                             }
                         }
                     },
-                    destroyCallback : function () {
+                    destroyCallback: function () {
                         var storage = $(this).data("captions");
                         if (!storage) {
                             return;
@@ -405,15 +432,15 @@ interface SudoSliderFactory {
                         storage.captions.remove();
                         storage.captions = $();
                     },
-                    ajaxLoad: function(t, img, that){
+                    ajaxLoad: function (t, img, that) {
                         var storage = $(that).data("captions");
                         storage.insertCaption(t);
                     },
-                    beforeAnimation: function(t, that){
+                    beforeAnimation: function (t, that) {
                         var storage = $(that).data("captions");
                         $(this).children().filter(storage.captions).hide();
                     },
-                    afterAnimation: function(t, that){
+                    afterAnimation: function (t, that) {
                         var storage = $(that).data("captions");
                         $(this).children().filter(storage.captions).slideDown(400);
                     }

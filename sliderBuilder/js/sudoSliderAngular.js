@@ -1,21 +1,25 @@
 /// <reference path="lib/jquery.d.ts" />
 /// <reference path="lib/angular.d.ts" />
+/// <reference path="events.ts" />
 (function (angular, $) {
     angular.module('sudoSlider', []).directive('sudoSlider', ["sudoSlider", "$timeout", function (factory, $timeout) {
         return {
             scope: {
-                sliderApi: '=',
-                sudoSlider: "="
+                sliderApi: '=?',
+                sudoSlider: "=?"
             },
             link: function ($scope, element, attrs) {
-                var options = {}, slider;
+                var slider;
                 $scope.sliderApi = $scope.sliderApi || {};
-                $scope.$watch("sudoSlider", function (value) {
+                EventBus.getInstance().register(SudoSliderApiEvent, function (event) {
+                    return event.callback($scope.sliderApi);
+                }, false, window);
+                var updateDefinitions = function (newDefinitions) {
                     var options;
-                    if ($.isArray(value)) {
+                    if ($.isArray(newDefinitions)) {
                         options = {};
-                        for (var i = 0; i < value.length; i++) {
-                            var definition = value[i];
+                        for (var i = 0; i < newDefinitions.length; i++) {
+                            var definition = newDefinitions[i];
                             var definitionValue = definition.value;
                             if (definition.optional && !definition.enabled) {
                                 definitionValue = false;
@@ -24,14 +28,21 @@
                         }
                     }
                     else {
-                        options = value ? value : {};
+                        options = newDefinitions ? newDefinitions : {};
                     }
                     slider.destroy();
                     slider.setOptions(options);
                     // When i destroy it myself, i init it myself.
                     slider.init();
-                }, true);
-                slider = $(element).sudoSlider(options);
+                };
+                $scope.$watch("sudoSlider", updateDefinitions, true);
+                $timeout(function () {
+                    EventBus.getInstance().register(SudoSliderUpdateOptionsEvent, function (event) {
+                        updateDefinitions(event.newDefinitions);
+                    }, true, window);
+                });
+                slider = $(element).sudoSlider();
+                $scope.slider = slider;
                 for (var prop in slider) {
                     if (slider.hasOwnProperty(prop)) {
                         $scope.sliderApi[prop] = slider[prop];
@@ -42,14 +53,28 @@
                 });
             }
         };
+    }]).controller('SudoSliderSlidesController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider) {
+        $scope.slides = [
+            { html: "<img src=\"../images/01.jpg\"/>" },
+            { html: "<img src=\"../images/02.jpg\"/>" },
+            { html: "<img src=\"../images/03.jpg\"/>" },
+            { html: "<img src=\"../images/04.jpg\"/>" },
+            { html: "<img src=\"../images/05.jpg\"/>" }
+        ];
+        EventBus.getInstance().register(SudoSliderSlidesUpdateEvent, function (event) {
+            $scope.slides = event.newSlides;
+            // We risk that the last event is fired immediately.
+            if (!$scope.$$phase) {
+                $scope.$apply();
+            }
+        }, true, window);
     }]).factory('sudoSlider', function () {
-        var factory = {
+        return {
             defaultOptionDefinitions: getOptionDefinitions,
             defaultOptionValues: $.fn.sudoSlider.getDefaultOptions,
             insertValuesIntoOptionDefinitions: insertValuesIntoOptionDefinitions,
             getDemoDefinitions: getDemoDefinitions
         };
-        return factory;
     });
     function insertValuesIntoOptionDefinitions(optionDefinitions, options) {
         $.each(optionDefinitions, function (index, optionDefinition) {
