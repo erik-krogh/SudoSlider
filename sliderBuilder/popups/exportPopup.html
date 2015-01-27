@@ -31,7 +31,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4 well">
-            <label><h2>Export</h2>
+            <label><h2>Export  <span class="glyphicon glyphicon-question-sign" tooltip-placement="right" tooltip="Use this output to &quot;save&quot; the configutation of the tool. Insert this in the below &quot;import&quot; form and press Import to restore the current configuration."></span></h2>
             <textarea class="form-control" rows="4">{{getExportOutput()}}</textarea></label><br />
             <label><h2>Import</h2>
             <textarea ng-model="importString"  class="form-control" rows="4" ></textarea>
@@ -42,7 +42,7 @@
         </div>-->
         <div class="col-md-8">
             <label><h2>Options: </h2><textarea class="form-control" rows="4">{{getExportOptionsOutput()}}</textarea></label><br />
-            <h2>HTML that will do the same. </h2>
+            <h2>HTML for the current configuration</h2>
             <pre>
 &lt;html&gt;
 &lt;head&gt;
