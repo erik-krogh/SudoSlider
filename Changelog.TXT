@@ -431,7 +431,7 @@ Various fixes. Including some Old-IE fixes.
 Change in script: Touch now works well when you slide across multiple slides, that includes if slideCount > 1.
 Change in script: Added a new option CSSease, so you can set the ease used for CSS and JavaScript animations separately.
 
-3.4.0
+3.4.0 (28-01-2015)
 Change in demos: Fixed that the fullscreen demo bugged when putting the window in "portrait" mode.
 Change in script: Resetting the position using margins and translate when slider is initialized.
 Change in script: The setOption method no longer accepts an object of options, that behaviour is now in the new setOptions method.
