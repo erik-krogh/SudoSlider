@@ -435,7 +435,7 @@ Change in script: Added a new option CSSease, so you can set the ease used for C
 Change in demos: Fixed that the fullscreen demo bugged when putting the window in "portrait" mode.
 Change in script: Resetting the position using margins and translate when slider is initialized.
 Change in script: The setOption method no longer accepts an object of options, that behaviour is now in the new setOptions method.
-Change in script: Added the sudoSlider object as an extra argument to ajaxload, afteranimation and beforeanimation. The other function already has it as "this".
+Change in script: Added the sudoSlider object as an extra argument to the callback: ajaxload, afteranimation and beforeanimation. The other functions already has it as "this".
 Change in script: If you have a single tag with class="slidesContainer" under the SudoSlider element, all the slides can (and will) be placed under that element.
 Change in script: The method "adjust" now adjusts twice, first time when its called, and a second in a 0ms timeout.
 Change in script: Removed the controlsShow option, since it was redundant.
@@ -443,3 +443,4 @@ Change in script: A factory method that returns the default options is now avail
 Change in script: Fixed some handlers that wasn't unbound when the slider was destroyed.
 Change in script: Fixed 2 bugs relating to height/width adjustments while an animation is running.
 Change in script: Auto is now stopped when destroying (but will start again on init if the option is still true).
+New: Added the SliderBuilder, that can be used to build a slider, and test out options.
