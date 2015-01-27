@@ -445,3 +445,4 @@ Change in script: Fixed 2 bugs relating to height/width adjustments while an ani
 Change in script: Auto is now stopped when destroying (but will start again on init if the option is still true).
 New: Added the SliderBuilder, that can be used to build a slider, and test out options.
 Change in demos: Removed the navigation in slider demo.
+Change in demos: Removed the tabs 2 demo.
