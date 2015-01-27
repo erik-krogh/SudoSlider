@@ -69,13 +69,40 @@
             }
         }, true, window);
     }]).factory('sudoSlider', function () {
-        return {
+        var result = {
             defaultOptionDefinitions: getOptionDefinitions,
             defaultOptionValues: $.fn.sudoSlider.getDefaultOptions,
             insertValuesIntoOptionDefinitions: insertValuesIntoOptionDefinitions,
-            getDemoDefinitions: getDemoDefinitions
+            getDemoDefinitions: getDemoDefinitions,
+            filterAllDefaultValueOptionDefinitions: filterAllDefaultValueOptionDefinitions,
+            globalSliderApi: getGlobalSliderApi
         };
+        return result;
     });
+    function getGlobalSliderApi() {
+        var sliderApi = {};
+        // Events doesn't return anything, so "getOption", "getValue" and "getSlide" doesn't make sense here.
+        var apiNames = ["init", "destroy", "setOption", "setOptions", "runWhenNotAnimating", "insertSlide", "removeSlide", "goToSlide", "block", "unblock", "startAuto", "stopAuto", "adjust", "stopAnimation"];
+        $.each(apiNames, function (index, name) {
+            sliderApi[name] = function () {
+                var _this = this;
+                var args = arguments;
+                EventBus.getInstance().fireEvent(new SudoSliderApiEvent(function (api) { return api[name].apply(_this, args); }, name));
+            };
+        });
+        return sliderApi;
+    }
+    function filterAllDefaultValueOptionDefinitions(optionDefinitions) {
+        var result = [];
+        $.each(optionDefinitions, function (index, optionDefinition) {
+            var defaultValue = $.fn.sudoSlider.getDefaultOptions()[optionDefinition.name];
+            var currentValue = optionDefinition.value;
+            if (defaultValue.toString() !== currentValue.toString()) {
+                result.push(optionDefinition);
+            }
+        });
+        return result;
+    }
     function insertValuesIntoOptionDefinitions(optionDefinitions, options) {
         $.each(optionDefinitions, function (index, optionDefinition) {
             if (!options.hasOwnProperty(optionDefinition.name)) {

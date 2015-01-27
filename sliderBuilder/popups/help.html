@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sudo Slider | Options explorer</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+
+    <link rel="STYLESHEET" type="text/css" href="../css/style.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.js"></script>
+    <script type="text/javascript"
+            src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
+    <script type="text/javascript"
+            src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.0/ui-bootstrap-tpls.min.js"></script>
+
+    <script type="text/javascript" src="../../js/jquery.sudoSlider.js"></script>
+    <script type="text/javascript" src="../js/events.js"></script>
+    <script type="text/javascript" src="../js/sudoSliderAngular.js"></script>
+    <script type="text/javascript" src="../js/exports.js"></script>
+    <!--<script type="text/javascript" src="js/optionExplorer.js"></script>-->
+    <script type="text/javascript">
+        EventBus.getInstance().fireEvent(new RegisterWindowEvent(window));
+    </script>
+
+    <style type="text/css" ng-bind="style"></style>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Help</h3>
+            <p>
+                In the top of the page is the slider, this shows how the slider behaves when the options selected below has been chosen. <br />
+                You can change the options and the content below, and the slider will immediately reflect the change. <br />
+                You can also open a popup with the slider instead, by pressing the "Open slider in popup" button on the right, the slider will still update immediately.
+            </p>
+
+            <p>
+                You can get HTML to use by pressing the "Get the result" button on the right, in the popup that opens you can also see the options to insert, or you can export/import the configuration you have the tool in.
+            </p>
+
+            <p>
+                The buttons under the slider controls the slider you see, and all also the slider in the popup (if you have one open).
+            </p>
+
+            <p>
+                To get started, try to find the "continuous" option and enable it (try to put "conti" in the "Filter options by name" input on the left). <br />
+                Then press the "Get the result" button on the right, to see how the HTML that initializes the slider in this configuration looks.
+            </p>
+            <p>
+                If you want to know what the different options do, check out <a href="http://webbies.dk/SudoSlider/help/">the documentation</a>. <br/>
+                And check out <a href="http://webbies.dk/SudoSlider/demos.html">the demos</a> to see examples of what you can do. Including things that aren't currently possible to do using this tool.
+
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

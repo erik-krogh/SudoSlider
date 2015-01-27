@@ -16,91 +16,51 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.0/ui-bootstrap-tpls.min.js"></script>
 
     <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
-    <script type="text/javascript" src="js/sudoSliderAngular.js"></script>
     <script type="text/javascript" src="js/events.js"></script>
+    <script type="text/javascript" src="js/sudoSliderAngular.js"></script>
+    <script type="text/javascript" src="js/exports.js"></script>
     <script type="text/javascript" src="js/optionExplorer.js"></script>
 
-    <style type="text/css" ng-bind="style" ng-if="showInlineSlider()"></style>
+    <style type="text/css" ng-bind="style" ng-if="showInlineSlider"></style>
 </head>
 <body>
 <div class="container">
     <!-- The header -->
-    <div class="page-header" style="margin-bottom: 0px;">
-        <h1>SudoSlider options explorer</h1>
+    <div class="page-header" style="margin-bottom: 0px;margin-top: 10px;">
+        <h1>SudoSlider options explorer <span style="cursor: pointer;" class="glyphicon glyphicon-question-sign" aria-hidden="true" onclick="window.open('popups/help.html', '_blank', 'width=800, height=600')"></span></h1>
         <p class="lead">Change the options and the content, the slider will update immediately.</p>
     </div>
 
     <!-- The slider -->
-    <div class="row" style="border-bottom: 1px solid #eee;" ng-if="showInlineSlider()">
+    <div class="row" style="border-bottom: 1px solid #eee;" ng-if="showInlineSlider">
         <div style="position:relative;min-height: 241px;margin:10px 10px 10px 20px;">
-            <div sudo-slider>
+            <div sudo-slider id="slider">
                 <div class="slidesContainer" ng-controller="SudoSliderSlidesController">
                     <div ng-repeat="slide in slides" ng-bind-html="slide.html"></div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="row" style="border-bottom: 1px solid #eee;text-align: center;" ng-if="!showInlineSlider">
+        <button class="btn btn-primary" ng-click="setShowInlineSlider(true)" style="margin-bottom: 0px;">Show the slider here again</button>
+    </div>
 
-    <div class="row" style="border-bottom: 1px solid #eee;" ng-if="!showInlineSlider() || true">
+    <div class="row" style="border-bottom: 1px solid #eee;">
         <h3 style="text-align: center;">Control the slider.</h3>
         <div style="text-align: center;margin-bottom: 10px;">
             <button class="btn btn-primary" ng-click="sliderApi.goToSlide('prev')" style="margin-bottom: 0px;">Previous</button>
             <button class="btn btn-primary" ng-click="sliderApi.goToSlide('next')" style="margin-bottom: 0px;">Next</button>
             <button class="btn btn-primary" ng-click="sliderApi.startAuto()" style="margin-bottom: 0px;">Start auto</button>
             <button class="btn btn-primary" ng-click="sliderApi.stopAuto()" style="margin-bottom: 0px;">Stop auto</button>
-            <button class="btn btn-primary" ng-click="sliderApi.destroy()" style="margin-bottom: 0px;">Destroy</button>
-            <button class="btn btn-primary" ng-click="sliderApi.init()" style="margin-bottom: 0px;">Init</button>
+            <!--<button class="btn btn-primary" ng-click="sliderApi.destroy()" style="margin-bottom: 0px;">Destroy</button>
+            <button class="btn btn-primary" ng-click="sliderApi.init()" style="margin-bottom: 0px;">Init</button>-->
         </div>
     </div>
 
     <!-- Modifying the slider -->
     <div class="row" style="margin-top: 10px;">
-        <!-- Demo selection, style, import and export -->
-        <div class="col-md-4 well">
-            <div ng-controller="PopupController">
-                <button class="btn btn-primary" ng-click="openSliderPopup()" style="margin-bottom: 20px;">Open slider in popup</button>
-            </div>
-
-            <div ng-controller="DemoLoaderController">
-                <div class="btn-group" dropdown>
-
-                    <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
-                        <span ng-if="currentDemo == null">
-                            No demo selected
-                        </span>
-                        <span ng-if="currentDemo != null">
-                            Demo: {{curentDemo.name}}
-                        </span>
-
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li ng-repeat="demo in demoDefiniftions">
-                            <a href="javascript:void(0);" ng-click="selectDemo(demo)">{{demo.name}}</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <label>
-                <h2>The style</h2>
-                <textarea class="form-control" rows="4" ng-model="style" ng-change="sliderApi.adjust()"></textarea>
-            </label>
-            <br />
-            <div ng-controller="ImportExportController" style="margin-top:30px;">
-                <h2>Export and import</h2>
-                <label>Import: <textarea ng-model="importString"  class="form-control" rows="4" ></textarea>
-                <button ng-click="doImport()">Import</button> </label>
-                <br />
-                <br />
-                <label>Export: <textarea class="form-control" rows="4">{{getExportOutput()}}</textarea></label><br />
-                <br />
-                <br />
-                <label>Options: <textarea class="form-control" rows="4">{{getExportOptionsOutput()}}</textarea></label><br />
-            </div>
-        </div>
-
         <!-- The options -->
-        <div class="col-md-4">
+        <div class="col-md-4 well" style="padding: 0 15px 20px">
             <div class="form-group">
                 <label><h2>The options</h2></label>
                 <input type="text" class="form-control" placeholder="Filter options by name"  ng-model="optionFilter">
@@ -180,20 +140,56 @@
                 </tbody>
             </table>
         </div>
+
         <!-- Modifying the content of the slider -->
-        <div class="col-md-4 well">
+        <div class="col-md-4" style="padding: 0 15px 20px">
             <h2>The content</h2>
 
             <div id="slides" style="margin-top: 10px;margin-bottom: 10px;">
-                <div ng-repeat="slide in slides">
-                    <label>
-                        Slide {{$index + 1}}:
-                        <textarea class="form-control" rows="3" ng-model="slide.html" ng-change="sliderApi.adjust()"></textarea>
-                    </label>
-                    <button ng-click="removeSlide($index)">Delete slide</button>
+                <div ng-repeat="slide in slides" style="margin-bottom: 20px;">
+                    <!--<label style="position: relative;">-->
+                        <h4 style="margin-bottom: 4px;">Slide {{$index + 1}} <button class="btn btn-danger" ng-click="removeSlide($index)">Delete slide</button></h4>
+                        <textarea class="form-control" rows="3" ng-model="slide.html" ng-change="sliderApi.adjust()" style="font-weight: bold;"></textarea>
+                    <!--</label>-->
                 </div>
-                <button ng-click="addSlide()">Add slide</button>
+                <button class="btn btn-primary" ng-click="addSlide()">Add slide</button>
             </div>
+        </div>
+
+        <!-- Demo selection, style, import and export -->
+        <div class="col-md-4 well" style="padding: 0 15px 20px">
+            <h2>The rest</h2>
+            <div ng-controller="PopupController" style="margin-bottom: 20px;">
+                <button class="btn btn-success" ng-click="openExportPopup()" style="margin-bottom: 20px;">Get the result</button> <br />
+                <button class="btn btn-primary" ng-click="openSliderPopup()">Open slider in popup</button>
+            </div>
+
+            <!--TODO: Do something with this.-->
+            <!--<div ng-controller="DemoLoaderController">
+                <div class="btn-group" dropdown>
+
+                    <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
+                        <span ng-if="currentDemo == null">
+                            No demo selected
+                        </span>
+                        <span ng-if="currentDemo != null">
+                            Demo: {{curentDemo.name}}
+                        </span>
+
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li ng-repeat="demo in demoDefiniftions">
+                            <a href="javascript:void(0);" ng-click="selectDemo(demo)">{{demo.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>-->
+            <label>
+                <h2>The style</h2>
+                <textarea class="form-control" rows="4" ng-model="style" ng-change="sliderApi.adjust()"></textarea>
+            </label>
+            <br />
         </div>
     </div>
 

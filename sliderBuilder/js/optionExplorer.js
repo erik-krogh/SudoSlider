@@ -2,24 +2,25 @@
 /// <reference path="lib/angular.d.ts" />
 /// <reference path="sudoSliderAngular.ts" />
 /// <reference path="events.ts" />
-// TODO: Export in pop-up window thinghy.
 (function (angular, $) {
     var eventBus = EventBus.getInstance();
-    var myApp = angular.module('myApp', ['ngSanitize', 'sudoSlider', 'ui.bootstrap', "sudoSlider"]).controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider, $timeout) {
-        (function () {
-            var sliderApi = {};
-            $scope.sliderApi = sliderApi;
-            // TODO: ECMAScript Harmony Proxies can make this way way pretier. Or __noSuchMethod__ if chrome supported it.
-            // Events doesn't return anything, so "getOption", "getValue" and "getSlide" doesn't make sense here.
-            var apiNames = ["init", "destroy", "setOption", "setOptions", "runWhenNotAnimating", "insertSlide", "removeSlide", "goToSlide", "block", "unblock", "startAuto", "stopAuto", "adjust", "stopAnimation"];
-            $.each(apiNames, function (index, name) {
-                sliderApi[name] = function () {
-                    var _this = this;
-                    var args = arguments;
-                    eventBus.fireEvent(new SudoSliderApiEvent(function (api) { return api[name].apply(_this, args); }, name));
-                };
+    (function () {
+        var windows = [];
+        eventBus.register(RegisterWindowEvent, function (event) {
+            var win = event.win;
+            windows.push(win);
+            $(win).on("beforeunload", function () {
+                windows.splice(windows.indexOf(win), 1);
             });
-        })();
+        });
+        $(window).on("beforeunload", function () {
+            $.each(windows, function (index, win) {
+                win.close();
+            });
+        });
+    })();
+    var myApp = angular.module('myApp', ['ngSanitize', 'sudoSlider', 'ui.bootstrap', "sudoSlider"]).controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider, $timeout) {
+        $scope.sliderApi = sudoSlider.globalSliderApi();
         $scope.style = ".slide img{\n" + "    width:100%;\n" + "}";
         $scope.$watch("style", function (newStyle) {
             eventBus.fireEvent(new SliderBuilderStyleChangeEvent(newStyle));
@@ -53,84 +54,23 @@
                 $scope.sliderApi.init();
             }, 0);
         };
-        $scope.sliderPopupCounter = 0;
-        $scope.showInlineSlider = function () {
-            return $scope.sliderPopupCounter == 0;
+        $scope.showInlineSlider = true;
+        $scope.setShowInlineSlider = function (value) {
+            $scope.showInlineSlider = value;
         };
+        eventBus.register(ImportEvent, function (event) {
+            $scope.slides = event.slides;
+            $scope.style = event.style;
+            $scope.optionDefinitions = event.definitions;
+            $scope.$apply();
+        });
     }]).controller('PopupController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider) {
         $scope.openSliderPopup = function () {
-            var newWindow = window.open("sliderPopup.html", "_blank", "width=1000, height=600");
-            $(newWindow).load(function () {
-                $scope.$parent.sliderPopupCounter++;
-                $scope.$apply();
-            });
-            $(newWindow).on("beforeunload", function () {
-                $scope.$parent.sliderPopupCounter--;
-                $scope.$apply();
-            });
+            var newWindow = window.open("popups/sliderPopup.html", "_blank", "width=1000, height=600");
+            $scope.$parent.showInlineSlider = false;
         };
-    }]).controller('ImportExportController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider) {
-        $scope.importString = "";
-        $scope.doImport = function () {
-            $scope.sliderApi.destroy();
-            var imported = JSON.parse($scope.importString);
-            $scope.importString = "";
-            var options = imported.options;
-            sudoSlider.insertValuesIntoOptionDefinitions($scope.optionDefinitions, options);
-            $scope.$parent.slides = imported.slides;
-            $scope.$parent.style = imported.style;
-            $timeout(function () {
-                $scope.sliderApi.init();
-            }, 0);
-        };
-        function getNonDefaultOptionValues() {
-            var optionDefs = filterAllDefaultValueOptionDefinitions($scope.optionDefinitions);
-            var options = {};
-            for (var i = 0; i < optionDefs.length; i++) {
-                var def = optionDefs[i];
-                if (def.type == "function") {
-                    options[def.name] = def.stringValue;
-                }
-                else {
-                    options[def.name] = def.value;
-                }
-            }
-            return options;
-        }
-        $scope.getExportOutput = function () {
-            return JSON.stringify({
-                options: getNonDefaultOptionValues(),
-                style: $scope.style,
-                slides: $.map($scope.slides, function (slide) {
-                    return {
-                        html: slide.html
-                    };
-                })
-            });
-        };
-        $scope.getExportOptionsOutput = function () {
-            var optionDefs = filterAllDefaultValueOptionDefinitions($scope.optionDefinitions);
-            var result = "";
-            var first = true;
-            $.each(optionDefs, function (index, def) {
-                if (first) {
-                    first = false;
-                }
-                else {
-                    result += ",";
-                }
-                if (def.type == "function" || def.type == "array") {
-                    result += "\"" + def.name + "\":" + def.stringValue;
-                }
-                else {
-                    var value = def.value;
-                    if (def.type == "number") {
-                        value = Number(value);
-                    }
-                    result += "\"" + def.name + "\":" + JSON.stringify(value);
-                }
-            });
-            return "{" + result + "}";
+        $scope.openExportPopup = function () {
+            var newWindow = window.open("popups/exportPopup.html", "_blank", "width=1000, height=600");
         };
     }]).controller('OptionController', ["$scope", function ($scope) {
         $scope.setOptionFunction = function (value) {
@@ -179,25 +119,13 @@
                 $scope.$parent.style = demo.style;
             }
         };
-    }]).filter('nonDefaultValues', function () {
+    }]).filter('nonDefaultValues', ["sudoSlider", function (sudoSlider) {
         return function (optionDefinitions, filter) {
             if (!filter) {
                 return optionDefinitions;
             }
-            return filterAllDefaultValueOptionDefinitions(optionDefinitions);
+            return sudoSlider.filterAllDefaultValueOptionDefinitions(optionDefinitions);
         };
-    });
-    var defaultOptions = jQuery.fn.sudoSlider.getDefaultOptions();
-    function filterAllDefaultValueOptionDefinitions(optionDefinitions) {
-        var result = [];
-        jQuery.each(optionDefinitions, function (index, optionDefinition) {
-            var defaultValue = defaultOptions[optionDefinition.name];
-            var currentValue = optionDefinition.value;
-            if (defaultValue.toString() !== currentValue.toString()) {
-                result.push(optionDefinition);
-            }
-        });
-        return result;
-    }
+    }]);
 }(angular, jQuery));
 //# sourceMappingURL=optionExplorer.js.map

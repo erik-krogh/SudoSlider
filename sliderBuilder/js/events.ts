@@ -45,9 +45,6 @@ class EventBus {
     static getInstance() {
         // Global, I'm serious.
         var win : any = window;
-        if (!win) {
-            alert("This is bad!");
-        }
         while (win.opener) {
             win = win.opener;
         }
@@ -86,5 +83,23 @@ class SliderBuilderStyleChangeEvent {
     style : string;
     constructor(style: string) {
         this.style = style;
+    }
+}
+
+class RegisterWindowEvent {
+    win : Window;
+    constructor(win : Window) {
+        this.win = win;
+    }
+}
+
+class ImportEvent {
+    slides:{html: string}[];
+    style : string;
+    definitions:OptionDefinition[];
+    constructor(slides:{html: string}[], style : string, definitions:OptionDefinition[]) {
+        this.slides = slides;
+        this.style = style;
+        this.definitions = definitions;
     }
 }

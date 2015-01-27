@@ -10,6 +10,7 @@ interface OptionDefinition {
     name : string;
     type: string;
     value?: any;
+    stringValue?: any;
 }
 
 interface DemoDefinition {
@@ -17,11 +18,30 @@ interface DemoDefinition {
     options: any;
 }
 
+interface GlobalSliderApi {
+    init: () => void;
+    destroy: () => void;
+    setOption: (name: string, value: any) => void;
+    setOptions: (options : any) => void;
+    runWhenNotAnimating: (func : () => any) => void;
+    insertSlide: (html : string, pos: number, numtext? : string, goToSlide? : number) => void;
+    removeSlide: (slide : number) => void;
+    goToSlide: (slide : number) => void;
+    block: () => void;
+    unblock: () => void;
+    startAuto: () => void;
+    stopAuto: () => void;
+    adjust: (repeat? : boolean) => void;
+    stopAnimation: () => void;
+}
+
 interface SudoSliderFactory {
     defaultOptionDefinitions: () => OptionDefinition[];
     defaultOptionValues: () => any;
     insertValuesIntoOptionDefinitions: (optionDefinitions:OptionDefinition[], options:any) => void;
     getDemoDefinitions: () => DemoDefinition[];
+    filterAllDefaultValueOptionDefinitions : (optionDefinitions:OptionDefinition[]) => OptionDefinition[];
+    globalSliderApi: () => GlobalSliderApi;
 }
 
 (function (angular:ng.IAngularStatic, $:JQueryStatic) {
@@ -103,13 +123,41 @@ interface SudoSliderFactory {
                 }
             }, true, window);
         }]).factory('sudoSlider', function () {
-            return {
+            var result : SudoSliderFactory = {
                 defaultOptionDefinitions: getOptionDefinitions,
                 defaultOptionValues: $.fn.sudoSlider.getDefaultOptions,
                 insertValuesIntoOptionDefinitions: insertValuesIntoOptionDefinitions,
-                getDemoDefinitions: getDemoDefinitions
+                getDemoDefinitions: getDemoDefinitions, // TODO: Something else.
+                filterAllDefaultValueOptionDefinitions: filterAllDefaultValueOptionDefinitions,
+                globalSliderApi : getGlobalSliderApi
             };
+            return result;
         });
+
+    function getGlobalSliderApi() : GlobalSliderApi {
+        var sliderApi : any = {};
+        // Events doesn't return anything, so "getOption", "getValue" and "getSlide" doesn't make sense here.
+        var apiNames = ["init", "destroy", "setOption", "setOptions", "runWhenNotAnimating", "insertSlide", "removeSlide", "goToSlide", "block", "unblock", "startAuto", "stopAuto", "adjust", "stopAnimation"]
+        $.each(apiNames, function (index, name:string) {
+            sliderApi[name] = function () {
+                var args = arguments;
+                EventBus.getInstance().fireEvent(new SudoSliderApiEvent((api) => api[name].apply(this, args), name));
+            }
+        });
+        return sliderApi;
+    }
+
+    function filterAllDefaultValueOptionDefinitions(optionDefinitions) {
+        var result = [];
+        $.each(optionDefinitions, function (index, optionDefinition) {
+            var defaultValue = $.fn.sudoSlider.getDefaultOptions()[optionDefinition.name];
+            var currentValue = optionDefinition.value;
+            if (defaultValue.toString() !== currentValue.toString()) {
+                result.push(optionDefinition);
+            }
+        });
+        return result;
+    }
 
     function insertValuesIntoOptionDefinitions(optionDefinitions, options) {
         $.each(optionDefinitions, function (index, optionDefinition) {

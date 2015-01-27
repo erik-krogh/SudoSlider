@@ -44,9 +44,6 @@ var EventBus = (function () {
     EventBus.getInstance = function () {
         // Global, I'm serious.
         var win = window;
-        if (!win) {
-            alert("This is bad!");
-        }
         while (win.opener) {
             win = win.opener;
         }
@@ -79,5 +76,19 @@ var SliderBuilderStyleChangeEvent = (function () {
         this.style = style;
     }
     return SliderBuilderStyleChangeEvent;
+})();
+var RegisterWindowEvent = (function () {
+    function RegisterWindowEvent(win) {
+        this.win = win;
+    }
+    return RegisterWindowEvent;
+})();
+var ImportEvent = (function () {
+    function ImportEvent(slides, style, definitions) {
+        this.slides = slides;
+        this.style = style;
+        this.definitions = definitions;
+    }
+    return ImportEvent;
 })();
 //# sourceMappingURL=events.js.map
