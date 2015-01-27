@@ -12,7 +12,6 @@
  * http://jquery.com
  *
  */
-// TODO: Text rotator
 // TODO: Having half a slide in either end, that is partially faded out like: http://riley87.co.uk/theme/ionic/
 (function ($, win) {
     // Saves space in the minified version.
@@ -1812,7 +1811,7 @@
             beforeAnimation: EMPTY_FUNCTION, /* option[24]/*beforeanimation*/
             afterAnimation: EMPTY_FUNCTION, /* option[25]/*afteranimation*/
             history: FALSE, /* option[26]/*history*/
-            autoHeight: TRUE, /*  option[27]/*autoheight*/ // TODO: Consider removing height when re-initializing.
+            autoHeight: TRUE, /*  option[27]/*autoheight*/
             autoWidth: TRUE, /*  option[28]/*autowidth*/
             updateBefore: FALSE, /* option[29]/*updateBefore*/
             ajax: FALSE, /* option[30]/*ajax*/
