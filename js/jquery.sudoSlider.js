@@ -1714,7 +1714,7 @@
             });
 
             baseSlider.removeSlide = runOnDestroyedSlider(function (pos) {
-                pos--; // 1 == the first.
+                pos = mathMax(0, parseInt10(pos) - 1); // 1 == the first.
 
                 slides[mathMin(pos, totalSlides - 1)].remove();
                 option[18]/*numerictext*/.splice(pos, 1);
