@@ -10,6 +10,7 @@ http://webbies.dk/SudoSlider/
 ## Links
 
 * Documentation - http://webbies.dk/SudoSlider/help/
+* Build a slider - http://webbies.dk/assets/files/SudoSlider/package/sliderBuilder/
 * Demos - http://webbies.dk/SudoSlider/demos.html
 
 ## HELP
