@@ -446,3 +446,8 @@ Change in script: Auto is now stopped when destroying (but will start again on i
 New: Added the SliderBuilder, that can be used to build a slider, and test out options.
 Change in demos: Removed the navigation in slider demo.
 Change in demos: Removed the tabs 2 demo.
+
+3.4.1
+Change in script: Changed the default value of "mouseTouch" to true, meaning that if you enable touch, mouse-dragging also work pr. default.
+Change in script. Added a "speed" argument in the end of beforeAnimation. Since the animation speed isn't always the option speed (e.g. touch animations).
+Change in demos: Added the "partial sides" demo.
