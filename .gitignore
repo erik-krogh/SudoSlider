@@ -1,3 +1,7 @@
+sliderBuilder/js/*.js
+sliderBuilder/js/*.js.map
+sliderBuilder/js/*.min.js
+
 #################
 ## Intellij IDEA
 #################
