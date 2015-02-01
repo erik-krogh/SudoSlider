@@ -1829,7 +1829,7 @@
             touch: FALSE,  /* option[41]/*touch*/
             touchHandle: FALSE, /* option[42]/*touchHandle*/
             destroyCallback: EMPTY_FUNCTION,  /* option[43]/*destroyCallback*/
-            mouseTouch: FALSE, /* option[44]/*mouseTouch*/
+            mouseTouch: TRUE, /* option[44]/*mouseTouch*/
             allowScroll: TRUE, /* option[45]/*allowScroll*/
             CSSease: SWING /* option[46]/*CSSease*/
         };
