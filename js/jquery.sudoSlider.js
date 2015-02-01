@@ -13,6 +13,7 @@
  *
  */
 // TODO: Having half a slide in either end, that is partially faded out like: http://riley87.co.uk/theme/ionic/
+// TODO: cursor: -webkit-grab; cursor: -moz-grab;
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -769,10 +770,10 @@
 
             // This function is called when i need a callback on the current element and it's continuous clones (if they are there).
             // after:  TRUE == afteranimation : FALSE == beforeanimation;
-            function aniCall(i, after, synchronous) {
+            function aniCall(i, after, synchronous, speed) {
                 i = getRealPos(i);
                 // Wierd fix to let IE accept the existance of the sudoSlider object.
-                var func = makeCallback(after ? afterAniCall : beforeAniCall, [slides[i], i + 1]);
+                var func = makeCallback(after ? afterAniCall : beforeAniCall, [slides[i], i + 1, speed]);
                 if (synchronous) {
                     func();
                 } else {
@@ -784,8 +785,8 @@
                 option[25]/*afteranimation*/.call(el, a, baseSlider);
             }
 
-            function beforeAniCall(el, a) {
-                option[24]/*beforeanimation*/.call(el, a, baseSlider);
+            function beforeAniCall(el, a, speed) {
+                option[24]/*beforeanimation*/.call(el, a, baseSlider, speed);
             }
 
             // Convert the direction into a usefull number.
@@ -1489,7 +1490,7 @@
                     }
 
                     // afteranimation
-                    aniCall(dir, TRUE);
+                    aniCall(dir, TRUE, speed);
                     if (option[10]/*responsive*/) {
                         adjustResponsiveLayout();
                     }
@@ -1527,7 +1528,7 @@
                 autoadjust(dir, overwritingSpeed);
                 callAsync(function () {
                     // beforeanimation
-                    aniCall(dir, FALSE, TRUE);
+                    aniCall(dir, FALSE, TRUE, speed);
 
                     effect.call(baseSlider, currentAnimationObject);
                 });
