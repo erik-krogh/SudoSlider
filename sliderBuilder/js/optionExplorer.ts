@@ -85,12 +85,12 @@
 
         }]).controller('PopupController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider : SudoSliderFactory) {
             $scope.openSliderPopup = function () {
-                var newWindow = window.open("popups/sliderPopup.html", "_blank", "width=1000, height=600");
+                var newWindow = window.open("popups/sliderPopup.html", "_blank", "width=1000, height=600, scrollbars=yes, resizeable=yes");
                 $scope.$parent.showInlineSlider = false;
             };
 
             $scope.openExportPopup = function () {
-                var newWindow = window.open("popups/exportPopup.html", "_blank", "width=1000, height=600");
+                var newWindow = window.open("popups/exportPopup.html", "_blank", "width=1000, height=600, scrollbars=yes, resizeable=yes");
             };
         }]).controller('OptionController', ["$scope", function ($scope) {
             $scope.setOptionFunction = function (value) {
