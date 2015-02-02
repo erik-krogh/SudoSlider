@@ -45,6 +45,7 @@
     var MOUSEMOVE = "mousemove";
     var MOUSEUP = "mouseup";
     var SLIDES_CONTAINER = "slidesContainer";
+    var SUDO_DRAGGING_CLASS = "sudoSlider-dragging";
 
     $.fn.sudoSlider = function (optionsOrg) {
         // Defining the base element.
@@ -978,6 +979,7 @@
             }
 
             function setUpTouch() {
+                var body = $("body");
                 var easingToUse;
                 var runningTouchEffect = FALSE;
 
@@ -1010,6 +1012,7 @@
                 var baseDistance;
 
                 function touchStart(x, y) {
+                    body.addClass(SUDO_DRAGGING_CLASS);
                     currentTouchSlide = currentSlide;
                     baseDistance = 0;
 
@@ -1107,6 +1110,7 @@
                 }
 
                 function touchEnd(x, y) {
+                    body.removeClass(SUDO_DRAGGING_CLASS);
                     var distance;
                     if (option[6]/*vertical*/) {
                         distance = y;
@@ -1265,7 +1269,7 @@
                             if (type == startEvent) {
                                 startX = x;
                                 startY = y;
-                                touchStart(x - startX, y - startY)
+                                touchStart(x - startX, y - startY);
                             } else {
                                 touchMove(x - startX, y - startY);
 
@@ -1490,7 +1494,7 @@
                     }
 
                     // afteranimation
-                    aniCall(dir, TRUE, speed);
+                    aniCall(dir, TRUE);
                     if (option[10]/*responsive*/) {
                         adjustResponsiveLayout();
                     }
@@ -1528,7 +1532,7 @@
                 autoadjust(dir, overwritingSpeed);
                 callAsync(function () {
                     // beforeanimation
-                    aniCall(dir, FALSE, TRUE, speed);
+                    aniCall(dir, FALSE, TRUE, overwritingSpeed);
 
                     effect.call(baseSlider, currentAnimationObject);
                 });
