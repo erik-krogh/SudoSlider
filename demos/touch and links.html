@@ -9,21 +9,21 @@
     <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            var sudoSlider = $("#slider").sudoSlider({
+            $(".slider").sudoSlider({
                 continuous: true,
                 touch: true,
                 mouseTouch: true,
-                touchHandle: "#slider * :not(a)",
+                touchHandle: "> * :not(a)",
                 prevNext: true,
                 numeric: true
             })
         });
     </script>
     <style type="text/css">
-        #slider div {
+        .slider div {
             position: relative;
         }
-        #slider a {
+        .slider a {
             font-size: 40px;
             color: white;
             margin: 40px;
@@ -56,53 +56,46 @@
             </div>
         </div>
     </div>
+    <h1>Space between sliders</h1>
+    <div style="position:relative;">
+        <div id="slider2" class="slider">
+            <div>
+                <a style="position: absolute;top: 0; left: 0" href="http://google.com">This is link 1</a>
+                <img src="../images/01.jpg" alt="image description">
+            </div>
+            <div>
+                <a style="position: absolute;bottom: 0; left: 0" href="http://google.com">This is link 2</a>
+                <img src="../images/02.jpg" alt="image description">
+            </div>
+            <div>
+                <a style="position: absolute;bottom: 0; right: 0" href="http://google.com">This is link 3</a>
+                <img src="../images/03.jpg" alt="image description">
+            </div>
+            <div>
+                <a style="position: absolute;top: 0; right: 0" href="http://google.com">This is link 4</a>
+                <img src="../images/04.jpg" alt="image description">
+            </div>
+        </div>
+    </div>
     <h3>Usage</h3>
     <h4>Include the javascripts</h4>
 	<pre>
 &lt;script type="Text/Javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
-    <h4>The Javascript to start it.</h4>
+    <h4>The Javascript to start it, this starts both sliders.</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
    $(document).ready(function(){
-      var sudoSlider = $("#slider").sudoSlider({
+      $(".slider").sudoSlider({
          continuous: true,
          touch: true,
          mouseTouch: true,
-         touchHandle: "#slider * :not(a)",
+         touchHandle: "> * :not(a)",
          prevNext: true,
          numeric: true
       });
    });
 &lt;/script&gt;</pre>
-    <h4>The HTML</h4>
-	<pre>
-&lt;div id="slider" class="slider"&gt;
-   &lt;div&gt;
-      &lt;a style="position: absolute;top: 0; left: 0" href="http://google.com"&gt;
-        This is link 1
-      &lt;/a&gt;
-      &lt;img src="../images/01.jpg" alt="image description"&gt;
-   &lt;/div&gt;
-   &lt;div&gt;
-      &lt;a style="position: absolute;bottom: 0; left: 0" href="http://google.com"&gt;
-        This is link 2
-      &lt;/a&gt;
-      &lt;img src="../images/02.jpg" alt="image description"&gt;
-   &lt;/div&gt;
-   &lt;div&gt;
-      &lt;a style="position: absolute;bottom: 0; right: 0" href="http://google.com"&gt;
-        This is link 3
-      &lt;/a&gt;
-      &lt;img src="../images/03.jpg" alt="image description"&gt;
-   &lt;/div&gt;
-   &lt;div&gt;
-      &lt;a style="position: absolute;top: 0; right: 0" href="http://google.com"&gt;
-        This is link 4
-      &lt;/a&gt;
-      &lt;img src="../images/04.jpg" alt="image description"&gt;
-   &lt;/div&gt;
-&lt;/div&gt;</pre>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">

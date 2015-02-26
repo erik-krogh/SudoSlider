@@ -452,3 +452,4 @@ Change in script: Changed the default value of "mouseTouch" to true, meaning tha
 Change in script. Added a "speed" argument in the end of beforeAnimation. Since the animation speed isn't always the option speed (e.g. touch animations).
 Change in demos: Added the "partial sides" demo.
 Change in script: A class "sudoSlider-dragging" is added to the body while the user is dragging an element.
+Change in script: Prefixing touchHandle with ">" (like "> img"), will limit the touchHandle to select within the slider. See example in the touch and links demo.

@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.4.0 - jQuery plugin
+ * Sudo Slider version 3.4.1 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -12,8 +12,6 @@
  * http://jquery.com
  *
  */
-// TODO: Having half a slide in either end, that is partially faded out like: http://riley87.co.uk/theme/ionic/
-// TODO: cursor: -webkit-grab; cursor: -moz-grab;
 (function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
@@ -1243,6 +1241,12 @@
                                 target = target.parents().add(eventTarget);
                             }
                             var filter = option[42]/*touchHandle*/ || obj;
+                            if (typeof filter === "string") {
+                                filter = stringTrim(filter);
+                                if (filter.charAt(0) == ">") {
+                                    filter = $(filter.substr(1, filter.length), obj);
+                                }
+                            }
 
                             var isTarget = target.filter(filter).length;
 
