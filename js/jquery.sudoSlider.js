@@ -443,7 +443,7 @@
                 autoOn = TRUE;
                 autoStartedWithPause = pause;
                 autoTimeout = schedule(function () {
-                    if (autoOn) {
+                    if (autoOn && !currentlyAnimating) {
                         enqueueAnimation(NEXT_STRING, FALSE);
                         autoStartedWithPause = FALSE;
                     }
