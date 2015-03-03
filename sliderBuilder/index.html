@@ -63,7 +63,7 @@
         <div class="col-md-4 well" style="padding: 0 15px 20px">
             <div class="form-group">
                 <label><h2>The options</h2></label>
-                <input type="text" class="form-control" placeholder="Filter options by name"  ng-model="optionFilter">
+                <input type="text" class="form-control" placeholder="Filter options by name"  ng-model="optionFilter.filter">
             </div>
             <div class="checkbox">
                 <label><input type="checkbox" ng-model="filterNonDefault">Hide options with default values</label>
@@ -71,7 +71,7 @@
 
             <table class="table table-striped" style="margin-top: 20px;">
                 <tbody>
-                    <tr ng-repeat="definition in optionDefinitions | filter:optionFilter | nonDefaultValues:filterNonDefault" class="optionDefinition"
+                    <tr ng-repeat="definition in optionDefinitions | filter:optionFilter.filter | nonDefaultValues:filterNonDefault" class="optionDefinition"
                          ng-controller="OptionController">
                         <td>
                             <div ng-if="definition.type == 'boolean'">
@@ -165,7 +165,7 @@
             </div>
 
             <!--TODO: Do something with this.-->
-            <!--<div ng-controller="DemoLoaderController">
+            <div ng-controller="DemoLoaderController">
                 <div class="btn-group" dropdown>
 
                     <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
@@ -184,7 +184,7 @@
                         </li>
                     </ul>
                 </div>
-            </div>-->
+            </div>
             <label>
                 <h2>The style</h2>
                 <textarea class="form-control" rows="4" ng-model="style" ng-change="sliderApi.adjust()"></textarea>

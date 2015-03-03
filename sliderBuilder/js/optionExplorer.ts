@@ -2,6 +2,7 @@
 /// <reference path="lib/angular.d.ts" />
 /// <reference path="sudoSliderAngular.ts" />
 /// <reference path="events.ts" />
+
 (function (angular : ng.IAngularStatic, $ : JQueryStatic) {
     var eventBus = EventBus.getInstance();
 
@@ -23,13 +24,28 @@
         });
     })();
 
-    var myApp = angular.module('myApp', ['ngSanitize', 'sudoSlider', 'ui.bootstrap', "sudoSlider"])
+    var modules = ['ngSanitize', 'sudoSlider', "sudoSlider"];
+    try {
+        angular.module("ui.bootstrap");
+        modules.push("ui.bootstrap");
+    } catch (e) {
+    }
+
+    try {
+        angular.module("ui.materialize");
+        modules.push("ui.materialize");
+    } catch (e) {
+    }
+
+    var myApp = angular.module('myApp', modules)
         .controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider : SudoSliderFactory, $timeout) {
             $scope.sliderApi = sudoSlider.globalSliderApi();
 
             $scope.style = ".slide img{\n" +
             "    width:100%;\n" +
             "}";
+
+            $scope.optionFilter = {filter: ""};
 
             $scope.$watch("style", function (newStyle) {
                 eventBus.fireEvent(new SliderBuilderStyleChangeEvent(newStyle));
@@ -85,12 +101,12 @@
 
         }]).controller('PopupController', ["$scope", "$timeout", "sudoSlider", function ($scope, $timeout, sudoSlider : SudoSliderFactory) {
             $scope.openSliderPopup = function () {
-                var newWindow = window.open("popups/sliderPopup.html", "_blank", "width=1000, height=600, scrollbars=yes, resizeable=yes");
+                window.open("popups/sliderPopup.html", "_blank", "width=1000, height=600, scrollbars=yes, resizeable=yes");
                 $scope.$parent.showInlineSlider = false;
             };
 
             $scope.openExportPopup = function () {
-                var newWindow = window.open("popups/exportPopup.html", "_blank", "width=1000, height=600, scrollbars=yes, resizeable=yes");
+                window.open("popups/exportPopup.html", "_blank", "width=1000, height=600, scrollbars=yes, resizeable=yes");
             };
         }]).controller('OptionController', ["$scope", function ($scope) {
             $scope.setOptionFunction = function (value) {
@@ -140,6 +156,10 @@
                 }
                 if (demo.style) {
                     $scope.$parent.style = demo.style;
+                }
+
+                if ($scope.showInlineSlider) {
+                    $("html, body").animate({scrollTop: 0}, "slow");
                 }
             };
         }])

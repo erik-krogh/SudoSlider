@@ -3,13 +3,14 @@
 /// <reference path="events.ts" />
 
 interface JQuery {
-    sudoSlider(options?:any) : JQueryStatic
+    sudoSlider(options?:any) : JQuery
 }
 
 interface OptionDefinition {
     name : string;
     type: string;
     value?: any;
+    enabled?: boolean;
     stringValue?: any;
 }
 
@@ -190,6 +191,9 @@ interface SudoSliderFactory {
             }
             if (optionDefinition.optional) {
                 optionDefinition.enabled = newValue !== false;
+                if (!newValue) {
+                    optionDefinition.value = "";
+                }
             }
         });
     }
@@ -408,7 +412,12 @@ interface SudoSliderFactory {
                 console.error("Could not find the option " + def.name + " in the SudoSlider options. ");
                 return;
             }
-            def.value = defaultOptions[def.name];
+            if (def.enabled !== false) {
+                def.value = defaultOptions[def.name];
+            } else {
+                def.value = "";
+            }
+
         });
         return optionDefinitions;
     }

@@ -138,6 +138,9 @@
             }
             if (optionDefinition.optional) {
                 optionDefinition.enabled = newValue !== false;
+                if (!newValue) {
+                    optionDefinition.value = "";
+                }
             }
         });
     }
@@ -352,7 +355,12 @@
                 console.error("Could not find the option " + def.name + " in the SudoSlider options. ");
                 return;
             }
-            def.value = defaultOptions[def.name];
+            if (def.enabled !== false) {
+                def.value = defaultOptions[def.name];
+            }
+            else {
+                def.value = "";
+            }
         });
         return optionDefinitions;
     }
