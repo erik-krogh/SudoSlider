@@ -20,18 +20,15 @@
         });
     })();
     var modules = ['ngSanitize', 'sudoSlider', "sudoSlider"];
-    try {
-        angular.module("ui.bootstrap");
-        modules.push("ui.bootstrap");
-    }
-    catch (e) {
-    }
-    try {
-        angular.module("ui.materialize");
-        modules.push("ui.materialize");
-    }
-    catch (e) {
-    }
+    var optionalModules = ["ui.bootstrap", "ui.materialize", "ngMaterial"]; // I experiment with multiple front-ends.
+    optionalModules.forEach(function (mod) {
+        try {
+            angular.module(mod);
+            modules.push(mod);
+        }
+        catch (e) {
+        }
+    });
     var myApp = angular.module('myApp', modules).controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider, $timeout) {
         $scope.sliderApi = sudoSlider.globalSliderApi();
         $scope.style = ".slide img{\n" + "    width:100%;\n" + "}";
