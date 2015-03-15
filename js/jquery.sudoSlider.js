@@ -217,6 +217,10 @@
                 option[7]/*slidecount*/ += option[8]/*movecount*/ - 1;
 
                 // startslide can only be a number (and not 0). Converting from 1 index to 0 index.
+                // unless it is the string "random".
+                if (option[9]/*startslide*/.toLowerCase() == "random") {
+                    option[9]/*startslide*/ = (Math.random() * totalSlides) | 0;
+                }
                 option[9]/*startslide*/ = parseInt10(option[9]/*startslide*/) - 1 || 0;
 
                 option[0]/*effect*/ = getEffectMethod(option[0]/*effect*/);

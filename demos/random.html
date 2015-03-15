@@ -14,7 +14,7 @@
                 '../images/03.jpg',
                 '../images/04.jpg',
                 '../images/05.jpg'
-            ]
+            ];
 			$(".slider").each(function (index, elem) {
                 var slider = $(elem);
                 var effect = slider.attr("data-effect");
@@ -26,7 +26,7 @@
                     effect: effect,
                     ajax: images,
                     continuous: true,
-                    startSlide: Math.floor(Math.random() * images.length) + 1
+                    startSlide: "random"
                 });
             });
 		});	

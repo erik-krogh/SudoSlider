@@ -453,3 +453,4 @@ Change in script. Added a "speed" argument in the end of beforeAnimation. Since 
 Change in demos: Added the "partial sides" demo.
 Change in script: A class "sudoSlider-dragging" is added to the body while the user is dragging an element.
 Change in script: Prefixing touchHandle with ">" (like "> img"), will limit the touchHandle to select within the slider. See example in the touch and links demo.
+Change in script: startSlide can now be set to a new special value "random", which will make it select a random of the slides.
