@@ -218,7 +218,7 @@
 
                 // startslide can only be a number (and not 0). Converting from 1 index to 0 index.
                 // unless it is the string "random".
-                if (option[9]/*startslide*/.toLowerCase() == "random") {
+                if (typeof option[9]/*startslide*/ == "string" && option[9]/*startslide*/.toLowerCase() == "random") {
                     option[9]/*startslide*/ = (Math.random() * totalSlides) | 0;
                 }
                 option[9]/*startslide*/ = parseInt10(option[9]/*startslide*/) - 1 || 0;
