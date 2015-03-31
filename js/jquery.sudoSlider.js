@@ -64,6 +64,7 @@
                 currentSlide,
                 previousSlide,
                 clickable,
+                currentlyAnimatingTowards,
                 numericControls,
                 numericContainer,
                 destroyed,
@@ -494,8 +495,10 @@
                     }
                 } else {
                     if (option[37]/*interruptible*/ && currentlyAnimating) {
-                        stopAnimation();
-                        enqueueAnimation(direction, clicked, speed);
+                        if (getRealPos(filterDir(direction)) !== currentlyAnimatingTowards) {
+                            stopAnimation();
+                            enqueueAnimation(direction, clicked, speed);
+                        }
                     } else {
                         animateToAfterCompletion = direction;
                         animateToAfterCompletionClicked = clicked;
@@ -757,6 +760,7 @@
                 if (!option[29]/*updateBefore*/) setCurrent(currentSlide);
                 adjustPositionTo(currentSlide);
                 clickable = TRUE;
+                currentlyAnimatingTowards = FALSE;
 
                 if (option[12]/*auto*/) {
                     // Stopping auto if clicked. And also continuing after X seconds of inactivity.
@@ -1347,6 +1351,8 @@
                     return;
                 }
                 clickable = FALSE;
+                currentlyAnimatingTowards = targetSlide;
+
                 if (option[30]/*ajax*/) {
                     var waitCounter = 0;
                     for (var loadSlide = targetSlide; loadSlide < targetSlide + numberOfVisibleSlides; loadSlide++) {
