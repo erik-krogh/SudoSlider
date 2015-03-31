@@ -447,10 +447,11 @@ New: Added the SliderBuilder, that can be used to build a slider, and test out o
 Change in demos: Removed the navigation in slider demo.
 Change in demos: Removed the tabs 2 demo.
 
-3.4.1
+3.4.1 (31-03-2015)
 Change in script: Changed the default value of "mouseTouch" to true, meaning that if you enable touch, mouse-dragging also work pr. default.
 Change in script. Added a "speed" argument in the end of beforeAnimation. Since the animation speed isn't always the option speed (e.g. touch animations).
 Change in demos: Added the "partial sides" demo.
 Change in script: A class "sudoSlider-dragging" is added to the body while the user is dragging an element.
 Change in script: Prefixing touchHandle with ">" (like "> img"), will limit the touchHandle to select within the slider. See example in the touch and links demo.
 Change in script: startSlide can now be set to a new special value "random", which will make it select a random of the slides.
+Change in script: fixed a bug when interruptible and history was used.
