@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.4.1 - jQuery plugin
+ * Sudo Slider version 3.4.2 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -1765,14 +1765,14 @@
                 stopAuto();
             };
 
-            baseSlider.adjust = function adjust(repeat) {
+            baseSlider.adjust = function adjustMethod(repeat) {
                 var autoAdjustSpeed = mathMax(adjustTargetTime - getTimeInMillis(), 0);
                 autoadjust(currentSlide, autoAdjustSpeed);
                 if (!currentlyAnimating) {
                     adjustPositionTo(currentSlide);
                 }
                 if (!repeat) {
-                    callAsync(makeCallback(adjust, [true]));
+                    callAsync(makeCallback(adjustMethod, [true]));
                 }
             };
 
