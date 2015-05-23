@@ -1,0 +1,47 @@
+{
+  "name": "sudoslider",
+  "title": "SudoSlider - Content slider",
+  "main": "js/jquery.sudoSlider.js",
+  "description": "An extremely versitile content-slider",
+  "keywords": [
+    "slider",
+    "content-slider",
+    "jquery-plugin",
+    "ecosystem:jquery"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webbiesdk/SudoSlider.git"
+  },
+  "version": "3.4.2",
+  "author": {
+    "name": "Erik Krogh Kristensen",
+    "url": "webbies.dk",
+    "email": "Erik@webbies.dk"
+  },
+  "maintainers": [
+    {
+      "name": "Erik Krogh Kristensen",
+      "url": "webbies.dk",
+      "email": "Erik@webbies.dk"
+    }
+  ],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/mit-license.php"
+    },
+    {
+      "type": "GPL",
+      "url": "http://www.gnu.org/licenses/gpl.html"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/webbiesdk/SudoSlider/issues"
+  },
+  "homepage": "http://webbies.dk/SudoSlider/",
+  "demo": "http://webbies.dk/SudoSlider/demos.html",
+  "dependencies": {
+    "jquery": ">=1.7"
+  }
+}
