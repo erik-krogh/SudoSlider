@@ -1912,7 +1912,12 @@
         },
         fade: {
             "": fade,
-            OutIn: fadeOutIn
+            OutIn: fadeOutIn,
+            Zoom: [
+                "In",
+                "Out",
+                fadeZoom
+            ]
         },
         foldRandom: [
             "Horizontal",
@@ -1990,7 +1995,7 @@
                     var argumentArray = [obj].concat(argumentsStack);
 
                     // Ugly hack, to make "generic" functions to work.
-                    var genericArgumentIndex = (argumentArray.length - 1);
+                    var genericArgumentIndex = argumentArray.length - 1;
                     if (generic === 0 && argumentArray[genericArgumentIndex] == 0) {
                         argumentArray[genericArgumentIndex] = getDirFromAnimationObject(obj);
                     }
@@ -2604,6 +2609,38 @@
         return callbackFunction
     }
 
+    function fadeZoom(obj, zoomOut) {
+        var options = obj.options;
+        var speed = options.speed;
+        var callback = obj.callback;
+        var usecss = obj.options.usecss;
+        if (zoomOut) {
+            var fromSlides = makeClone(obj, FALSE);
+            obj.slider.append(fromSlides);
+            obj.goToNext();
+
+            if (obj.options.usecss) {
+                animate(fromSlides, {transform: "scale(2)", opacity: 0}, speed, FALSE, callback, obj);
+            } else {
+                fromSlides.css("zoom", "100%"); // Fixing that IE likes to start from 0.
+                animate(fromSlides, {zoom: "200%", left: "-50%", top: "-50%", opacity: 0}, speed, FALSE, callback, obj);
+            }
+        } else {
+            var toSlides = makeClone(obj, TRUE);
+            obj.slider.append(toSlides);
+
+            if (usecss) {
+                toSlides.css({transform: "scale(2)", opacity: 0});
+                schedule(function () {
+                    animate(toSlides, {transform: "scale(1)", opacity: 1}, speed, FALSE, callback, obj);
+                }, 100);
+            } else {
+                toSlides.css({zoom: "200%", left: "-50%", top: "-50%", opacity: 0});
+                animate(toSlides, {zoom: "100%", left: "0%", top: "0%", opacity: 1}, speed, FALSE, callback, obj);
+            }
+        }
+    }
+
     function fadeOutIn(obj) {
         var options = obj.options;
         var fadeSpeed = options.speed;
@@ -2924,7 +2961,7 @@
 
     // Mutates and returns the array.
     function shuffle(array) {
-        for (var j, x, i = array.length; i; j = parseInt(Math.random() * i), x = array[--i], array[i] = array[j], array[j] = x) {
+        for (var j, x, i = array.length; i; j = (Math.random() * i) | 0, x = array[--i], array[i] = array[j], array[j] = x) {
         }
         return array;
     }
@@ -3010,6 +3047,23 @@
         return obj[shuffle(getKeys(obj))[0]];
     }
 
+    var requestAnimationFrame = function(callback, frameCount){
+        var equestAnimationFrame = "equestAnimationFrame";
+        var requestWindow = win["r" + equestAnimationFrame] ||
+            win["webkitR" + equestAnimationFrame] ||
+            win["mozR" + equestAnimationFrame] ||
+            win["oR" + equestAnimationFrame] ||
+            win["msR" + equestAnimationFrame] ||
+            function (callback) {
+                schedule(callback, 1000 / 60);
+            };
+        if (frameCount) {
+            requestWindow(makeCallback(recursive, [callback, frameCount - 1]));
+        } else {
+            requestWindow(callback);
+        }
+    };
+
     // From this guy: https://github.com/rdallasgray/bez
     // Inlined into my own script to make it shorter.
     function makeBezier(coOrdArray) {
@@ -3054,3 +3108,4 @@
 })(jQuery, window);
 // If you did just read the entire code, congrats.
 // Did you find a bug? I didn't, so plz tell me if you did. (https://github.com/webbiesdk/SudoSlider/issues)
+// You can use this fiddle: http://jsfiddle.net/32m7bhtn/ as a starting point if you want to create a snall test-case for me.
