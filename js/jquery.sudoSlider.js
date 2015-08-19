@@ -1282,6 +1282,7 @@
                                 startX = x;
                                 startY = y;
                                 touchStart(x - startX, y - startY);
+                                event.preventDefault();
                             } else {
                                 touchMove(x - startX, y - startY);
 
