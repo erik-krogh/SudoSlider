@@ -22,6 +22,8 @@
                     var currentSlide = this.getSlide(this.getValue("currentSlide"));
                     currentSlide.fadeTo(0, 1);
                     this.find(".slide").not(currentSlide).fadeTo(0, 0.5);
+
+                    this.css("overflow", "visible");
                 }
             });
         });
@@ -110,6 +112,8 @@
             var currentSlide = this.getSlide(this.getValue("currentSlide"));
             currentSlide.fadeTo(0, 1);
             this.find(".slide").not(currentSlide).fadeTo(0, 0.5);
+
+            this.css("overflow", "visible");
          }
       });
    });
