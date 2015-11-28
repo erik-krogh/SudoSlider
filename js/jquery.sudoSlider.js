@@ -1936,12 +1936,7 @@
         },
         fade: {
             "": fade,
-            OutIn: fadeOutIn,
-            Zoom: [
-                "In",
-                "Out",
-                fadeZoom
-            ]
+            OutIn: fadeOutIn
         },
         foldRandom: [
             "Horizontal",
@@ -2631,38 +2626,6 @@
             });
         });
         return callbackFunction
-    }
-
-    function fadeZoom(obj, zoomOut) {
-        var options = obj.options;
-        var speed = options.speed;
-        var callback = obj.callback;
-        var usecss = obj.options.usecss;
-        if (zoomOut) {
-            var fromSlides = makeClone(obj, FALSE);
-            obj.slider.append(fromSlides);
-            obj.goToNext();
-
-            if (obj.options.usecss) {
-                animate(fromSlides, {transform: "scale(2)", opacity: 0}, speed, FALSE, callback, obj);
-            } else {
-                fromSlides.css("zoom", "100%"); // Fixing that IE likes to start from 0.
-                animate(fromSlides, {zoom: "200%", left: "-50%", top: "-50%", opacity: 0}, speed, FALSE, callback, obj);
-            }
-        } else {
-            var toSlides = makeClone(obj, TRUE);
-            obj.slider.append(toSlides);
-
-            if (usecss) {
-                toSlides.css({transform: "scale(2)", opacity: 0});
-                schedule(function () {
-                    animate(toSlides, {transform: "scale(1)", opacity: 1}, speed, FALSE, callback, obj);
-                }, 100);
-            } else {
-                toSlides.css({zoom: "200%", left: "-50%", top: "-50%", opacity: 0});
-                animate(toSlides, {zoom: "100%", left: "0%", top: "0%", opacity: 1}, speed, FALSE, callback, obj);
-            }
-        }
     }
 
     function fadeOutIn(obj) {
