@@ -12,7 +12,28 @@
  * http://jquery.com
  *
  */
-(function ($, win) {
+(function(factory) {
+    // window/root object.
+    var root = (typeof self == 'object' && self.self == self && self) ||
+        (typeof global == 'object' && global.global == global && global);
+
+    // AMD
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery'], function($) {
+            factory($, root);
+        });
+
+        // CommonJS
+    } else if (typeof exports !== 'undefined') {
+        var $ = require('jquery');
+        factory($, root);
+
+        // Finally, as a browser global.
+    } else {
+        factory(root.$, root);
+    }
+
+})(function ($, win) {
     // Saves space in the minified version.
     var undefined; // Makes sure that undefined really is undefined within this scope.
     var FALSE = false;
@@ -233,7 +254,9 @@
                     if (!option[18]/*numerictext*/[a] && option[18]/*numerictext*/[a] != "") {
                         option[18]/*numerictext*/[a] = (a + 1);
                     }
-                    option[30]/*ajax*/[a] = option[30]/*ajax*/[a] || FALSE;
+                    if (option[30]/*ajax*/) {
+                        option[30]/*ajax*/[a] = option[30]/*ajax*/[a] || FALSE;
+                    }
                 }
 
                 option[4]/*controlsfade*/ = option[4]/*controlsfade*/ && !option[15]/*continuous*/;
@@ -3106,7 +3129,7 @@
         return encodedFuncName;
     }
 
-})(jQuery, window);
+});
 // If you did just read the entire code, congrats.
 // Did you find a bug? I didn't, so plz tell me if you did. (https://github.com/webbiesdk/SudoSlider/issues)
 // You can use this fiddle: http://jsfiddle.net/32m7bhtn/ as a starting point if you want to create a snall test-case for me.
