@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.4.2 - jQuery plugin
+ * Sudo Slider version 3.4.4 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -1646,7 +1646,11 @@
             }
 
             function fixClearType(element) {
-                if (screen.fontSmoothingEnabled && element.style) element.style.removeAttribute("filter"); // Fix cleartype
+                if (screen.fontSmoothingEnabled && element.style) {
+                    try {
+                        element.style.removeAttribute("filter"); // Fix cleartype
+                    } catch (ignored) { }
+                }
             }
 
             /*
