@@ -311,7 +311,12 @@
                 }
 
                 if (option[2]/*customlink*/) {
-                    bindAndRegisterOff(doc, "click", customLinkClickHandler, option[2]/*customlink*/);
+                    var filter = stringTrim(option[2]/*customlink*/);
+                    if (stringTrim(filter).charAt(0) == ">") {
+                        bindAndRegisterOff(obj, "click", customLinkClickHandler, filter.substr(1, filter.length));
+                    } else {
+                        bindAndRegisterOff(doc, "click", customLinkClickHandler, filter);
+                    }
                 }
 
                 runOnImagesLoaded(getSlides(option[9]/*startslide*/, option[7]/*slidecount*/), TRUE, function () {
