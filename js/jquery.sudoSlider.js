@@ -312,7 +312,7 @@
 
                 if (option[2]/*customlink*/) {
                     var filter = stringTrim(option[2]/*customlink*/);
-                    if (stringTrim(filter).charAt(0) == ">") {
+                    if (filter.charAt(0) == ">") {
                         bindAndRegisterOff(obj, "click", customLinkClickHandler, filter.substr(1, filter.length));
                     } else {
                         bindAndRegisterOff(doc, "click", customLinkClickHandler, filter);
