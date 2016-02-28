@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.4.5 - jQuery plugin
+ * Sudo Slider version 3.4.6 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *

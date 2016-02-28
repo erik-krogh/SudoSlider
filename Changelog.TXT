@@ -468,5 +468,8 @@ Added CommonJS and AMD support.
 3.4.4 (21-01-2016)
 Fixed that the slider always crashed in Microsoft Edge.
 
-3.4.5 ()27-02-2015
+3.4.5 (27-02-2015)
 Change in script: Added a the possibility of prefixing customLinks with ">", to have the links only work within the context of the slider.
+
+3.4.6 (28-02-2015)
+Fixed that the minified code contained a syntax-error.
