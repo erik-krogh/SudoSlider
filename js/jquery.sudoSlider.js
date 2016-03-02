@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.4.6 - jQuery plugin
+ * Sudo Slider version 3.4.7 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -77,6 +77,7 @@
 
         return this.each(function () {
             var init,
+                fullyInitialized = FALSE,
                 isSlideContainerUl,
                 slidesContainer,
                 slides,
@@ -131,6 +132,7 @@
                 }
 
                 init = TRUE;
+                fullyInitialized = FALSE;
 
                 imagesInSlidesLoaded = [];
                 runAfterAnimationCallbacks = [];
@@ -984,6 +986,7 @@
             }
 
             function performInitCallback() {
+                fullyInitialized = TRUE;
                 if (option[15]/*continuous*/) {
                     centerTargetSlideAfter(currentSlide);
                 }
@@ -1694,8 +1697,12 @@
             }
 
             function runOnDestroyedSlider(func) {
-                return function () {
+                return function foo() {
                     var reinit = !destroyed;
+                    if (!init && !fullyInitialized) {
+                        callAsync(foo); // Fixing a very special, special case
+                        return;
+                    }
                     publicDestroy();
 
                     func.apply(this, arguments);
