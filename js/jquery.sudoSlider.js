@@ -390,7 +390,7 @@
                         return;
                     }
 
-                    var newWidth = getResponsiveWidth();
+                    var newWidth = parseInt10(getResponsiveWidth());
 
                     if (previousAdjustedResponsiveWidth != newWidth || (forced === TRUE)) {
                         previousAdjustedResponsiveWidth = newWidth;
@@ -1706,7 +1706,7 @@
                 return function foo() {
                     var reinit = !destroyed;
                     if (!init && !fullyInitialized) {
-                        callAsync(foo.bind.apply([undefined].concat(arguments))); // Fixing a very special, special case 
+                        callAsync(foo.bind.apply([undefined].concat(arguments))); // Fixing a very special, special case
                         return;
                     }
                     publicDestroy();
