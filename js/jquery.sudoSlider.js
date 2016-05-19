@@ -449,7 +449,7 @@
                                 clearTimeout(asyncDelayedSlideLoadTimeout);
                                 asyncDelayedSlideLoadTimeout = schedule(function () {
                                     if (option[30]/*ajax*/[i]) {
-                                        ajaxLoad(parseInt10(i));
+                                        ajaxLoad(i);
                                     } else {
                                         startAsyncDelayedLoad();
                                     }
@@ -909,41 +909,45 @@
                     var image = new Image();
                     image.src = target;
                     var thatImage = $(image);
-                    runOnImagesLoaded(thatImage, TRUE, makeCallback(runWhenNotAnimating, [function () {
+                    runOnImagesLoaded(thatImage, TRUE, function () {
                         targetslide.empty().append(image);
 
                         ajaxAdjust(slide, TRUE);
-                    }]));
+                    });
                 }
 
-                var succesRan = FALSE;
-
-                $.ajax({
-                    url: target,
-                    success: function (data, textStatus, jqXHR) {
-                        succesRan = TRUE;
-                        runWhenNotAnimating(function () {
-                            var type = jqXHR.getResponseHeader('Content-Type');
-                            if (type && type.substr(0, 1) != "i") {
-                                targetslide.html(data);
-                                ajaxAdjust(slide, FALSE);
-                            } else {
-                                loadImage();
-                            }
-                        });
-                    },
-                    complete: function () {
-                        // Some browsers wont load images this way, so i treat an error as an image.
-                        // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
-                        if (!succesRan) {
-                            loadImage();
-                        }
-                    }
-                });
                 // It is loaded, we dont need to do that again.
                 option[30]/*ajax*/[slide] = FALSE;
                 // It is the only option that i need to change for good.
                 options.ajax[slide] = FALSE;
+
+                if (option[47]/*AjaxHasHTML*/) {
+                    var succesRan = FALSE;
+                    $.ajax({
+                        url: target,
+                        success: function (data, textStatus, jqXHR) {
+                            succesRan = TRUE;
+                            runWhenNotAnimating(function () {
+                                var type = jqXHR.getResponseHeader('Content-Type');
+                                if (type && type.substr(0, 1) != "i") {
+                                    targetslide.html(data);
+                                    ajaxAdjust(slide, FALSE);
+                                } else {
+                                    loadImage();
+                                }
+                            });
+                        },
+                        complete: function () {
+                            // Some browsers wont load images this way, so i treat an error as an image.
+                            // There is no stable way of determining if it's a real error or if i tried to load an image in a old browser, so i do it this way.
+                            if (!succesRan) {
+                                loadImage();
+                            }
+                        }
+                    });
+                } else {
+                    loadImage();
+                }
             }
 
             // Performs the callback immediately if no animation is running.
@@ -959,8 +963,10 @@
             function ajaxAdjust(i, img) {
                 var target = slides[i];
 
-                adjustPositionTo(currentSlide);
-                autoadjust(currentSlide, 0);
+                if (!currentlyAnimating) {
+                    adjustPositionTo(currentSlide);
+                    autoadjust(currentSlide, 0);
+                }
 
                 runOnImagesLoaded(target, TRUE, makeCallback(runWhenNotAnimating, [
                     function () {
@@ -1700,7 +1706,7 @@
                 return function foo() {
                     var reinit = !destroyed;
                     if (!init && !fullyInitialized) {
-                        callAsync(foo); // Fixing a very special, special case
+                        callAsync(foo.bind.apply([undefined].concat(arguments))); // Fixing a very special, special case 
                         return;
                     }
                     publicDestroy();
@@ -1889,7 +1895,9 @@
             destroyCallback: EMPTY_FUNCTION,  /* option[43]/*destroyCallback*/
             mouseTouch: TRUE, /* option[44]/*mouseTouch*/
             allowScroll: TRUE, /* option[45]/*allowScroll*/
-            CSSease: SWING /* option[46]/*CSSease*/
+            CSSease: SWING, /* option[46]/*CSSease*/
+            ajaxHasHTML: FALSE /* option[47]/*AjaxHasHTML*/
+
         };
     }
     $.fn.sudoSlider.getDefaultOptions = getDefaultOptions;
