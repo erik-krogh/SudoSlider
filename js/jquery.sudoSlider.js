@@ -390,13 +390,22 @@
                         return;
                     }
 
-                    var newWidth = parseInt10(getResponsiveWidth());
+                    var subPixelNewWidth = getResponsiveWidth();
+                    var newWidth = parseInt10(subPixelNewWidth);
+                    var addAPixelEvery = 1 / (subPixelNewWidth - newWidth);
 
                     if (previousAdjustedResponsiveWidth != newWidth || (forced === TRUE)) {
                         previousAdjustedResponsiveWidth = newWidth;
 
+                        var slideCounter = 1;
                         for (var i = 0; i < totalSlides; i++) {
-                            slides[i].width(newWidth);
+                            slideCounter++;
+                            if (slideCounter >= addAPixelEvery) {
+                                slideCounter = 0;
+                                slides[i].width(newWidth + 1);
+                            } else {
+                                slides[i].width(newWidth);
+                            }
                         }
                         if (autoStartedWithPause !== FALSE) {
                             startAuto(autoStartedWithPause);
@@ -1706,7 +1715,10 @@
                 return function foo() {
                     var reinit = !destroyed;
                     if (!init && !fullyInitialized) {
-                        callAsync(foo.bind.apply([undefined].concat(arguments))); // Fixing a very special, special case
+                        var args = arguments;
+                        callAsync(function () {
+                            foo.apply(undefined, args);
+                        }); // Fixing a very special, special case
                         return;
                     }
                     publicDestroy();
