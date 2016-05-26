@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.4.9 - jQuery plugin
+ * Sudo Slider version 3.4.10 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -394,8 +394,8 @@
                     var newWidth = parseInt10(subPixelNewWidth);
                     var addAPixelEvery = 1 / (subPixelNewWidth - newWidth);
 
-                    if (previousAdjustedResponsiveWidth != newWidth || (forced === TRUE)) {
-                        previousAdjustedResponsiveWidth = newWidth;
+                    if (previousAdjustedResponsiveWidth !== subPixelNewWidth || (forced === TRUE)) {
+                        previousAdjustedResponsiveWidth = subPixelNewWidth;
 
                         var slideCounter = 1;
                         for (var i = 0; i < totalSlides; i++) {
