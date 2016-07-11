@@ -1327,8 +1327,11 @@
                             if (type == startEvent) {
                                 startX = x;
                                 startY = y;
+                                
                                 touchStart(x - startX, y - startY);
-                                event.preventDefault();
+                                if (isMouseEvent || !option[45]/*allowScroll*/) {
+                                    event.preventDefault();
+                                }
                             } else {
                                 touchMove(x - startX, y - startY);
 
