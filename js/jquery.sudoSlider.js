@@ -30,7 +30,7 @@
 
         // Finally, as a browser global.
     } else {
-        factory(root.$, root);
+        factory(root.jQuery, root);
     }
 
 })(function ($, win) {
