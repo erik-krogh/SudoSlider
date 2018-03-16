@@ -4,12 +4,13 @@
 	<title>Sudo Slider | Autowidth centered demo</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
-	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var sudoSlider = $("#slider").sudoSlider({
-                speed: 800
+                speed: 800,
+                responsive: false
             });
 		});	
 	</script>
@@ -34,26 +35,29 @@
 	<h3>Usage</h3>
     <h4>Include the javascripts</h4>
 	<pre>
-&lt;script type="Text/Javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"&gt;&lt;/script&gt;
+&lt;script type="Text/Javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"&gt;&lt;/script&gt;
 &lt;script type="text/javascript" src="../js/jquery.sudoSlider.min.js"&gt;&lt;/script&gt;</pre>
     <h4>The Javascript to start it. (This script has to be below the CSS on your site)</h4>
 	<pre>
 &lt;script type="text/javascript" &gt;
     $(document).ready(function(){
         var sudoSlider = $("#slider").sudoSlider({
-           speed: 800
+           speed: 800,
+           responsive: false
         });
     });
 &lt;/script&gt;</pre>
     <h4>The HTML</h4>
 	<pre>
 &lt;div style="text-align:center;position:relative;"&gt;
-&lt;div id="slider" style="margin: 0 auto;" &gt;
-   &lt;div&gt;&lt;img src="../images/01.jpg" alt="image description"/&gt;&lt;/div&gt;
-   &lt;div&gt;&lt;img src="../images/02.jpg" alt="image description"/&gt;&lt;/div&gt;
-   &lt;div&gt;&lt;img src="../images/03.jpg" alt="image description"/&gt;&lt;/div&gt;
-   &lt;div&gt;&lt;img src="../images/04.jpg" alt="image description"/&gt;&lt;/div&gt;
-   &lt;div&gt;&lt;img src="../images/05.jpg" alt="image description"/&gt;&lt;/div&gt;
+&lt;div id="slider" style="margin: 0 auto;"&gt;
+    &lt;ul&gt;
+        &lt;li&gt;&lt;img src="../images/08.jpg" alt="image description"/&gt;&lt;/li&gt;
+        &lt;li style="width:500px;"&gt;
+           &lt;img src="../images/02.jpg" width="500px;" alt="image description"/&gt;
+        &lt;/li&gt;
+        &lt;li&gt;&lt;img src="../images/07.jpg" alt="image description"/&gt;&lt;/li&gt;
+    &lt;/ul&gt;
 &lt;/div&gt;
 &lt;/div&gt;</pre>
 </div>

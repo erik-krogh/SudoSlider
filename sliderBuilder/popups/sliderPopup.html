@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html ng-app="popupApp" ng-controller="BodyController">
+<head>
+    <base href=".." > <!-- Same base href as the page that opened it -->
+    <title>Sudo Slider | Options explorer</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8"/>
+
+    <link rel="STYLESHEET" type="text/css" href="css/style.css">
+
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.js"></script>
+    <script type="text/javascript"
+            src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
+    <script type="text/javascript"
+            src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
+
+    <!-- Bootstrap -->
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.0/ui-bootstrap-tpls.min.js"></script>-->
+
+    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <script type="text/javascript" src="js/events.js"></script>
+    <script type="text/javascript" src="js/sudoSliderAngular.js"></script>
+    <!--<script type="text/javascript" src="js/optionExplorer.js"></script>-->
+    <script type="text/javascript">
+        (function () {
+            EventBus.getInstance().fireEvent(new RegisterWindowEvent(window));
+
+            var myApp = angular.module('popupApp', ["ngSanitize", "sudoSlider"]);
+            myApp.controller('BodyController', ["$scope", "sudoSlider", "$timeout", function ($scope, sudoSlider, $timeout) {
+                $scope.style = "";
+                EventBus.getInstance().register(SliderBuilderStyleChangeEvent, function (event) {
+                    $scope.style = event.style;
+                    if(!$scope.$$phase) {
+                        $scope.$apply();
+                    }
+                }, true, window)
+            }]);
+        })();
+    </script>
+
+    <style type="text/css" ng-bind="style"></style>
+</head>
+<body>
+<div class="container">
+    <div style="position: relative">
+        <div sudo-slider>
+            <div class="slidesContainer" ng-controller="SudoSliderSlidesController">
+                <div ng-repeat="slide in slides" ng-bind-html="slide.html"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

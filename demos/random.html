@@ -4,7 +4,7 @@
 	<title>Sudo Slider | Random effects</title>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />    
 	<link rel="STYLESHEET" type="text/css" href="../css/style.css">
-	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
@@ -14,7 +14,7 @@
                 '../images/03.jpg',
                 '../images/04.jpg',
                 '../images/05.jpg'
-            ]
+            ];
 			$(".slider").each(function (index, elem) {
                 var slider = $(elem);
                 var effect = slider.attr("data-effect");
@@ -26,23 +26,34 @@
                     effect: effect,
                     ajax: images,
                     continuous: true,
-                    startSlide: Math.floor(Math.random() * images.length) + 1
+                    startSlide: "random"
                 });
             });
 		});	
 	</script>
+    <style type="text/css">
+        .slider {
+            width: 696px;
+        }
+    </style>
 
 	
 </head>
 <body>
 <div id="container">
 	<h1>Sudo Slider jQuery Plugin - Random effects</h1>
-    <h2>The "random" effect chooses randomly between all effects. <br />
-    A prefix of some effects, chooses randomly between all those effects. <br />
-    You can select randomly between multiple effects by separating them with a comma.</h2>
+    <h3>Insert the "effect: ..." option into your slider, to use this.</h3>
+    <br/>
+    <h2>The "random" effect chooses randomly between all effects. </h2>
     <div class="slider" data-effect="random"></div>
-    <div class="slider" data-effect="boxRain"></div>
-    <div class="slider" data-effect="boxRainGrow,fade,sliceRandom"></div>
+    <h2>You can select randomly between multiple effects by separating them with a comma.</h2>
+    <div class="slider" data-effect="boxRainGrowInDownRight,fade,sliceRandom"></div>
+    <h2>You can use wildcards</h2>
+    <div class="slider" data-effect="boxRain*"></div>
+    <h2>Mutiple wildcards</h2>
+    <div class="slider" data-effect="box*Grow*"></div>
+    <h2>A more advanced example</h2>
+    <div class="slider" data-effect="blinds1, boxRandom*, boxRainDown*, boxRainFlyInUp* ,boxSpiral*Grow*, fade, fold, foldRan*, *zip"></div>
 </div>
 
 <div style="width:728px;height:90px;margin:0 auto;">

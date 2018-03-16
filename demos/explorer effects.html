@@ -4,7 +4,7 @@
     <title>Sudo Slider | Explorer the effects</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <link rel="STYLESHEET" type="text/css" href="../css/style.css">
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
     <script type="text/javascript" src="../js/jquery.sudoSlider.min.js"></script>
     <script type="text/javascript">
         /****************************************
@@ -15,7 +15,7 @@
         (function () {
             $(document).ready(function(){
                 var effects = $.fn.sudoSlider.effects;
-
+                var slides = $("#slider").children();
                 var sudoSlider = $("#slider").sudoSlider({
                     effect: function (obj) {
                         alert("No effect specified");
@@ -25,7 +25,7 @@
                     controlsFade: false,
                     continuous: true,
                     numeric: true,
-                    vertical: true,
+                    vertical: false,
                     interruptible: true
                 });
 
@@ -110,6 +110,24 @@
                     return result;
                 }
 
+                effectMap = makeWildcards(effectMap);
+                function makeWildcards(effectMap) {
+                    var result = {};
+                    $.each(effectMap, function (name, effectTree) {
+                        if ($.isFunction(effectTree)) {
+                            result[name] = effectTree;
+                        } else {
+                            if ($.fn.sudoSlider.effects[name]) {
+                                result[name] = makeWildcards(effectTree);
+                            } else {
+                                result[name + "*"] = makeWildcards(effectTree);
+                            }
+                        }
+
+                    });
+                    return result;
+                }
+
 
                 effectMap = makeArrows(effectMap);
                 function makeArrows(effectMap) {
@@ -168,18 +186,17 @@
 
                     });
                     function setEffectAndSlide(name) {
-                        sudoSlider.setOption("effect", name);
+                        slides.attr("data-effect", name);
                         $("#selectedEffectContainer").text(name);
-                        setTimeout(function () {
-                            sudoSlider.goToSlide("next");
-                        }, 0);
+                        sudoSlider.stopAnimation();
+                        sudoSlider.goToSlide("next");
 
                         if (!$.fn.sudoSlider.effects[name]) {
                             var allNames = getKeyArray($.fn.sudoSlider.effects);
                             var text = "This is a prefix, it selects randomly between: ";
                             var first = true;
                             for (var i = 0; i < allNames.length; i++) {
-                                if (startsWith(allNames[i], name)) {
+                                if (matches(allNames[i], name)) {
                                     if (first) {
                                         first = false;
                                     } else {
@@ -198,8 +215,8 @@
                 }
             });
 
-            function startsWith(string, prefix) {
-                return string.indexOf(prefix) == 0;
+            function matches(string, patternWithWildCards) {
+                return !!string.match(new RegExp("^" + patternWithWildCards.split("*").join(".*") + "$", "g"));
             }
 
             function getKeyArray(object) {
@@ -288,10 +305,12 @@
 <div style="width: 940px;margin:0 auto;">
     <h1>Sudo Slider jQuery Plugin - Explorer the <span id="effectCounter"></span> effects</h1>
     <h2>Click on the links to the left to see them in action</h2>
-    <div style="position:relative;width:450px;display:block;float:left;">
-        <div id="effectLinksHolder"></div>
+    <div style="width:450px;display:inline-block;float:left;">
+        <div id="effectLinksHolder">
+
+        </div>
     </div>
-    <div style="position:relative;width:450px;display:block;float:left;">
+    <div style="width:450px;display:inline-block;float:left;">
         <h2>Selected effect: "<span id="selectedEffectContainer"></span>"</h2>
         <div id="slider">
             <img src="../images/01.jpg" alt="image description"/>

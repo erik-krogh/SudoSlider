@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp" ng-controller="BodyController">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>SudoSlider - Options explorer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css">
+    <link href="css/materialStyle.css" type="text/css" rel="stylesheet" media="screen,projection">
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- TODO: This version contains a bug with adjusting height in textarea's. Update when possible -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js"></script>
+
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-sanitize.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.6/angular-animate.min.js"></script>
+    <script type="text/javascript" src="js/lib/angular-materialize.js"></script>
+
+    <script type="text/javascript" src="../js/jquery.sudoSlider.js"></script>
+    <script type="text/javascript" src="js/events.js"></script>
+    <script type="text/javascript" src="js/sudoSliderAngular.js"></script>
+    <script type="text/javascript" src="js/exports.js"></script>
+    <script type="text/javascript" src="js/optionExplorer.js"></script>
+
+    <style type="text/css" ng-bind="style" ng-if="showInlineSlider"></style>
+</head>
+<body>
+<header>
+    <div class="container"><a href="#" data-activates="nav-mobile" class="button-collapse top-nav" data-sidenav="left"><i
+            class="mdi-navigation-menu"></i></a></div>
+    <ul id="nav-mobile" class="side-nav fixed">
+        <!--Maybe a logo?-->
+        <li class="logo" style="margin-left: -15px;"><a id="logo-container" href="http://materializecss.com/"
+                                                        class="brand-logo">
+            <h3>SudoSlider</h3></a></li>
+        <li class="bold"><a href="about.html" class="waves-effect waves-teal">About</a></li>
+        <li class="bold active"><a href="material.html" class="waves-effect waves-teal">Getting Started</a></li>
+        <!--<li class="no-padding">
+          <ul class="collapsible collapsible-accordion">
+            <li class="bold"><a class="collapsible-header waves-effect waves-teal">CSS</a>
+              <div class="collapsible-body">
+                <ul>
+                  <li><a href="color.html">Color</a></li>
+                  <li><a href="grid.html">Grid</a></li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </li>-->
+        <li class="bold"><a href="http://materializecss.com/mobile.html" class="waves-effect waves-teal">Mobile</a></li>
+        <li class="bold"><a href="showcase.html" class="waves-effect waves-teal">Showcase</a></li>
+    </ul>
+</header>
+<main>
+    <div class="section" id="index-banner">
+        <div class="container">
+            <div class="row">
+                <div class="col s12">
+                    <h1 class="header center-on-small-only">Slider builder <i class="mdi-communication-live-help" style="cursor: pointer" onclick="window.open('popups/help.html', '_blank', 'width=800, height=600')"></i></h1>
+                    <!--<h4 class ="light red-text text-lighten-4 center-on-small-only">Change the options and the content, the slider will update immediately.</h4>-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!--The slider -->
+        <div class="row">
+            <div class="col s12">
+                <div class="row" ng-if="showInlineSlider">
+                    <div style="position:relative;min-height: 241px;margin:10px 10px 10px 20px;">
+                        <div sudo-slider id="slider">
+                            <div class="slidesContainer" ng-controller="SudoSliderSlidesController">
+                                <div ng-repeat="slide in slides" ng-bind-html="slide.html"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row center-align" ng-if="!showInlineSlider" style="margin-top:20px;">
+                    <button class="btn waves-effect" ng-click="setShowInlineSlider(true)">Show the slider here again</button>
+                </div>
+
+                <div class="row center-align" style="border-bottom: 1px solid #eee;">
+                    <h4 class="center-align">Control the slider</h4>
+                    <div style="text-align: center;margin-bottom: 10px;">
+                        <button class="btn waves-effect" ng-click="sliderApi.goToSlide('prev')" style="margin-bottom: 0px;">Previous</button>
+                        <button class="btn waves-effect" ng-click="sliderApi.goToSlide('next')" style="margin-bottom: 0px;">Next</button>
+                        <button class="btn waves-effect" ng-click="sliderApi.startAuto()" style="margin-bottom: 0px;">Start auto</button>
+                        <button class="btn waves-effect" ng-click="sliderApi.stopAuto()" style="margin-bottom: 0px;">Stop auto</button>
+                        <!--<button class="btn btn-primary" ng-click="sliderApi.destroy()" style="margin-bottom: 0px;">Destroy</button>
+                        <button class="btn btn-primary" ng-click="sliderApi.init()" style="margin-bottom: 0px;">Init</button>-->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="row">
+            <!-- The options -->
+            <div class="section col s4">
+                <h2>The options</h2>
+                <div input-field>
+                    <label>Filter options by name</label>
+                    <input type="text" ng-model="optionFilter.filter">
+                </div>
+                <form action="#">
+                    <input type="checkbox" id="hideDefaultValuesCheckbox"  ng-model="filterNonDefault" />
+                    <label for="hideDefaultValuesCheckbox">Hide options with default values</label>
+                </form>
+
+                <table class="striped" >
+                    <tbody>
+                    <tr ng-repeat="definition in optionDefinitions | filter:optionFilter.filter | nonDefaultValues:filterNonDefault" class="optionDefinition" ng-controller="OptionController">
+                        <td>
+
+                            <div ng-if="definition.type == 'boolean'">
+                                <div class="switch">
+                                    <label>
+                                        <input type="checkbox" ng-model="definition.value">
+                                        <span class="lever"></span>
+                                        {{definition.name}}
+                                    </label>
+                                </div>
+                            </div>
+                            <div ng-if="definition.type == 'dropdown'">
+                                <b>{{definition.name}}:</b>
+                                <select class="" ng-model="definition.value" material-select>
+                                    <option ng-repeat="value in definition.choices | filter:dropDownFilter">{{value}}</option>
+                                </select>
+                                <!--<inputField style="margin-top: 10px;">
+                                    <label for="filterOption{{definition.name}}">filter {{definition.name}}s:  </label>
+                                    <input type="text" ng-model="dropDownFilter" id="filterOption{{definition.name}}">
+                                </div>-->
+                            </div>
+                            <div ng-if="definition.type == 'number' || definition.type == 'text'">
+                                <div class="{{clazz()}}" input-field>
+                                    <label >{{definition.name}}:</label>
+                                    <input type="text" name="{{definition.name}}" ng-model="definition.value" class="{{clazz()}}">
+                                </div>
+
+                                <div ng-if="definition.optional">
+                                    <div class="switch">
+                                        <label>
+                                            Disabled
+                                            <input type="checkbox" ng-model="definition.enabled">
+                                            <span class="lever"></span>
+                                            Enabled
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div ng-if="definition.type == 'function'">
+                                <label>
+                                    {{definition.name}}:
+                                <textarea type="text" name="{{definition.name}}" ng-model="definition.stringValue"
+                                          ng-change="setOptionFunction(definition.stringValue)" class="materialize-textarea"></textarea>
+                                </label>
+                            </div>
+                            <div ng-if="definition.type == 'array'">
+                                <div class="{{clazz()}}">
+                                    <label>
+                                        {{definition.name}}:
+                                        <input type="text" name="{{definition.name}}" ng-model="definition.stringValue"
+                                               ng-change="setstringValue(definition.stringValue)">
+                                    </label>
+                                </div>
+
+                                <div ng-if="definition.optional">
+                                    <div class="switch">
+                                        <label>
+                                            Disabled
+                                            <input type="checkbox" ng-model="definition.enabled">
+                                            <span class="lever"></span>
+                                            Enabled
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modifying the content of the slider -->
+            <div class="section col s4">
+                <h2>The content</h2>
+
+                <div id="slides">
+                    <div ng-repeat="slide in slides">
+                        <!--<label style="position: relative;">-->
+                        <h4 style="margin-bottom: 4px;">Slide {{$index + 1}}
+                            <a class="btn-floating waves-effect waves-light red" style="font-size: 32px;margin-left: 0.5px;" ng-click="removeSlide($index)"><i class="mdi-action-highlight-remove"></i></a>
+                        </h4>
+                        <textarea class="materialize-textarea" rows="3" ng-model="slide.html" ng-change="sliderApi.adjust()" style="font-weight: bold;"></textarea>
+                        <!--</label>-->
+                    </div>
+                    <button class="btn waves-effect waves-light" ng-click="addSlide()">Add slide</button>
+                </div>
+            </div>
+
+            <!-- Demo selection, style, import and export -->
+            <div class="section col s4">
+                <h2>The rest</h2>
+                <div ng-controller="PopupController" style="margin-bottom: 20px;">
+                    <button class="btn waves-effect waves-light" ng-click="openExportPopup()" style="margin-bottom: 20px;">Get the result</button> <br />
+                    <button class="btn waves-effect waves-light" ng-click="openSliderPopup()">Open slider in popup</button>
+                </div>
+
+                <!--TODO: Do something with this.-->
+                <div ng-controller="DemoLoaderController">
+                    <!-- Dropdown Trigger -->
+                    <a class='dropdown-button btn' href='javascript:void(0);' data-activates='demoDropdown' dropdown>Load a demo</a>
+
+                    <!-- Dropdown Structure -->
+                    <ul id='demoDropdown' class='dropdown-content'>
+                        <li ng-repeat="demo in demoDefiniftions">
+                            <a href="javascript:void(0);" ng-click="selectDemo(demo)">{{demo.name}}</a>
+                        </li>
+                    </ul>
+                </div>
+                <h2>The style</h2>
+                <label>
+                    <textarea class="materialize-textarea" ng-model="style" ng-change="sliderApi.adjust()"></textarea>
+                </label>
+                <br />
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="section col s12 m9 l12">
+                <h1>This is a test</h1>
+                <a class="waves-effect waves-light btn" data-message="message" toast='click'>Toast!</a>
+            </div>
+        </div>
+        <!-- Table of contents -->
+        <!--<div class="col hide-on-small-only m3 l2">
+          <div class="toc-wrapper">
+            <div style="height: 1px;">
+            <ul class="table-of-contents">
+              <li><a href="#download">Download</a></li>
+              <li><a href="#setup">Setup</a></li>
+              <li><a href="#templates">Templates</a></li>
+              <li><a href="#third-party-options">Third-party Options</a></li>
+              <li><a href="#sass">Sass</a></li>
+            </ul>
+            </div>
+          </div>
+        </div>-->
+
+    </div>
+
+
+    </div>
+
+</main>
+<!-- <footer class="page-footer">
+    <div class="container">
+        <div class="row">
+            <div class="col l4 s12">
+
+
+            </div>
+            <div class="col l4 s12">
+
+            </div>
+            <div class="col l4 s12" style="overflow: hidden;">
+
+            </div>
+        </div>
+    </div>
+    <div class="footer-copyright">
+
+    </div>
+</footer> -->
+</body>
+</html>
