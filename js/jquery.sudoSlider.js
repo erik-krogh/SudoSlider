@@ -2901,10 +2901,9 @@
     function minJQueryVersion(minVersion) {
         var version = $.fn.jquery.split(".");
         var length = version.length
-        for (var a = 0; a < length; a++) {
-            if (minVersion[a] && +version[a] < +minVersion[a]) {
-                return FALSE;
-            }
+        for (var i = 0; i < length; i++) {
+            if (+version[i] < +minVersion[i]) { return FALSE; }
+            if (+version[i] > +minVersion[i]) { return TRUE; }
         }
         return TRUE;
     }
