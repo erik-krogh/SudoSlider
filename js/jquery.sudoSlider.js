@@ -1285,33 +1285,14 @@
 
 
                         if (!startedTouch) {
-                            if (type != startEvent) {
-                                return;
-                            }
-
-                            var eventTarget = event.target;
-                            var target = $(eventTarget);
-                            if (!option[42]/*touchHandle*/) {
-                                target = target.parents().add(eventTarget);
-                            }
-                            var filter = option[42]/*touchHandle*/ || obj;
-                            if (typeof filter === "string") {
-                                filter = stringTrim(filter);
-                                if (filter.charAt(0) == ">") {
-                                    filter = $(filter.substr(1, filter.length), obj);
-                                }
-                            }
-
-                            var isTarget = target.filter(filter).length;
-
-                            if (!isTarget) {
-                                return;
-                            } else {
-                                startedTouch = TRUE;
+                            startedTouch = TRUE;
+                            element.on([TOUCHMOVE, TOUCHEND, TOUCHCANCEL].join(" "), selector, dragFunction);
+                            if (option[44]/*mouseTouch*/) {
+                                element.on([MOUSEMOVE, MOUSEUP].join(" "), selector, dragFunction);
                             }
                         }
 
-                        if (type != endEvent1 && type != endEvent2) {
+                        if (type !== endEvent1 && type !== endEvent2) {
                             var x;
                             var y;
                             if (isMouseEvent) {
@@ -1324,7 +1305,7 @@
                             }
 
 
-                            if (type == startEvent) {
+                            if (type === startEvent) {
                                 startX = x;
                                 startY = y;
                                 
@@ -1343,15 +1324,37 @@
                             prevX = x - startX;
                             prevY = y - startY;
                         } else {
+                            element.off([TOUCHMOVE, TOUCHEND, TOUCHCANCEL].join(" "), selector, dragFunction);
+                            if (option[44]/*mouseTouch*/) {
+                                element.off([MOUSEMOVE, MOUSEUP].join(" "), selector, dragFunction);
+                            }
+
                             touchEnd(prevX, prevY);
                             startedTouch = FALSE;
                         }
                     };
-                    bindAndRegisterOff(doc, [TOUCHSTART, TOUCHMOVE, TOUCHEND, TOUCHCANCEL].join(" "), dragFunction);
-                    if (option[44]/*mouseTouch*/) {
-                        bindAndRegisterOff(doc, [MOUSEDOWN, MOUSEMOVE, MOUSEUP].join(" "), dragFunction);
+
+                    var element;
+                    var selector;
+
+                    var filter = option[42]/*touchHandle*/ || obj;
+                    if (typeof filter === "string") {
+                        filter = stringTrim(filter);
+                        if (filter.charAt(0) === ">") {
+                            element = obj;
+                            selector = filter.substr(1, filter.length);
+                        } else {
+                            element = doc;
+                            selector = filter;
+                        }
+                    } else {
+                        element = filter;
                     }
 
+                    bindAndRegisterOff(element, [TOUCHSTART].join(" "), dragFunction, selector);
+                    if (option[44]/*mouseTouch*/) {
+                        bindAndRegisterOff(element, [MOUSEDOWN].join(" "), dragFunction, selector);
+                    }
                 }
 
                 function allowScroll(isMouseEvent, x, y) {
