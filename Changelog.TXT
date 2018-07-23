@@ -468,8 +468,29 @@ Added CommonJS and AMD support.
 3.4.4 (21-01-2016)
 Fixed that the slider always crashed in Microsoft Edge.
 
-3.4.5 (27-02-2015)
+3.4.5 (27-02-2016)
 Change in script: Added a the possibility of prefixing customLinks with ">", to have the links only work within the context of the slider.
 
-3.4.6 (28-02-2015)
+3.4.6 (28-02-2016)
 Fixed that the minified code contained a syntax-error.
+
+3.4.7 (22-07-2018)
+Fixing an issue where calling setOptions() or similar multiple times after another, caused problems with touch.
+
+3.4.8 (19-05-2016)
+Small fixes
+
+3.4.9 (24-05-2016)
+Adding an extra pixel once in a while, due to the earlier removal of sub-pixel widths, which resulted in the slider sometimes being to small.
+
+3.4.10 (26-05-2016)
+Fixed some subpixel precision problems in Firefox when rezizing and having multiple slides visible. Fixes #56
+
+3.4.11 (03-05-2018)
+Fixed jQuery version detection
+
+3.5.0 (22-07-2018)
+Improved page performance when enabling touch. But re-working how the events are registered.
+Added performanceMode option. Can be used to hide slides that are invisible anyway, and reset the CSS if the slider is not currently animating. Can increase performance, especially if on mobile and there are multiple sliders on a single page.
+Removed nested sliders demo, it stopped working and I don't wanna fix it.
+Removed css effects demo. There was no reason for me to have it.
