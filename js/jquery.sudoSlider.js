@@ -801,6 +801,8 @@
                 clickable = TRUE;
                 currentlyAnimatingTowards = FALSE;
 
+                hideExcess();
+
                 if (option[12]/*auto*/) {
                     // Stopping auto if clicked. And also continuing after X seconds of inactivity.
                     if (clicked) {
@@ -812,6 +814,48 @@
                 }
 
                 callQueuedAnimation();
+            }
+
+            var excessHasBeenHidden = false;
+            function hideExcess() {
+                var performanceMode = option[48]/*performanceMode*/;
+                if (excessHasBeenHidden || !performanceMode) {
+                    return;
+                }
+                if (!slidesContainer.is("div")) {
+                    return;
+                }
+                excessHasBeenHidden = TRUE;
+                for (var i = 0; i < totalSlides; i++) {
+                    var slide = slides[i];
+                    if (performanceMode === 2) {
+                        slide.css({position: "static"});
+                    }
+                    if (!((i >= currentSlide && i < currentSlide + option[7]/*slidecount*/) || (i + totalSlides >= currentSlide && i + totalSlides < currentSlide + option[7]/*slidecount*/))) {
+                        slide.hide();
+                    }
+                }
+                if (performanceMode === 2) {
+                    slidesContainer.css({
+                        display: "inline",
+                        position: "static"
+                    });
+                }
+            }
+
+            function showAll() {
+                if (!excessHasBeenHidden) {
+                    return;
+                }
+                excessHasBeenHidden = FALSE;
+                for (var i = 0; i < totalSlides; i++) {
+                    slides[i].css({position: "relative"}).show();
+                }
+                slidesContainer.css({
+                    display: "block",
+                    position: "relative"
+                });
+                adjustPositionTo(currentSlide);
             }
 
             // This function is called when i need a callback on the current element and it's continuous clones (if they are there).
@@ -1286,6 +1330,7 @@
 
                         if (!startedTouch) {
                             startedTouch = TRUE;
+                            showAll();
                             element.on([TOUCHMOVE, TOUCHEND, TOUCHCANCEL].join(" "), selector, dragFunction);
                             if (option[44]/*mouseTouch*/) {
                                 element.on([MOUSEMOVE, MOUSEUP].join(" "), selector, dragFunction);
@@ -1308,7 +1353,7 @@
                             if (type === startEvent) {
                                 startX = x;
                                 startY = y;
-                                
+
                                 touchStart(x - startX, y - startY);
                                 if (isMouseEvent || !option[45]/*allowScroll*/) {
                                     event.preventDefault();
@@ -1351,9 +1396,9 @@
                         element = filter;
                     }
 
-                    bindAndRegisterOff(element, [TOUCHSTART].join(" "), dragFunction, selector);
+                    bindAndRegisterOff(element, TOUCHSTART, dragFunction, selector);
                     if (option[44]/*mouseTouch*/) {
-                        bindAndRegisterOff(element, [MOUSEDOWN].join(" "), dragFunction, selector);
+                        bindAndRegisterOff(element, MOUSEDOWN, dragFunction, selector);
                     }
                 }
 
@@ -1473,6 +1518,8 @@
 
 
             function performAnimation(dir, speed, clicked, prevNext, skipPreCenterTargetSlide) {
+                showAll();
+
                 if (option[29]/*updateBefore*/) setCurrent(dir);
 
                 if (option[26]/*history*/ && clicked) win.location.hash = option[18]/*numerictext*/[dir];
@@ -1691,6 +1738,7 @@
                 stopAuto();
                 stopAnimation();
                 autoadjust(currentSlide, 0);
+                showAll();
                 destroyed = TRUE;
 
                 slideNumberBeforeDestroy = currentSlide;
@@ -1914,7 +1962,8 @@
             mouseTouch: TRUE, /* option[44]/*mouseTouch*/
             allowScroll: TRUE, /* option[45]/*allowScroll*/
             CSSease: SWING, /* option[46]/*CSSease*/
-            ajaxHasHTML: FALSE /* option[47]/*AjaxHasHTML*/
+            ajaxHasHTML: FALSE, /* option[47]/*AjaxHasHTML*/
+            performanceMode: 0 /* option[48]/*performanceMode*/ // 0: None. 1: Hide Excess Slides. 2: Hide Excess slides and reset style.
 
         };
     }
