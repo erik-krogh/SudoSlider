@@ -1329,6 +1329,29 @@
 
 
                         if (!startedTouch) {
+                            if (type !== startEvent) {
+                                return;
+                            }
+
+                            var eventTarget = event.target;
+                            var target = $(eventTarget);
+                            if (!option[42]/*touchHandle*/) {
+                                target = target.parents().add(eventTarget);
+                            }
+                            var filter = option[42]/*touchHandle*/ || obj;
+                            if (typeof filter === "string") {
+                                filter = stringTrim(filter);
+                                if (filter.charAt(0) === ">") {
+                                    filter = $(filter.substr(1, filter.length), obj);
+                                }
+                            }
+
+                            var isTarget = target.filter(filter).length;
+
+                            if (!isTarget) {
+                                return;
+                            }
+
                             startedTouch = TRUE;
                             showAll();
                             element.on([TOUCHMOVE, TOUCHEND, TOUCHCANCEL].join(" "), selector, dragFunction);
