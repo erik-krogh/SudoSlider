@@ -494,3 +494,6 @@ Improved page performance when enabling touch. But re-working how the events are
 Added performanceMode option. Can be used to hide slides that are invisible anyway, and reset the CSS if the slider is not currently animating. Can increase performance, especially if on mobile and there are multiple sliders on a single page.
 Removed nested sliders demo, it stopped working and I don't wanna fix it.
 Removed css effects demo. There was no reason for me to have it.
+
+3.5.1 (26-01-2021)
+Changed the "slide" effect to use `margin` instead of `translate(left, top)`. Fixes an animation issue in Chrome 88. Fixes #67
