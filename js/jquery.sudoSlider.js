@@ -231,7 +231,7 @@
                 // The last CSS to make it work.
                 slidesContainer.add(slidesJquery).css({display: "block", position: RELATIVE_STRING, margin: "0"});
 
-                adjustPositionToPosition(0, 0, TRUE);
+                adjustPositionToPosition(0, 0);
 
                 option[7]/*slidecount*/ = parseInt10(option[7]/*slidecount*/);
 
@@ -755,14 +755,10 @@
                 adjustPositionToPosition(left, top);
             }
 
-            function adjustPositionToPosition(left, top, both) {
+            function adjustPositionToPosition(left, top) {
                 currentSliderPositionLeft = left;
                 currentSliderPositionTop = top;
 
-                if (option[38]/*useCSS*/ || both) {
-                    slidesContainer.css({transform: "translate(" + left + "px, " + top + "px)"});
-                }
-                if (!option[38]/*useCSS*/ || both) {
                     function setMargins(left, top) {
                         slidesContainer.css({
                             marginLeft: left,
@@ -773,7 +769,6 @@
                     setMargins(0, 0);
                     setMargins(left, top);
                 }
-            }
 
             function getSlidePosition(slide, vertical) {
                 if (vertical == undefined) {
@@ -2652,12 +2647,8 @@
         var left = target.left;
         var top = target.top;
 
-        if (obj.options.usecss) {
-            animate(ul, {transform: "translate(" + left + "px, " + top + "px)"}, speed, FALSE, obj.callback, obj, TRUE);
-        } else {
             animate(ul, {marginTop: top, marginLeft: left}, speed, FALSE, obj.callback, obj);
         }
-    }
 
     function animate(elem, properties, speed, ease, callback, obj, doNotResetCss) {
         var usecss = !obj || obj.options.usecss;
