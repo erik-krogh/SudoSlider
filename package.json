@@ -13,16 +13,16 @@
     "type": "git",
     "url": "git+https://github.com/webbiesdk/SudoSlider.git"
   },
-  "version": "3.5.0",
+  "version": "3.5.1",
   "author": {
     "name": "Erik Krogh Kristensen",
-    "url": "webbies.dk",
+    "url": "http://webbies.dk",
     "email": "Erik@webbies.dk"
   },
   "maintainers": [
     {
       "name": "Erik Krogh Kristensen",
-      "url": "webbies.dk",
+      "url": "http://webbies.dk",
       "email": "Erik@webbies.dk"
     }
   ],

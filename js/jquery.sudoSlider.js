@@ -1,5 +1,5 @@
 /**@preserve
- * Sudo Slider version 3.5.0 - jQuery plugin
+ * Sudo Slider version 3.5.1 - jQuery plugin
  * Written by Erik Krogh Kristensen erik@webbies.dk.
  * http://webbies.dk/SudoSlider/
  *
@@ -759,16 +759,16 @@
                 currentSliderPositionLeft = left;
                 currentSliderPositionTop = top;
 
-                    function setMargins(left, top) {
-                        slidesContainer.css({
-                            marginLeft: left,
-                            marginTop: top
-                        });
-                    }
-
-                    setMargins(0, 0);
-                    setMargins(left, top);
+                function setMargins(left, top) {
+                    slidesContainer.css({
+                        marginLeft: left,
+                        marginTop: top
+                    });
                 }
+
+                setMargins(0, 0);
+                setMargins(left, top);
+            }
 
             function getSlidePosition(slide, vertical) {
                 if (vertical == undefined) {
@@ -2647,8 +2647,8 @@
         var left = target.left;
         var top = target.top;
 
-            animate(ul, {marginTop: top, marginLeft: left}, speed, FALSE, obj.callback, obj);
-        }
+        animate(ul, {marginTop: top, marginLeft: left}, speed, FALSE, obj.callback, obj);
+    }
 
     function animate(elem, properties, speed, ease, callback, obj, doNotResetCss) {
         var usecss = !obj || obj.options.usecss;
